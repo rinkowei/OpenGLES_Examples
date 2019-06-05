@@ -31,10 +31,14 @@ endif(WIN32)
 set(EXAMPLES
     1.hello_window
     2.hello_window_color_clear
+    3.hello_triangle
 )
 
 add_library(GLAD "src/glad.c")
 set(LIBS ${LIBS} GLAD)
+
+add_library(Common "src/Common.cpp")
+set(LIBS ${LIBS} Common)
 
 foreach(EXAMPLE ${EXAMPLES})
     file(GLOB SOURCE
