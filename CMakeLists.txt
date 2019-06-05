@@ -30,6 +30,7 @@ endif(WIN32)
 
 set(EXAMPLES
     1.hello_window
+    2.hello_window_color_clear
 )
 
 add_library(GLAD "src/glad.c")
