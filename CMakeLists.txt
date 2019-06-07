@@ -17,6 +17,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
+add_definitions(-DES_EXAMPLE_RESOURCES_DIR=\"${CMAKE_SOURCE_DIR}/resources/\")
+
 add_compile_options(-std=c++17)
 
 find_package(GLFW3 REQUIRED)
@@ -51,14 +53,4 @@ foreach(EXAMPLE ${EXAMPLES})
     if(WIN32)
         set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${EXAMPLE}")
     endif(WIN32)
-    file(GLOB SHADERS
-              "src/${EXAMPLE}/*.vs"
-              "src/${EXAMPLE}/*.fs"
-    )
-    foreach(SHADER ${SHADERS})
-        if(WIN32)
-            add_custom_command(TARGET ${NAME} COMMAND ${CMAKE_COMMAND} -E copy
-            ${SHADER} $<TARGET_FILE_DIR:${NAME}>)
-        endif(WIN32)
-    endforeach(SHADER)
 endforeach(EXAMPLE)

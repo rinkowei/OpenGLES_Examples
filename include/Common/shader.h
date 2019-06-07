@@ -13,7 +13,7 @@ class Shader
 public:
 	unsigned int ID;
 
-	Shader(const char* vsPath, const char* fsPath)
+	Shader(const std::string& vsPath, const std::string& fsPath)
 	{
 		std::string vsCode;
 		std::string fsCode;
