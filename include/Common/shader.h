@@ -19,19 +19,20 @@ public:
 		std::string fsCode;
 		std::ifstream vsShaderFile;
 		std::ifstream fsShaderFile;
-
+		
 		vsShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 		fsShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
+		
 		try {
-			vsShaderFile.open(vsPath);
-			fsShaderFile.open(fsPath);
+			vsShaderFile.open(vsPath, std::ios::in | std::ios::binary);
+			fsShaderFile.open(fsPath, std::ios::in | std::ios::binary);
+
 			std::stringstream vsShaderStream;
 			std::stringstream fsShaderStream;
 
 			vsShaderStream << vsShaderFile.rdbuf();
 			fsShaderStream << fsShaderFile.rdbuf();
-
+		
 			vsShaderFile.close();
 			fsShaderFile.close();
 
@@ -135,7 +136,7 @@ private:
 	{
 		GLint success;
 		GLchar infoLog[1024];
-		if (type != "PROGRAM")
+		if (type == "PROGRAM")
 		{
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 			if (!success)
@@ -144,7 +145,7 @@ private:
 				std::cout << "ERROR : shader compilation of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 			}
 		}
-		else
+		else if (type == "SHADER")
 		{
 			glGetProgramiv(shader, GL_LINK_STATUS, &success);
 			if (!success)

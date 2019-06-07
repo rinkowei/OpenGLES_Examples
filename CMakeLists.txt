@@ -23,7 +23,7 @@ find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
 if(WIN32)
-    set(LIBS glfw3 libGLESv2 libMaliEmulator)
+    set(LIBS glfw3 libGLESv2 libMaliEmulator assimp-vc142-mt)
 else()
     set(LIBS )
 endif(WIN32)
@@ -51,4 +51,14 @@ foreach(EXAMPLE ${EXAMPLES})
     if(WIN32)
         set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${EXAMPLE}")
     endif(WIN32)
+    file(GLOB SHADERS
+              "src/${EXAMPLE}/*.vs"
+              "src/${EXAMPLE}/*.fs"
+    )
+    foreach(SHADER ${SHADERS})
+        if(WIN32)
+            add_custom_command(TARGET ${NAME} COMMAND ${CMAKE_COMMAND} -E copy
+            ${SHADER} $<TARGET_FILE_DIR:${NAME}>)
+        endif(WIN32)
+    endforeach(SHADER)
 endforeach(EXAMPLE)
