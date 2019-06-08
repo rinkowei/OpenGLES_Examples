@@ -10,8 +10,8 @@ using namespace std;
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void handleInput(GLFWwindow* window);
 
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
+const GLuint SCREEN_WIDTH = 800;
+const GLuint SCREEN_HEIGHT = 600;
 
 int main()
 {
@@ -44,18 +44,18 @@ int main()
 	string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
 	Shader shader(resources_dir + "shaders/4.hello_triangle_indices/triangle.vs", resources_dir + "shaders/4.hello_triangle_indices/triangle.fs");
-	float vertices[] = {
+	GLfloat vertices[] = {
 		 0.5f,  0.5f, 0.0f,  
 		 0.5f, -0.5f, 0.0f,  
 		-0.5f, -0.5f, 0.0f,  
 		-0.5f,  0.5f, 0.0f   
 	};
-	unsigned int indices[] = {
+	GLuint indices[] = {
 		0, 1, 3,
 		1, 2, 3
 	};
 
-	unsigned int VAO, VBO, EBO;
+	GLuint VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -93,7 +93,7 @@ int main()
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-
+	
 	glfwTerminate();
 	return 0;
 }
