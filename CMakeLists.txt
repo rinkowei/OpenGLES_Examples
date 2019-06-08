@@ -34,6 +34,7 @@ set(EXAMPLES
     1.hello_window
     2.hello_window_color_clear
     3.hello_triangle
+    4.hello_triangle_indices
 )
 
 add_library(GLAD "src/glad.c")
