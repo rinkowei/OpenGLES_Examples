@@ -44,7 +44,7 @@ int main()
 
 	string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-	Shader shader(resources_dir + "shaders/6.hello_triangle_multi_instance/triangle.vs", resources_dir + "shaders/6.hello_triangle_multi_instance/triangle.fs");
+	Shader shader(resources_dir + "shaders/6.hello_triangle_instancing/triangle.vs", resources_dir + "shaders/6.hello_triangle_instancing/triangle.fs");
 
 	// create a array of 100 triangle locations
 	std::array<glm::vec2, 100> locations;
