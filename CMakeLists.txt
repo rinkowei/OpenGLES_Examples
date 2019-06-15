@@ -37,6 +37,7 @@ set(EXAMPLES
     4.hello_triangle_indices
     5.hello_triangle_restart_index
     6.hello_triangle_instancing
+    7.quad_with_texture
 )
 
 add_library(GLAD "src/glad.c")
