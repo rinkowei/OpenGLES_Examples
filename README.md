@@ -7,5 +7,21 @@ A comprehensive collection of open source C++ examples for OpenGL ES 3.2 which i
 
 ## Build Tool
 
-<img src="E:/OpenGLES_Examples/images/cmakelogo.png" alt="" height="30px" valign="bottom">[CMake](https://cmake.org/) 3.2 or higher
+<img src="./images/cmakelogo.png" alt="" height="30px" valign="bottom">[CMake](https://cmake.org/) 3.2 or higher
+
+## Building
+
+The repository contains everything required to compile and build the examples on Windows,  using the Visual Studio compiler that supports C++17. All required dependencies are included.
+
+- ###### compile option : Debug
+
+- ###### target platform : Win32
+
+<img src="./images/windowslogo.png" alt="" height="30px"> **Windows**
+
+Use the provided CMakeLists.txt with CMake to generate a build configuration, e.g.:
+
+```
+cmake -G "Visual Studio 16 2019" -A Win32
+```
 
