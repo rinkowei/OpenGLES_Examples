@@ -6,6 +6,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+const glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+const float MAX_FOV = 45.0f;
+const float MIN_FOV = 1.0f;
+
 class Camera
 {
 public:
@@ -17,11 +21,7 @@ public:
 		RIGHT
 	};
 
-	Camera(float aspect, float znear, float zfar, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f))
-		:front(glm::vec3(0.0f, 0.0f, -1.0f)),
-		 movementSpeed(2.5f),
-		 mouseSensitivity(0.1f),
-		 fov(45.0f)
+	Camera(float aspect, float znear, float zfar, glm::vec3 position = glm::vec3(0.0f, 0.0f, 1.0f))
 	{
 		this->position = position;
 		this->aspectRatio = aspect;
@@ -70,32 +70,76 @@ public:
 		{
 			position += right * velocity;
 		}
+		setViewMatrix();
 	}
 
-	void handleMouseScroll(float yoffset)
+	void handleMouseMovement(float xOffset, float yOffset, GLboolean constrainPitch = true)
 	{
-		
+		xOffset *= mouseSensitivity;
+		yOffset *= mouseSensitivity;
+
+		yaw += xOffset;
+		pitch += yOffset;
+
+		if (constrainPitch)
+		{
+			if (pitch > 89.0f)
+				pitch = 89.0f;
+			else if (pitch < -89.0f)
+				pitch = -89.0f;
+		}
+
+		updateCameraProperties();
+	}
+
+	void handleMouseScroll(float yOffset)
+	{
+		if (fov >= MIN_FOV && fov <= MAX_FOV)
+			fov -= yOffset;
+		if (fov <= MIN_FOV)
+			fov = MIN_FOV;
+		if (fov >= MAX_FOV)
+			fov = MAX_FOV;
+
+		setPerspectiveMatrix();
 	}
 
 private:
+	// camera's properties
 	float fov = 45.0f;
-	float movementSpeed = 2.5;
-	float mouseSensitivity = 0.1;
-
-	glm::vec3 position;
-	glm::vec3 front;
-	glm::vec3 up;
-	glm::vec3 right;
-	glm::vec3 worldUp;
-
-	float yaw;
-	float pitch;
-
+	float aspectRatio;
+	glm::vec3 position = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
 	float znear;
 	float zfar;
 
-	float aspectRatio;
+	// euler angle rotate around Y-axis
+	float yaw = -90.0f;
+	// euler angle rotate around X-axis
+	float pitch = 0.0f;
 
+	// camera operate options
+	float movementSpeed = 2.5f;
+	float mouseSensitivity = 0.1f;
+
+	// matrices
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
 	glm::mat4 perspectiveMatrix = glm::mat4(1.0f);
+
+	// recalculate the front vector from the camera's updated euler angles
+	void updateCameraProperties()
+	{
+		glm::vec3 updatedFront;
+		updatedFront.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+		updatedFront.y = glm::sin(glm::radians(pitch));
+		updatedFront.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+		this->front = glm::normalize(updatedFront);
+
+		right = glm::normalize(glm::cross(front, worldUp));
+		up = glm::normalize(glm::cross(right, front));
+
+		setViewMatrix();
+	}
 };
