@@ -55,3 +55,7 @@ cmake -G "Visual Studio 16 2019" -A Win32
 
 
 
+#### [08 - cube_with_camera](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/8.cube_with_camera>)
+
+
+
