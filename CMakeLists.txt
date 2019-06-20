@@ -39,6 +39,7 @@ set(EXAMPLES
     6.hello_triangle_instancing
     7.quad_with_texture
     8.cube_with_camera
+    9.transformations
 )
 
 add_library(GLAD "src/glad.c")
