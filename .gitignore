@@ -1,3 +1,4 @@
 # ignores following folders
+.vs/
 bin/
 build/
