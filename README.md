@@ -61,3 +61,7 @@ cmake -G "Visual Studio 16 2019" -A Win32
 
 #### [09 - transformations](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/9.transformations>)
 
+
+
+#### [10 - model_loading](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/10.model_loading>)
+
