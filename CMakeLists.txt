@@ -25,7 +25,7 @@ find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
 if(WIN32)
-    set(LIBS glfw3 libGLESv2 libMaliEmulator assimp-vc142-mt)
+    set(LIBS glfw3 libGLESv2 libMaliEmulator assimp)
 else()
     set(LIBS )
 endif(WIN32)
@@ -40,6 +40,7 @@ set(EXAMPLES
     7.quad_with_texture
     8.cube_with_camera
     9.transformations
+    10.fbx_model_loading
 )
 
 add_library(GLAD "src/glad.c")

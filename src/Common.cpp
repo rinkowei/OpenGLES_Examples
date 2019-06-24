@@ -6,3 +6,4 @@
 #include <Common/shader.h>
 #include <Common/textureLoader.h>
 #include <Common/mesh.h>
+#include <Common/model.h>
