@@ -40,7 +40,7 @@ set(EXAMPLES
     7.quad_with_texture
     8.cube_with_camera
     9.transformations
-    10.fbx_model_loading
+    10.model_loading
 )
 
 add_library(GLAD "src/glad.c")
