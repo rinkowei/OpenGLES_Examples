@@ -3,14 +3,12 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2019, assimp team
-
-
+Copyright (c) 2006-2012, assimp team
 
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms,
-with or without modification, are permitted provided that the following
+Redistribution and use of this software in source and binary forms, 
+with or without modification, are permitted provided that the following 
 conditions are met:
 
 * Redistributions of source code must retain the above
@@ -27,23 +25,22 @@ conditions are met:
   derived from this software without specific prior
   written permission of the assimp team.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
 OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
 LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
-/** @file vector2.h
+/** @file aiVector2t.h
  *  @brief 2D vector structure, including operators when compiling in C++
  */
-#pragma once
 #ifndef AI_VECTOR2D_H_INC
 #define AI_VECTOR2D_H_INC
 
@@ -53,55 +50,64 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #   include <math.h>
 #endif
 
-#include "defs.h"
+#include "./Compiler/pushpack1.h"
 
 // ----------------------------------------------------------------------------------
-/** Represents a two-dimensional vector.
+/** Represents a two-dimensional vector. 
  */
 
 #ifdef __cplusplus
 template <typename TReal>
-class aiVector2t {
+class aiVector2t
+{
 public:
-    aiVector2t () : x(), y() {}
-    aiVector2t (TReal _x, TReal _y) : x(_x), y(_y) {}
-    explicit aiVector2t (TReal _xyz) : x(_xyz), y(_xyz) {}
-    aiVector2t (const aiVector2t& o) = default;
 
-    void Set( TReal pX, TReal pY);
-    TReal SquareLength() const ;
-    TReal Length() const ;
-    aiVector2t& Normalize();
+	aiVector2t () : x(), y() {}
+	aiVector2t (TReal _x, TReal _y) : x(_x), y(_y) {}
+	explicit aiVector2t (TReal _xyz) : x(_xyz), y(_xyz) {}
+	aiVector2t (const aiVector2t& o) : x(o.x), y(o.y) {}
 
-    const aiVector2t& operator += (const aiVector2t& o);
-    const aiVector2t& operator -= (const aiVector2t& o);
-    const aiVector2t& operator *= (TReal f);
-    const aiVector2t& operator /= (TReal f);
+public:
 
-    TReal operator[](unsigned int i) const;
+	void Set( TReal pX, TReal pY);
+	TReal SquareLength() const ;
+	TReal Length() const ;
+	aiVector2t& Normalize();
 
-    bool operator== (const aiVector2t& other) const;
-    bool operator!= (const aiVector2t& other) const;
+public:
 
-    bool Equal(const aiVector2t& other, TReal epsilon = 1e-6) const;
+	const aiVector2t& operator += (const aiVector2t& o);
+	const aiVector2t& operator -= (const aiVector2t& o);
+	const aiVector2t& operator *= (TReal f);
+	const aiVector2t& operator /= (TReal f);
 
-    aiVector2t& operator= (TReal f);
-    const aiVector2t SymMul(const aiVector2t& o);
+	TReal operator[](unsigned int i) const;
+	TReal& operator[](unsigned int i);
 
-    template <typename TOther>
-    operator aiVector2t<TOther> () const;
+	bool operator== (const aiVector2t& other) const;
+	bool operator!= (const aiVector2t& other) const;
 
-    TReal x, y;
-};
+	bool Equal(const aiVector2t& other, TReal epsilon = 1e-6) const;
 
-typedef aiVector2t<ai_real> aiVector2D;
+	aiVector2t& operator= (TReal f);
+	const aiVector2t SymMul(const aiVector2t& o);
+
+	template <typename TOther>
+	operator aiVector2t<TOther> () const;
+
+	TReal x, y;	
+} PACK_STRUCT;
+
+typedef aiVector2t<float> aiVector2D;
 
 #else
 
 struct aiVector2D {
-    ai_real x, y;
+	float x,y;
 };
 
 #endif // __cplusplus
+
+#include "./Compiler/poppack1.h"
 
 #endif // AI_VECTOR2D_H_INC
