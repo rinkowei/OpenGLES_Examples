@@ -31,15 +31,15 @@ else()
 endif(WIN32)
 
 set(EXAMPLES
-    1.hello_window
-    2.hello_window_color_clear
-    3.hello_triangle
-    4.hello_triangle_indices
-    5.hello_triangle_restart_index
-    6.hello_triangle_instancing
-    7.quad_with_texture
-    8.cube_with_camera
-    9.transformations
+    01.hello_window
+    02.hello_window_color_clear
+    03.hello_triangle
+    04.hello_triangle_indices
+    05.hello_triangle_restart_index
+    06.hello_triangle_instancing
+    07.quad_with_texture
+    08.cube_with_camera
+    09.transformations
     10.model_loading
 )
 
