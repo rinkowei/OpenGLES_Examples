@@ -27,7 +27,7 @@ math(EXPR BITS "8*${CMAKE_SIZEOF_VOID_P}")
 
 if(WIN32 AND NOT MINGW)
     link_directories(${CMAKE_SOURCE_DIR}/lib/win${BITS})
-    set(LIBS glfw3 libGLESv2 libMaliEmulator assimp)
+    set(LIBS glfw3 libGLESv2 libMaliEmulator assimp-vc140-mt)
 else()
     set(LIBS )
 endif(WIN32 AND NOT MINGW)

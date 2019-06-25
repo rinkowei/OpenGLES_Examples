@@ -2,3 +2,5 @@
 .vs/
 bin/
 build/
+build_win32/
+build_win64/
