@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define GLM_FORCE_RADIANS
 #include <Common/shader.h>
 #include <Common/textureLoader.h>
 
