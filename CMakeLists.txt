@@ -15,20 +15,22 @@ endif(WIN32)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-link_directories(${CMAKE_SOURCE_DIR}/lib)
-
 add_definitions(-DES_EXAMPLE_RESOURCES_DIR=\"${CMAKE_SOURCE_DIR}/resources/\")
 
-add_compile_options(-std=c++17)
+if(MSVC_VERSION GREATER_EQUAL "1900")
+    add_compile_options("/std:c++17")
+else()
+    add_compile_options("/std:c++14")
+endif()
 
-find_package(GLFW3 REQUIRED)
-message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
+math(EXPR BITS "8*${CMAKE_SIZEOF_VOID_P}")
 
-if(WIN32)
+if(WIN32 AND NOT MINGW)
+    link_directories(${CMAKE_SOURCE_DIR}/lib/win${BITS})
     set(LIBS glfw3 libGLESv2 libMaliEmulator assimp)
 else()
     set(LIBS )
-endif(WIN32)
+endif(WIN32 AND NOT MINGW)
 
 set(EXAMPLES
     01.hello_window
@@ -58,6 +60,6 @@ foreach(EXAMPLE ${EXAMPLES})
     add_executable(${NAME} ${SOURCE})
     target_link_libraries(${NAME} ${LIBS})
     if(WIN32)
-        set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${EXAMPLE}")
+        set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/win${BITS}/${EXAMPLE}")
     endif(WIN32)
 endforeach(EXAMPLE)
