@@ -49,7 +49,7 @@ private:
 	void loadModel(const std::string& filePath)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			throw std::runtime_error("error : " + std::string(importer.GetErrorString()));
@@ -148,10 +148,10 @@ private:
 		}
 		
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
+		
 		std::vector<Texture> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "textureDiffuse");
 		textures.insert(textures.end(), diffuseTextures.begin(), diffuseTextures.end());
-
+		/*
 		std::vector<Texture> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, "textureSpecular");
 		textures.insert(textures.end(), specularTextures.begin(), specularTextures.end());
 
@@ -160,7 +160,7 @@ private:
 
 		std::vector<Texture> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, "textureHeight");
 		textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
-
+		*/
 		return Mesh(vertices, indices, textures);
 	}
 
