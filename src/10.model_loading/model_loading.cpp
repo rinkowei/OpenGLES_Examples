@@ -27,7 +27,7 @@ const GLuint SCREEN_HEIGHT = 600;
 
 const string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 0.0f, 7.0f));
+Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 1.0f, 3.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -72,7 +72,7 @@ int main()
 	
 	Shader shader(resources_dir + "shaders/10.model_loading/model.vs", resources_dir + "shaders/10.model_loading/model.fs");
 	
-	Model venusModel(resources_dir + "models/venus.fbx");
+	Model venusModel(resources_dir + "models/carnage/carnage.obj");
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -84,7 +84,7 @@ int main()
 		handleInput(window);
 		
 		// clear color buffer
-		glClearColor(0.2f, 0.8f, 0.3f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.setMat4("projection", camera.getPerspectiveMatrix());
@@ -93,7 +93,9 @@ int main()
 		// initialize matrix to identity matrix
 		glm::mat4 model = glm::mat4(1.0f);
 
-		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 
 		shader.setMat4("model", model);
 		shader.use();

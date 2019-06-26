@@ -25,12 +25,6 @@ using namespace std;
 class Model
 {
 public:
-	std::vector<Texture> texturesLoaded;
-	std::vector<Mesh> meshes;
-
-	std::string fileName;
-	bool gammaCorrection;
-
 	Model(const std::string& path, bool gamma = false)
 		: gammaCorrection(gamma)
 	{
@@ -46,16 +40,22 @@ public:
 	}
 
 private:
-	void loadModel(const std::string& filePath)
+	std::vector<Texture> texturesLoaded;
+	std::vector<Mesh> meshes;
+
+	std::string directory;
+	bool gammaCorrection;
+
+	void loadModel(const std::string& path)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			throw std::runtime_error("error : " + std::string(importer.GetErrorString()));
 			return;
 		}
-		fileName = filePath;
+		directory = path.substr(0, path.find_last_of('/'));
 
 		handleNode(scene->mRootNode, scene);
 	}
@@ -151,7 +151,7 @@ private:
 		
 		std::vector<Texture> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "textureDiffuse");
 		textures.insert(textures.end(), diffuseTextures.begin(), diffuseTextures.end());
-		/*
+		
 		std::vector<Texture> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, "textureSpecular");
 		textures.insert(textures.end(), specularTextures.begin(), specularTextures.end());
 
@@ -160,7 +160,7 @@ private:
 
 		std::vector<Texture> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, "textureHeight");
 		textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
-		*/
+		
 		return Mesh(vertices, indices, textures);
 	}
 
@@ -171,6 +171,18 @@ private:
 		{
 			aiString str;
 			mat->GetTexture(type, i, &str);
+			
+			std::string texName = std::string(str.C_Str());
+			if (texName.find('/') != texName.npos)
+			{
+				texName = texName.substr(texName.find_last_of('/') + 1);
+			}
+			else if (texName.find('\\') != texName.npos)
+			{
+				texName = texName.substr(texName.find_last_of('\\') + 1);
+			}
+
+			std::string texPath = directory + '/' + texName;
 
 			bool alreadyLoaded = false;
 			for (unsigned int j = 0; j < texturesLoaded.size(); j++)
@@ -185,9 +197,9 @@ private:
 			if (!alreadyLoaded)
 			{
 				Texture tex;
-				tex.id = textureLoader::loadTexture2D(string(str.C_Str()), true);
+				tex.id = textureLoader::loadTexture2D(texPath, true);
 				tex.type = typeName;
-				tex.path = str.C_Str();
+				tex.path = texPath;
 				textures.push_back(tex);
 				texturesLoaded.push_back(tex);
 			}
