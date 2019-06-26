@@ -70,7 +70,7 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 	
-	Shader shader(resources_dir + "shaders/10.fbx_model_loading/model.vs", resources_dir + "shaders/10.fbx_model_loading/model.fs");
+	Shader shader(resources_dir + "shaders/10.model_loading/model.vs", resources_dir + "shaders/10.model_loading/model.fs");
 	
 	Model venusModel(resources_dir + "models/venus.fbx");
 
