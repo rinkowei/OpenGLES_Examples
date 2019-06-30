@@ -76,7 +76,7 @@ int main()
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 	
-	Shader shader(resources_dir + "shaders/10.model_loading/model.vs", resources_dir + "shaders/10.model_loading/model.fs");
+	Shader shader(resources_dir + "shaders/11.cull_face/model.vs", resources_dir + "shaders/11.cull_face/model.fs");
 	
 	Model venusModel(resources_dir + "models/carnage/carnage.obj");
 
