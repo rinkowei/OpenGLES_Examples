@@ -43,6 +43,7 @@ set(EXAMPLES
     08.cube_with_camera
     09.transformations
     10.model_loading
+    11.cull_face
 )
 
 add_library(GLAD "src/glad.c")
