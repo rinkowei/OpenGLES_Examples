@@ -69,3 +69,6 @@ cmake -G "Visual Studio 16 2019"
 
 #### [11 - cull_face](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/11.cull_face>)
 
+
+
+#### [12 - object_outlining](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/12.object_outlining>)
