@@ -44,6 +44,7 @@ set(EXAMPLES
     09.transformations
     10.model_loading
     11.cull_face
+    12.object_outlining
 )
 
 add_library(GLAD "src/glad.c")
