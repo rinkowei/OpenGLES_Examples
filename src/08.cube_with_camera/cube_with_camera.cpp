@@ -67,11 +67,8 @@ int main()
 		cout << "Success to initialize GLAD\n";
 	}
 
+	// enable depth test
 	glEnable(GL_DEPTH_TEST);
-
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CW);
 
 	Shader shader(resources_dir + "shaders/8.cube_with_camera/cube.vs", resources_dir + "shaders/8.cube_with_camera/cube.fs");
 	
