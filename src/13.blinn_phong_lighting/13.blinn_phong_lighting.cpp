@@ -27,7 +27,7 @@ const GLuint SCREEN_HEIGHT = 600;
 
 const string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 1.0f, 3.0f));
+Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 4.0f, 10.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -57,7 +57,7 @@ int main()
 	
 	// capture mouse
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	
+
 	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
 	{
 		cout << "Failed to initialize GLAD\n";
@@ -76,9 +76,9 @@ int main()
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 	
-	Shader shader(resources_dir + "shaders/11.cull_face/model.vs", resources_dir + "shaders/11.cull_face/model.fs");
+	Shader shader(resources_dir + "shaders/13.blinn_phong_lighting/model.vs", resources_dir + "shaders/13.blinn_phong_lighting/model.fs");
 	
-	Model venusModel(resources_dir + "models/carnage/carnage.obj");
+	Model venusModel(resources_dir + "models/nanosuit/nanosuit.obj");
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -99,9 +99,9 @@ int main()
 		// initialize matrix to identity matrix
 		glm::mat4 model = glm::mat4(1.0f);
 
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 
 		shader.setMat4("model", model);
 		shader.use();

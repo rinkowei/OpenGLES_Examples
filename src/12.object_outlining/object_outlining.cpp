@@ -35,6 +35,178 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastTime = 0.0f;
 
+GLuint cubeVAO = 0;
+GLuint cubeVBO = 0;
+
+GLuint sphereVAO = 0;
+GLuint indexCount = 0;
+
+void drawCube()
+{
+	if (cubeVAO == 0)
+	{
+		GLfloat vertices[] = {
+			// positions          // normals          // texture coordinates
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, // bottom-left
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, // top-right
+			 1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f, // bottom-right         
+			 1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, // top-right
+			-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, // bottom-left
+			-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f, // top-left
+			
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, // top-right
+			 1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, // top-right
+			-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, // top-left
+			-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, // bottom-left
+			
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-right
+			-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // top-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-right
+		
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-left
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // top-right         
+			 1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // bottom-right
+			 1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // top-left
+			 1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, // bottom-left     
+		
+			-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f, // top-right
+			 1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f, // top-left
+			 1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f, // bottom-left
+			 1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f, // bottom-left
+			-1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, // bottom-right
+			-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f, // top-right
+		
+			-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f, // top-left
+			 1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // bottom-right
+			 1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f, // top-right     
+			 1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // bottom-right
+			-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f, // top-left
+			-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f  // bottom-left   
+		};
+
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &cubeVBO);
+
+		glBindVertexArray(cubeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+}
+
+void drawSphere()
+{
+	if (sphereVAO == 0)
+	{
+		glGenVertexArrays(1, &sphereVAO);
+
+		GLuint VBO;
+		GLuint EBO;
+		glGenBuffers(1, &VBO);
+		glGenBuffers(1, &EBO);
+
+		std::vector<glm::vec3> positions;
+		std::vector<glm::vec2> uv;
+		std::vector<glm::vec3> normals;
+		std::vector<GLuint> indices;
+
+		const GLuint X_SEGMENTS = 64;
+		const GLuint Y_SEGMENTS = 64;
+		const GLfloat PI = glm::pi<float>();
+
+		for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
+		{
+			for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+			{
+				GLfloat xSegment = (GLfloat)x / (GLfloat)X_SEGMENTS;
+				GLfloat ySegment = (GLfloat)y / (GLfloat)Y_SEGMENTS;
+				GLfloat xPos = glm::cos(xSegment * 2.0f * PI) * glm::sin(ySegment * PI);
+				GLfloat yPos = glm::cos(ySegment * PI);
+				GLfloat zPos = glm::sin(xSegment * 2.0f * PI) * glm::sin(ySegment * PI);
+
+				positions.push_back(glm::vec3(xPos, yPos, zPos));
+				uv.push_back(glm::vec2(xSegment, ySegment));
+				normals.push_back(glm::vec3(xPos, yPos, zPos));
+			}
+		}
+
+		GLboolean oddRow = false;
+		for (int y = 0; y < Y_SEGMENTS; ++y)
+		{
+			if (!oddRow)
+			{
+				for (int x = 0; x <= X_SEGMENTS; ++x)
+				{
+					indices.push_back(y * (X_SEGMENTS + 1) + x);
+					indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+				}
+			}
+			else
+			{
+				for (int x = X_SEGMENTS; x >= 0; --x)
+				{
+					indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+					indices.push_back(y * (X_SEGMENTS + 1) + x);
+				}
+			}
+
+			oddRow = !oddRow;
+		}
+
+		indexCount = indices.size();
+
+		std::vector<GLfloat> data;
+		for (int i = 0; i < positions.size(); ++i)
+		{
+			data.push_back(positions[i].x);
+			data.push_back(positions[i].y);
+			data.push_back(positions[i].z);
+			if (uv.size() > 0)
+			{
+				data.push_back(uv[i].x);
+				data.push_back(uv[i].y);
+			}
+			if (normals.size() > 0)
+			{
+				data.push_back(normals[i].x);
+				data.push_back(normals[i].y);
+				data.push_back(normals[i].z);
+			}
+		}
+
+		glBindVertexArray(sphereVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(), GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
+		glEnableVertexAttribArray(0);
+	}
+}
+
 int main()
 {
 	// initialize and configure glfw
@@ -70,73 +242,6 @@ int main()
 
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
-
-	// enable stencil test
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	
-	GLfloat vertices[] = {
-		// positions          // texture Coords
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
-
-	GLuint VAO;
-	GLuint VBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0);
 
 	GLuint cubeTexture = textureLoader::loadTexture2D(resources_dir + "textures/12.object_outlining/marble.jpg", true);
 
