@@ -182,16 +182,16 @@ void drawSphere()
 			data.push_back(positions[i].x);
 			data.push_back(positions[i].y);
 			data.push_back(positions[i].z);
-			if (uv.size() > 0)
-			{
-				data.push_back(uv[i].x);
-				data.push_back(uv[i].y);
-			}
 			if (normals.size() > 0)
 			{
 				data.push_back(normals[i].x);
 				data.push_back(normals[i].y);
 				data.push_back(normals[i].z);
+			}
+			if (uv.size() > 0)
+			{
+				data.push_back(uv[i].x);
+				data.push_back(uv[i].y);
 			}
 		}
 
@@ -204,7 +204,17 @@ void drawSphere()
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
 		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
 	}
+
+	glBindVertexArray(sphereVAO);
+	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 int main()
@@ -240,17 +250,34 @@ int main()
 		cout << "Success to initialize GLAD\n";
 	}
 
+	// all positions of cubes
+	std::array<glm::vec3, 10> cubePositions = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 
-	GLuint cubeTexture = textureLoader::loadTexture2D(resources_dir + "textures/12.object_outlining/marble.jpg", true);
+	GLuint diffuseMap = textureLoader::loadTexture2D(resources_dir + "textures/13.blinn_phong_lighting/cube_diffuse.jpg", true);
+	GLuint specularMap = textureLoader::loadTexture2D(resources_dir + "textures/13.blinn_phong_lighting/cube_specular.png", true);
 
-	Shader shader(resources_dir + "shaders/12.object_outlining/cube.vs", resources_dir + "shaders/12.object_outlining/cube.fs");
-	Shader outlineShader(resources_dir + "shaders/12.object_outlining/cube.vs", resources_dir + "shaders/12.object_outlining/outline_color.fs");
+	Shader cubeShader(resources_dir + "shaders/13.blinn_phong_lighting/cube.vs", resources_dir + "shaders/13.blinn_phong_lighting/cube.fs");
+	Shader lightSourceShader(resources_dir + "shaders/13.blinn_phong_lighting/light_source.vs", resources_dir + "shaders/13.blinn_phong_lighting/light_source.fs");
 
-	shader.use();
-	shader.setInt("cubeTexture", 0);
-
+	cubeShader.use();
+	cubeShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+	cubeShader.setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+	cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+	cubeShader.setVec3("dirLight.specular", glm::vec3(-0.2f, -1.0f, -0.3f));
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -264,60 +291,13 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glBindVertexArray(VAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, cubeTexture);
-
-		// firstly, draw cubes as normal, write to the stencil buffer
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
-
-		shader.use();
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		shader.setMat4("model", model);
-		shader.setMat4("view", camera.getViewMatrix());
-		shader.setMat4("projection", camera.getPerspectiveMatrix());
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.5f, 0.0f, -1.5f));
-		shader.setMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// secondly, draw slightly scaled versions of the cubes, disable stencil write and depth test 
-		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		glStencilMask(0x00);
-		glDisable(GL_DEPTH_TEST);
-	
-		outlineShader.use(); 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.05f, 1.05f, 1.05f));
-		outlineShader.setMat4("model", model);
-		outlineShader.setMat4("view", camera.getViewMatrix());
-		outlineShader.setMat4("projection", camera.getPerspectiveMatrix());
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.5f, 0.0f, -1.5f));
-		model = glm::scale(model, glm::vec3(1.05f, 1.05f, 1.05f));
-		outlineShader.setMat4("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
-		glBindVertexArray(0);
-		glStencilMask(0xFF);
-		glEnable(GL_DEPTH_TEST);
 
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	
-	// delete all textures and buffers
-	glDeleteTextures(1, &cubeTexture);
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+
 
 	glfwTerminate();
 	return 0;

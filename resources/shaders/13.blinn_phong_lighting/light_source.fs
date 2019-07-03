@@ -2,7 +2,9 @@
 precision mediump float;
 out vec4 fragColor;
 
+in vec2 fTexCoord;
+
 void main()
 {
-    fragColor = vec4(0.0, 1.0, 1.0, 1.0);
+    fragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
