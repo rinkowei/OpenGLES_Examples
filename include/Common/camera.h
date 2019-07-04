@@ -104,6 +104,16 @@ public:
 		setPerspectiveMatrix();
 	}
 
+	glm::vec3 getPosition()
+	{
+		return position;
+	}
+
+	glm::vec3 getFront()
+	{
+		return front;
+	}
+
 private:
 	// camera's properties
 	float fov = 45.0f;
