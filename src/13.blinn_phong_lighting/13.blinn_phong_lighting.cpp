@@ -267,7 +267,7 @@ int main()
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 
-	GLuint diffuseMap = textureLoader::loadTexture2D(resources_dir + "textures/13.blinn_phong_lighting/cube_diffuse.jpg", true);
+	GLuint diffuseMap = textureLoader::loadTexture2D(resources_dir + "textures/13.blinn_phong_lighting/cube_diffuse.png", true);
 	GLuint specularMap = textureLoader::loadTexture2D(resources_dir + "textures/13.blinn_phong_lighting/cube_specular.png", true);
 
 	Shader cubeShader(resources_dir + "shaders/13.blinn_phong_lighting/cube.vs", resources_dir + "shaders/13.blinn_phong_lighting/cube.fs");
@@ -286,7 +286,6 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		/*
 		cubeShader.use();
 		cubeShader.setVec3("viewPos", camera.getPosition());
 		cubeShader.setFloat("shininess", 32.0f);
@@ -294,15 +293,15 @@ int main()
 		cubeShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 		cubeShader.setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
 		cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-		cubeShader.setVec3("dirLight.specular", glm::vec3(-0.2f, -1.0f, -0.3f));
+		cubeShader.setVec3("dirLight.specular", glm::vec3(0.4f, 0.4f, 0.4f));
 		// point light
 		cubeShader.setVec3("pointLight.position", glm::vec3(0.0f, 0.0f, 0.0f));
-		cubeShader.setVec3("pointLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		cubeShader.setVec3("pointLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
 		cubeShader.setVec3("pointLight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		cubeShader.setVec3("pointLight.specular", glm::vec3(0.8f, 0.8f, 0.8f));
 		cubeShader.setFloat("pointLight.constant", 1.0f);
-		cubeShader.setFloat("pointLight.linear", 1.0f);
-		cubeShader.setFloat("pointLight.quadratic", 0.032f);
+		cubeShader.setFloat("pointLight.linear", 0.022f);
+		cubeShader.setFloat("pointLight.quadratic", 0.0019f);
 		// spot light
 		cubeShader.setVec3("spotLight.position", camera.getPosition());
 		cubeShader.setVec3("spotLight.direction", camera.getFront());
@@ -325,24 +324,22 @@ int main()
 
 		cubeShader.setInt("diffuseMap", 0);
 		cubeShader.setInt("specularMap", 1);
-		*/
-		lightSourceShader.use();
-		lightSourceShader.setMat4("view", camera.getViewMatrix());
-		lightSourceShader.setMat4("projection", camera.getPerspectiveMatrix());
-
+		
 		// render cubes
 		glm::mat4 model = glm::mat4(1.0f);
-		
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			model = glm::translate(model, cubePositions[i]);
 			model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
-			lightSourceShader.setMat4("model", model);
+			cubeShader.setMat4("model", model);
 
 			drawCube();
 		}
 		
 		// render point light
+		lightSourceShader.use();
+		lightSourceShader.setMat4("view", camera.getViewMatrix());
+		lightSourceShader.setMat4("projection", camera.getPerspectiveMatrix());
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(-2.5f, 5.0f, -12.0f));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
