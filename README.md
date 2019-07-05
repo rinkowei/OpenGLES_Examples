@@ -76,3 +76,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 #### [13 - blinn_phong_lighting](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/13.blinn_phong_lighting>)
+
+
+
+#### [14 - blending](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/14.blending>)
