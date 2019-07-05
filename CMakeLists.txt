@@ -46,6 +46,7 @@ set(EXAMPLES
     11.cull_face
     12.object_outlining
     13.blinn_phong_lighting
+    14.blending
 )
 
 add_library(GLAD "src/glad.c")
