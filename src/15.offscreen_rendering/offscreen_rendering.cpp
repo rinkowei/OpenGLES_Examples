@@ -28,53 +28,13 @@ const GLuint SCREEN_HEIGHT = 600;
 
 const string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 10.0f, glm::vec3(0.0f, 0.0f, 2.0f));
+Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 10.0f, 30.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 float deltaTime = 0.0f;
 float lastTime = 0.0f;
-
-GLuint quadVAO = 0;
-GLuint quadVBO = 0;
-
-void drawQuad()
-{
-	if (quadVAO == 0)
-	{
-		GLfloat vertices[] = {
-			// positions        // texture coordinates
-			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-			0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
-			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-
-			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-			1.0f,  0.5f,  0.0f,  1.0f,  0.0f
-		};
-
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(1);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
-}
 
 int main()
 {
@@ -111,24 +71,11 @@ int main()
 
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
-
-	// enbale blend
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
 	
-	Shader quadShader(resources_dir + "shaders/14.blending/quad.vs", resources_dir + "shaders/14.blending/quad.fs");
-
-	std::array<glm::vec3, 6> quadPositions
-	{
-		glm::vec3(-1.5f, 0.0f, -0.48f),
-		glm::vec3(1.5f, 0.0f, 0.51f),
-		glm::vec3(0.0f, 0.0f, 0.7f),
-		glm::vec3(0.5f, 0.0f, -0.6f),
-		glm::vec3(0.2f, 0.0f, -0.9f),
-		glm::vec3(-0.2f, 0.0f, -1.4f)
-	};
+	Shader constructionShader(resources_dir + "shaders/15.offscreen_rendering/construction.vs", resources_dir + "shaders/15.offscreen_rendering/construction.fs");
 	
+	Model constructionModel(resources_dir + "/models/construction-site-rawscan/site.obj");
+
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -142,35 +89,21 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		std::map<float, glm::vec3> sortedMap;
-		for (unsigned int i = 0; i < quadPositions.size(); i++)
-		{
-			float distance = glm::length(camera.getPosition() - quadPositions[i]);
-			sortedMap[distance] = quadPositions[i];
-		}
-		
-		quadShader.use();
-		quadShader.setMat4("view", camera.getViewMatrix());
-		quadShader.setMat4("projection", camera.getPerspectiveMatrix());
-		
-		// render quadrangles from furthest to nearest
+		constructionShader.use();
+		constructionShader.setMat4("projection", camera.getPerspectiveMatrix());
+		constructionShader.setMat4("view", camera.getViewMatrix());
+
 		glm::mat4 model = glm::mat4(1.0f);
-		for (auto iter = sortedMap.rbegin(); iter != sortedMap.rend(); iter++)
-		{
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, iter->second);
-			quadShader.setMat4("model", model);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		constructionShader.setMat4("model", model);
 
-			drawQuad();
-		}
-
+		constructionModel.Draw(constructionShader);
+		
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	glDeleteVertexArrays(1, &quadVAO);
-	glDeleteBuffers(1, &quadVBO);
 
 	glfwTerminate();
 	return 0;
