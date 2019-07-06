@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <array>
+#include <map>
 using namespace std;
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -35,88 +36,8 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastTime = 0.0f;
 
-GLuint cubeVAO = 0;
-GLuint cubeVBO = 0;
-
-GLuint sphereVAO = 0;
-GLuint indexCount = 0;
-
 GLuint quadVAO = 0;
 GLuint quadVBO = 0;
-
-void drawCube()
-{
-	if (cubeVAO == 0)
-	{
-		GLfloat vertices[] = {
-			// positions          // normals          // texture coordinates
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-		};
-
-		glGenVertexArrays(1, &cubeVAO);
-		glGenBuffers(1, &cubeVBO);
-
-		glBindVertexArray(cubeVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(1);
-
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(2);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	glBindVertexArray(cubeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-}
 
 void drawQuad()
 {
@@ -197,7 +118,16 @@ int main()
 	glBlendEquation(GL_FUNC_ADD);
 	
 	Shader quadShader(resources_dir + "shaders/14.blending/quad.vs", resources_dir + "shaders/14.blending/quad.fs");
-	Shader lightSourceShader(resources_dir + "shaders/13.blinn_phong_lighting/light_source.vs", resources_dir + "shaders/13.blinn_phong_lighting/light_source.fs");
+
+	std::array<glm::vec3, 6> quadPositions
+	{
+		glm::vec3(-1.5f, 0.0f, -0.48f),
+		glm::vec3(1.5f, 0.0f, 0.51f),
+		glm::vec3(0.0f, 0.0f, 0.7f),
+		glm::vec3(0.5f, 0.0f, -0.6f),
+		glm::vec3(0.2f, 0.0f, -0.9f),
+		glm::vec3(-0.2f, 0.0f, -1.4f)
+	};
 	
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -210,19 +140,37 @@ int main()
 		
 		// clear color buffer
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		std::map<float, glm::vec3> sortedMap;
+		for (unsigned int i = 0; i < quadPositions.size(); i++)
+		{
+			float distance = glm::length(camera.getPosition() - quadPositions[i]);
+			sortedMap[distance] = quadPositions[i];
+		}
+		
 		quadShader.use();
 		quadShader.setMat4("view", camera.getViewMatrix());
 		quadShader.setMat4("projection", camera.getPerspectiveMatrix());
-		quadShader.setMat4("model", glm::mat4(1.0f));
+		
+		// render quadrangles from furthest to nearest
+		glm::mat4 model = glm::mat4(1.0f);
+		for (auto iter = sortedMap.rbegin(); iter != sortedMap.rend(); iter++)
+		{
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, iter->second);
+			quadShader.setMat4("model", model);
 
-		drawQuad();
+			drawQuad();
+		}
 
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteVertexArrays(1, &quadVAO);
+	glDeleteBuffers(1, &quadVBO);
 
 	glfwTerminate();
 	return 0;
