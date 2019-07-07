@@ -114,6 +114,14 @@ public:
 		return front;
 	}
 
+	void rotate(float pitch, float yaw, float roll)
+	{
+		this->pitch += pitch;
+		this->yaw += yaw;
+
+		updateCameraProperties();
+	}
+
 private:
 	// camera's properties
 	float fov = 45.0f;
