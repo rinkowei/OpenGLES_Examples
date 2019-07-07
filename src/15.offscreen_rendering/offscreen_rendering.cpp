@@ -36,6 +36,46 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastTime = 0.0f;
 
+GLuint quadVAO = 0;
+GLuint quadVBO = 0;
+
+void drawQuad()
+{
+	if (quadVAO == 0)
+	{
+		GLfloat vertices[] = {
+			// positions        // texture coordinates
+			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+			0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+			1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+		};
+
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+}
+
 int main()
 {
 	// initialize and configure glfw
@@ -73,9 +113,35 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	
 	Shader constructionShader(resources_dir + "shaders/15.offscreen_rendering/construction.vs", resources_dir + "shaders/15.offscreen_rendering/construction.fs");
-	
+	Shader screenShader(resources_dir + "shaders/15.offscreen_rendering/screen.vs", resources_dir + "shaders/15.offscreen_rendering/screen.fs");
+
 	Model constructionModel(resources_dir + "/models/construction-site-rawscan/site.obj");
 
+	// configure framebuffer
+	GLuint framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	GLuint colorAttachment;
+	glGenTextures(1, &colorAttachment);
+	glBindTexture(GL_TEXTURE_2D, colorAttachment);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorAttachment, 0);
+
+	GLuint renderbuffer;
+	glGenRenderbuffers(1, &renderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		throw std::runtime_error("failed to create framebuffer!");
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -85,7 +151,10 @@ int main()
 
 		handleInput(window);
 		
-		// clear color buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		glEnable(GL_DEPTH_TEST);
+
+		// clear color and depth buffer
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -99,6 +168,23 @@ int main()
 		constructionShader.setMat4("model", model);
 
 		constructionModel.Draw(constructionShader);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// clear color and depth buffer
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		constructionModel.Draw(constructionShader);
+
+		// disable depth test for render quad in front of the scene
+		glDisable(GL_DEPTH_TEST);
+
+		screenShader.use();
+		screenShader.setInt("screenTexture", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, colorAttachment);
+		drawQuad();
 		
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
