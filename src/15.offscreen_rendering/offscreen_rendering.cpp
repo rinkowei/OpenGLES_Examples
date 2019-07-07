@@ -38,28 +38,35 @@ float lastTime = 0.0f;
 
 GLuint quadVAO = 0;
 GLuint quadVBO = 0;
+GLuint quadEBO = 0;
 
 void drawQuad()
 {
 	if (quadVAO == 0)
 	{
 		GLfloat vertices[] = {
-			// positions        // texture coordinates
-			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-			0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
-			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+			 // positions        // texture coordinates
+			 0.4f, 1.3f, 0.0f,  1.0f, 1.0f,
+			 0.4f, 0.3f, 0.0f,  1.0f, 0.0f,
+			-0.4f, 0.3f, 0.0f,  0.0f, 0.0f,
+			-0.4f, 1.3f, 0.0f,  0.0f, 1.0f
+		};
 
-			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-			1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+		GLuint indices[] = {
+			0, 1, 3,
+			1, 2, 3
 		};
 
 		glGenVertexArrays(1, &quadVAO);
 		glGenBuffers(1, &quadVBO);
+		glGenBuffers(1, &quadEBO);
 
 		glBindVertexArray(quadVAO);
 		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
 		glEnableVertexAttribArray(0);
@@ -72,7 +79,7 @@ void drawQuad()
 	}
 
 	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
 
@@ -151,6 +158,7 @@ int main()
 
 		handleInput(window);
 		
+		// switch to another framebuffer we have created, so now would not render to screen
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glEnable(GL_DEPTH_TEST);
 
@@ -159,8 +167,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		constructionShader.use();
-		constructionShader.setMat4("projection", camera.getPerspectiveMatrix());
 		constructionShader.setMat4("view", camera.getViewMatrix());
+		constructionShader.setMat4("projection", camera.getPerspectiveMatrix());
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -169,6 +177,7 @@ int main()
 
 		constructionModel.Draw(constructionShader);
 
+		// switch to default famebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// clear color and depth buffer
@@ -190,6 +199,12 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	// delete all buffers and VAOs
+	glDeleteFramebuffers(1, &framebuffer);
+	glDeleteVertexArrays(1, &quadVAO);
+	glDeleteBuffers(1, &quadVBO);
+	glDeleteBuffers(1, &quadEBO);
 
 	glfwTerminate();
 	return 0;
