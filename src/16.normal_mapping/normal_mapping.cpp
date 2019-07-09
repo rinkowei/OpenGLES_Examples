@@ -36,53 +36,6 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastTime = 0.0f;
 
-GLuint quadVAO = 0;
-GLuint quadVBO = 0;
-GLuint quadEBO = 0;
-
-void drawQuad()
-{
-	if (quadVAO == 0)
-	{
-		GLfloat vertices[] = {
-			 // positions        // texture coordinates
-			 0.4f, 1.3f, 0.0f,  1.0f, 1.0f,
-			 0.4f, 0.3f, 0.0f,  1.0f, 0.0f,
-			-0.4f, 0.3f, 0.0f,  0.0f, 0.0f,
-			-0.4f, 1.3f, 0.0f,  0.0f, 1.0f
-		};
-
-		GLuint indices[] = {
-			0, 1, 3,
-			1, 2, 3
-		};
-
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glGenBuffers(1, &quadEBO);
-
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadEBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(1);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	glBindVertexArray(quadVAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-}
-
 int main()
 {
 	// initialize and configure glfw
@@ -124,30 +77,70 @@ int main()
 
 	Model constructionModel(resources_dir + "/models/construction-site-rawscan/site.obj");
 
-	// configure framebuffer
-	GLuint framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	// set up vertex data and configure vertex attributes
+	GLfloat vertices[] = {
+		  // positions             // texture coordnates   // normals
+		 -10.0f, -10.0f,  0.0f,    0.0f,  0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
+		 -5.0f,  -10.0f,  0.0f,    0.0f,  1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  0.0f,  -10.0f,  0.0f,    0.25f, 0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
+		  5.0f,  -10.0f,  0.0f,    0.25f, 1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  10.0f, -10.0f,  0.0f,    0.5f,  0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
+		 -10.0f, -5.0f,   0.0f,    0.5f,  1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		 -5.0f,  -5.0f,   0.0f,    0.75f, 0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
+		  0.0f,  -5.0f,   0.0f,    0.75f, 1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  5.0f,  -5.0f,   0.0f,    1.0f,  0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
+		  10.0f, -5.0f,   0.0f,    1.0f,  1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		 -10.0f,  0.0f,   0.0f,    0.0f,  0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
+		 -5.0f,   0.0f,   0.0f,    0.25f, 0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  0.0f,   0.0f,   0.0f,    0.5f,  0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  5.0f,   0.0f,   0.0f,    0.75f, 0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  10.0f,  0.0f,   0.0f,    1.0f,  0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
+		 -10.0f,  5.0f,   0.0f,    0.0f,  0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
+		 -5.0f,   5.0f,   0.0f,    0.25f, 0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
+		  0.0f,   5.0f,   0.0f,    0.5f,  0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
+		  5.0f,   5.0f,   0.0f,    0.75f, 0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
+		  10.0f,  5.0f,   0.0f,    1.0f,  0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
+		 -10.0f,  10.0f,  0.0f,    0.0f,  0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		 -5.0f,   10.0f,  0.0f,    0.25f, 0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  0.0f,   10.0f,  0.0f,    0.5f,  0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  5.0f,   10.0f,  0.0f,    0.75f, 0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
+		  10.0f,  10.0f,  0.0f,    1.0f,  0.0f,   0.0f,    0.0f, 0.0f, 1.0f
+	};
 
-	GLuint colorAttachment;
-	glGenTextures(1, &colorAttachment);
-	glBindTexture(GL_TEXTURE_2D, colorAttachment);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorAttachment, 0);
-
-	GLuint renderbuffer;
-	glGenRenderbuffers(1, &renderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		throw std::runtime_error("failed to create framebuffer!");
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	GLfloat indices[] = {
+		6, 1, 6, 1, 2, 1, 7, 3, 7,
+		2, 4, 2, 7, 3, 7, 1, 2, 1,
+		7, 3, 7, 2, 4, 2, 8, 5, 8,
+		3, 6, 3, 8, 5, 8, 2, 4, 2,
+		8, 5, 8, 3, 6, 3, 9, 7, 9,
+		4, 8, 4, 9, 7, 9, 3, 6, 3,
+		9, 7, 9, 4, 8, 4, 10, 9, 10,
+		5, 10, 5, 10, 9, 10, 4, 8, 4,
+		11, 11, 11, 6, 1, 6, 12, 12, 12,
+		7, 3, 7, 12, 12, 12, 6, 1, 6,
+		12, 12, 12, 7, 3, 7, 13, 13, 13,
+		8, 5, 8, 13, 13, 13, 7, 3, 7,
+		13, 13, 13, 8, 5, 8, 14, 14, 14,
+		9, 7, 9, 14, 14, 14, 8, 5, 8,
+		14, 14, 14, 9, 7, 9, 15, 15, 15,
+		10, 9, 10, 15, 15, 15, 9, 7, 9,
+		16, 16, 16, 11, 11, 11, 17, 17, 17,
+		12, 12, 12, 17, 17, 17, 11, 11, 11,
+		17, 17, 17, 12, 12, 12, 18, 18, 18,
+		13, 13, 13, 18, 18, 18, 12, 12, 12,
+		18, 18, 18, 13, 13, 13, 19, 19, 19,
+		14, 14, 14, 19, 19, 19, 13, 13, 13,
+		19, 19, 19, 14, 14, 14, 20, 20, 20,
+		15, 15, 15, 20, 20, 20, 14, 14, 14,
+		21, 21, 21, 16, 16, 16, 22, 22, 22,
+		17, 17, 17, 22, 22, 22, 16, 16, 16,
+		22, 22, 22, 17, 17, 17, 23, 23, 23,
+		18, 18, 18, 23, 23, 23, 17, 17, 17,
+		23, 23, 23, 18, 18, 18, 24, 24, 24,
+		19, 19, 19, 24, 24, 24, 18, 18, 18,
+		24, 24, 24, 19, 19, 19, 25, 25, 25,
+		20, 20, 20, 25, 25, 25, 19, 19, 19
+	};
 	
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -157,54 +150,16 @@ int main()
 		lastTime = currentFrame;
 
 		handleInput(window);
-		
-		// switch to another framebuffer we have created, so now would not render to screen
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-		glEnable(GL_DEPTH_TEST);
 
 		// clear color and depth buffer
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		constructionShader.use();
-		constructionShader.setMat4("view", camera.getViewMatrix());
-		constructionShader.setMat4("projection", camera.getPerspectiveMatrix());
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-		constructionShader.setMat4("model", model);
-
-		constructionModel.Draw(constructionShader);
-
-		// switch to default famebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// clear color and depth buffer
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		constructionModel.Draw(constructionShader);
-
-		// disable depth test for render quad in front of the scene
-		glDisable(GL_DEPTH_TEST);
-
-		screenShader.use();
-		screenShader.setInt("screenTexture", 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, colorAttachment);
-		drawQuad();
 		
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	// delete all buffers and VAOs
-	glDeleteFramebuffers(1, &framebuffer);
-	glDeleteVertexArrays(1, &quadVAO);
-	glDeleteBuffers(1, &quadVBO);
-	glDeleteBuffers(1, &quadEBO);
 
 	glfwTerminate();
 	return 0;
