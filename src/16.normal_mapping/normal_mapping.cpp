@@ -14,8 +14,9 @@
 #include <Common/model.h>
 
 #include <iostream>
+#include <vector>
 #include <array>
-#include <map>
+
 using namespace std;
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -28,7 +29,7 @@ const GLuint SCREEN_HEIGHT = 600;
 
 const string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 10.0f, 30.0f));
+Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -71,77 +72,18 @@ int main()
 
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
+
+	// diffuse map
+	GLuint diffuseMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_COL.jpg", true);
+	// specular map
+	GLuint specularMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_DSP.jpg", true);
+	// normal map
+	GLuint normalMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_NRM.jpg", true);
 	
-	Shader constructionShader(resources_dir + "shaders/15.offscreen_rendering/construction.vs", resources_dir + "shaders/15.offscreen_rendering/construction.fs");
-	Shader screenShader(resources_dir + "shaders/15.offscreen_rendering/screen.vs", resources_dir + "shaders/15.offscreen_rendering/screen.fs");
+	Shader shader(resources_dir + "shaders/16.normal_mapping/plane.vs", resources_dir + "shaders/16.normal_mapping/plane.fs");
 
-	Model constructionModel(resources_dir + "/models/construction-site-rawscan/site.obj");
+	Model planeModel(resources_dir + "/models/Aussie-Telco/grid.obj");
 
-	// set up vertex data and configure vertex attributes
-	GLfloat vertices[] = {
-		  // positions             // texture coordnates   // normals
-		 -10.0f, -10.0f,  0.0f,    0.0f,  0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
-		 -5.0f,  -10.0f,  0.0f,    0.0f,  1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  0.0f,  -10.0f,  0.0f,    0.25f, 0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
-		  5.0f,  -10.0f,  0.0f,    0.25f, 1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  10.0f, -10.0f,  0.0f,    0.5f,  0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
-		 -10.0f, -5.0f,   0.0f,    0.5f,  1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		 -5.0f,  -5.0f,   0.0f,    0.75f, 0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
-		  0.0f,  -5.0f,   0.0f,    0.75f, 1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  5.0f,  -5.0f,   0.0f,    1.0f,  0.75f,  0.0f,    0.0f, 0.0f, 1.0f,
-		  10.0f, -5.0f,   0.0f,    1.0f,  1.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		 -10.0f,  0.0f,   0.0f,    0.0f,  0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
-		 -5.0f,   0.0f,   0.0f,    0.25f, 0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  0.0f,   0.0f,   0.0f,    0.5f,  0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  5.0f,   0.0f,   0.0f,    0.75f, 0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  10.0f,  0.0f,   0.0f,    1.0f,  0.5f,   0.0f,    0.0f, 0.0f, 1.0f,
-		 -10.0f,  5.0f,   0.0f,    0.0f,  0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
-		 -5.0f,   5.0f,   0.0f,    0.25f, 0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
-		  0.0f,   5.0f,   0.0f,    0.5f,  0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
-		  5.0f,   5.0f,   0.0f,    0.75f, 0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
-		  10.0f,  5.0f,   0.0f,    1.0f,  0.25f,  0.0f,    0.0f, 0.0f, 1.0f,
-		 -10.0f,  10.0f,  0.0f,    0.0f,  0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		 -5.0f,   10.0f,  0.0f,    0.25f, 0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  0.0f,   10.0f,  0.0f,    0.5f,  0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  5.0f,   10.0f,  0.0f,    0.75f, 0.0f,   0.0f,    0.0f, 0.0f, 1.0f,
-		  10.0f,  10.0f,  0.0f,    1.0f,  0.0f,   0.0f,    0.0f, 0.0f, 1.0f
-	};
-
-	GLfloat indices[] = {
-		6, 1, 6, 1, 2, 1, 7, 3, 7,
-		2, 4, 2, 7, 3, 7, 1, 2, 1,
-		7, 3, 7, 2, 4, 2, 8, 5, 8,
-		3, 6, 3, 8, 5, 8, 2, 4, 2,
-		8, 5, 8, 3, 6, 3, 9, 7, 9,
-		4, 8, 4, 9, 7, 9, 3, 6, 3,
-		9, 7, 9, 4, 8, 4, 10, 9, 10,
-		5, 10, 5, 10, 9, 10, 4, 8, 4,
-		11, 11, 11, 6, 1, 6, 12, 12, 12,
-		7, 3, 7, 12, 12, 12, 6, 1, 6,
-		12, 12, 12, 7, 3, 7, 13, 13, 13,
-		8, 5, 8, 13, 13, 13, 7, 3, 7,
-		13, 13, 13, 8, 5, 8, 14, 14, 14,
-		9, 7, 9, 14, 14, 14, 8, 5, 8,
-		14, 14, 14, 9, 7, 9, 15, 15, 15,
-		10, 9, 10, 15, 15, 15, 9, 7, 9,
-		16, 16, 16, 11, 11, 11, 17, 17, 17,
-		12, 12, 12, 17, 17, 17, 11, 11, 11,
-		17, 17, 17, 12, 12, 12, 18, 18, 18,
-		13, 13, 13, 18, 18, 18, 12, 12, 12,
-		18, 18, 18, 13, 13, 13, 19, 19, 19,
-		14, 14, 14, 19, 19, 19, 13, 13, 13,
-		19, 19, 19, 14, 14, 14, 20, 20, 20,
-		15, 15, 15, 20, 20, 20, 14, 14, 14,
-		21, 21, 21, 16, 16, 16, 22, 22, 22,
-		17, 17, 17, 22, 22, 22, 16, 16, 16,
-		22, 22, 22, 17, 17, 17, 23, 23, 23,
-		18, 18, 18, 23, 23, 23, 17, 17, 17,
-		23, 23, 23, 18, 18, 18, 24, 24, 24,
-		19, 19, 19, 24, 24, 24, 18, 18, 18,
-		24, 24, 24, 19, 19, 19, 25, 25, 25,
-		20, 20, 20, 25, 25, 25, 19, 19, 19
-	};
-	
 	// render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -154,12 +96,41 @@ int main()
 		// clear color and depth buffer
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		shader.use();
+		shader.setMat4("view", camera.getViewMatrix());
+		shader.setMat4("projection", camera.getPerspectiveMatrix());
+		
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		shader.setMat4("model", model);
 
+		shader.setVec3("lightPos", camera.getPosition());
+		shader.setVec3("viewPos", camera.getPosition());
+
+		// bind textures to shader
+		shader.setInt("diffuseMap", 0);
+		shader.setInt("specularMap", 1);
+		shader.setInt("normalMap", 2);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
+		
+		planeModel.Draw(shader);
 		
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	glDeleteTextures(1, &diffuseMap);
+	glDeleteTextures(1, &specularMap);
+	glDeleteTextures(1, &normalMap);
 
 	glfwTerminate();
 	return 0;
