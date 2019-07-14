@@ -20,7 +20,10 @@ function(buildExample EXAMPLE_NAME)
 
     endif()
 
-    set_target_properties(${EXAMPLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+    set_target_properties(${EXAMPLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/win${BITS})
+    set_target_properties(${EXAMPLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/MinSizeRel/win${BITS})
+    set_target_properties(${EXAMPLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/win${BITS})
+    set_target_properties(${EXAMPLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/RelWithDebInfo/win${BITS})
 endfunction(buildExample)
 
 function(buildExamples)
@@ -29,6 +32,7 @@ function(buildExamples)
     endforeach(EXAMPLE)
 endfunction(buildExamples)
 
+# example list
 set(EXAMPLES
     01.hello_window
     02.hello_window_color_clear
