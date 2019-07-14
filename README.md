@@ -13,7 +13,7 @@ A comprehensive collection of open source C++ examples for OpenGL ES 3.2 which i
 
 The repository contains everything required to compile and build the examples on Windows,  using the Visual Studio compiler that supports C++14 at least. All required dependencies are included.
 
-- ##### compile option : Debug, Release
+- ##### compile option : Debug, MinSizeRel, Release, RelWithDebInfo
 
 - ##### target platform : Win32, Win64
 
