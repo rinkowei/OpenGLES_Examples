@@ -6,7 +6,7 @@ function(buildExample EXAMPLE_NAME)
     file(GLOB SOURCE ${EXAMPLE_FOLDER}/*.cpp)
     # third-party source files
     if(EXISTS ${EXAMPLE_NAME} STREQUAL "17.dear_imgui")
-        file(GLOB ADD_SOURCE "../include/imgui/*.cpp")
+        file(GLOB ADD_SOURCE "../external/imgui/*.cpp")
         SET(SOURCE ${SOURCE} ${ADD_SOURCE})
     endif()
     # Add shaders
@@ -15,7 +15,7 @@ function(buildExample EXAMPLE_NAME)
     source_group("Shaders" FILES ${SHADERS})
     if(WIN32)
         add_executable(${EXAMPLE_NAME} ${SOURCE} ${SHADERS})
-        target_link_libraries(${EXAMPLE_NAME} ${LIBS})
+        target_link_libraries(${EXAMPLE_NAME} common ${LIBS})
     else()
 
     endif()

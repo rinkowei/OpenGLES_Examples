@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.2 FATAL_ERROR)
-cmake_policy(VERSION 3.2)
+cmake_minimum_required (VERSION 3.4 FATAL_ERROR)
+cmake_policy(VERSION 3.4)
 
 set(NAME OpenGLES_Examples)
 project(${NAME})
@@ -10,7 +10,8 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/common)
+include_directories(${CMAKE_SOURCE_DIR}/external)
 
 math(EXPR BITS "8*${CMAKE_SIZEOF_VOID_P}")
 
@@ -33,7 +34,7 @@ if(WIN32 AND NOT MINGW)
         foreach(DLL ${DLLs})
             execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${DLL} ${DLL_DESTINATION}/)
         endforeach(DLL)
-    endforeach(DESTINATION)
+    endforeach(DLL_DESTINATION)
 else()
     set(LIBS )
 endif()
@@ -47,10 +48,8 @@ else()
     add_compile_options("/std:c++14")
 endif()
 
-add_library(glad "include/glad/glad.c")
+add_library(glad "external/glad/glad.c")
 set(LIBS ${LIBS} glad)
 
-add_library(common "include/common/common.cpp")
-set(LIBS ${LIBS} common)
-
+add_subdirectory(common)
 add_subdirectory(src)
