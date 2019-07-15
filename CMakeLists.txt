@@ -47,10 +47,10 @@ else()
     add_compile_options("/std:c++14")
 endif()
 
-add_library(GLAD "src/glad.c")
-set(LIBS ${LIBS} GLAD)
+add_library(glad "include/glad/glad.c")
+set(LIBS ${LIBS} glad)
 
-add_library(Common "src/common.cpp")
-set(LIBS ${LIBS} Common)
+add_library(common "include/common/common.cpp")
+set(LIBS ${LIBS} common)
 
 add_subdirectory(src)
