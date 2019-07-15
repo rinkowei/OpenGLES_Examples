@@ -8,9 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <Common/camera.h>
-#include <Common/shader.h>
-#include <Common/textureLoader.h>
+#include <common.h>
 
 #include <iostream>
 #include <array>

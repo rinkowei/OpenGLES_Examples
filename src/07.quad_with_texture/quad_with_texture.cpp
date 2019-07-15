@@ -4,8 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
-#include <Common/shader.h>
-#include <Common/textureLoader.h>
+#include <common.h>
 
 #include <iostream>
 #include <array>

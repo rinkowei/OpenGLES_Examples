@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <Common/shader.h>
+#include <common.h>
 #include <iostream>
 #include <array>
 using namespace std;
