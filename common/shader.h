@@ -11,7 +11,36 @@
 class Shader
 {
 public:
-	unsigned int ID;
+	Shader() {};
+	~Shader() {};
+
+	enum class TYPE {
+		VERTEX,
+		FRAGMENT,
+		PROGRAM
+	};
+
+	static Shader* createWithFile(const std::string& vsFile, const std::string& fsFile)
+	{
+		Shader* shader = new (std::nothrow) Shader();
+		if (shader && shader->initWithFile(vsFile, fsFile))
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
+	}
+
+	static Shader* createWithSource(const std::string& vsSource, const std::string& fsSource)
+	{
+		Shader* shader = new (std::nothrow) Shader();
+		if (shader && shader->initWithSource(vsSource, fsSource))
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
+	}
 
 	Shader(const std::string& vsPath, const std::string& fsPath)
 	{
@@ -44,27 +73,27 @@ public:
 			std::cout << "ERROR : shader file failed to read" << std::endl;
 		}
 
-		unsigned int vsShaderID;
-		unsigned int fsShaderID;
+		GLuint vsShaderID;
+		GLuint fsShaderID;
 
-		const char* vsShaderCode = vsCode.c_str();
-		const char* fsShaderCode = fsCode.c_str();
+		const GLchar* vsShaderCode = vsCode.c_str();
+		const GLchar* fsShaderCode = fsCode.c_str();
 
 		vsShaderID = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vsShaderID, 1, &vsShaderCode, nullptr);
 		glCompileShader(vsShaderID);
-		checkCompileErrors(vsShaderID, "SHADER");
+		checkCompileErrors(vsShaderID, Shader::TYPE::VERTEX);
 
 		fsShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fsShaderID, 1, &fsShaderCode, nullptr);
 		glCompileShader(fsShaderID);
-		checkCompileErrors(fsShaderID, "SHADER");
+		checkCompileErrors(fsShaderID, Shader::TYPE::FRAGMENT);
 
 		ID = glCreateProgram();
 		glAttachShader(ID, vsShaderID);
 		glAttachShader(ID, fsShaderID);
 		glLinkProgram(ID);
-		checkCompileErrors(ID, "PROGRAM");
+		checkCompileErrors(ID, Shader::TYPE::PROGRAM);
 
 		glDeleteShader(vsShaderID);
 		glDeleteShader(fsShaderID);
@@ -131,28 +160,119 @@ public:
 	{
 		glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 	}
+
+	GLuint getID()
+	{
+		return ID;
+	}
 private:
-	void checkCompileErrors(GLuint shader, const std::string& type)
+	GLuint ID = 0;
+
+	bool initWithFile(const std::string& vsFile, const std::string& fsFile)
+	{
+		struct stat info;
+		if (stat(vsFile.c_str(), &info) != 0)
+		{
+			std::runtime_error("failed to locate vertex shader file in " + vsFile);
+			return false;
+		}
+		if (stat(fsFile.c_str(), &info) != 0)
+		{
+			std::runtime_error("failed to locate fragment shader file in " + fsFile);
+			return false;
+		}
+
+		std::string vsCode;
+		std::string fsCode;
+		std::ifstream vsShaderFile;
+		std::ifstream fsShaderFile;
+
+		vsShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+		fsShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+		try {
+			vsShaderFile.open(vsFile, std::ios::in | std::ios::binary);
+			fsShaderFile.open(fsFile, std::ios::in | std::ios::binary);
+
+			std::stringstream vsShaderStream;
+			std::stringstream fsShaderStream;
+
+			vsShaderStream << vsShaderFile.rdbuf();
+			fsShaderStream << fsShaderFile.rdbuf();
+
+			vsShaderFile.close();
+			fsShaderFile.close();
+
+			vsCode = vsShaderStream.str();
+			fsCode = fsShaderStream.str();
+		}
+		catch (std::ifstream::failure e)
+		{
+			std::cout << "ERROR : shader file failed to read" << std::endl;
+		}
+
+		return initWithSource(vsCode, fsCode);
+	}
+
+	bool initWithSource(const std::string& vsSource, const std::string& fsSource)
+	{
+		GLuint vsShaderID;
+		GLuint fsShaderID;
+
+		const GLchar* vsShaderCode = vsSource.c_str();
+		const GLchar* fsShaderCode = fsSource.c_str();
+
+		vsShaderID = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vsShaderID, 1, &vsShaderCode, nullptr);
+		glCompileShader(vsShaderID);
+		if (!checkCompileErrors(vsShaderID, Shader::TYPE::VERTEX))
+			return false;
+
+		fsShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fsShaderID, 1, &fsShaderCode, nullptr);
+		glCompileShader(fsShaderID);
+		if (!checkCompileErrors(fsShaderID, Shader::TYPE::FRAGMENT))
+			return false;
+
+		ID = glCreateProgram();
+		glAttachShader(ID, vsShaderID);
+		glAttachShader(ID, fsShaderID);
+		glLinkProgram(ID);
+		if (!checkCompileErrors(ID, Shader::TYPE::PROGRAM))
+			return false;
+
+		glDeleteShader(vsShaderID);
+		glDeleteShader(fsShaderID);
+
+		return true;
+	}
+
+	bool checkCompileErrors(GLuint shader, Shader::TYPE type)
 	{
 		GLint success;
 		GLchar infoLog[1024];
-		if (type == "PROGRAM")
+		if (type == Shader::TYPE::VERTEX || type == Shader::TYPE::FRAGMENT)
 		{
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-				std::cout << "ERROR : shader compilation of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				std::cout << "shader compilation error : \n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				return false;
 			}
+			return true;
 		}
-		else if (type == "SHADER")
+		else if (type == Shader::TYPE::PROGRAM)
 		{
 			glGetProgramiv(shader, GL_LINK_STATUS, &success);
 			if (!success)
 			{
 				glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
-				std::cout << "ERROR : program link error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				std::cout << "program link error : " << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				return false;
 			}
+			return true;
 		}
+		return false;
 	}
 };
