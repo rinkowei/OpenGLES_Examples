@@ -1,3 +1,2 @@
 ﻿// Implementation of Common library
-
-#include "examplebase.h"
+#include "UIOverlay.h"
