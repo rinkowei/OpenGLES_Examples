@@ -77,7 +77,7 @@ int main()
 	// normal map
 	GLuint normalMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_NRM.jpg", true);
 	
-	Shader shader(resources_dir + "shaders/16.normal_mapping/plane.vs", resources_dir + "shaders/16.normal_mapping/plane.fs");
+	Shader* shader = Shader::createWithFile(resources_dir + "shaders/16.normal_mapping/plane.vs", resources_dir + "shaders/16.normal_mapping/plane.fs");
 
 	Model planeModel(resources_dir + "/models/Aussie-Telco/grid.obj");
 
@@ -94,23 +94,23 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		shader.use();
-		shader.setMat4("view", camera.getViewMatrix());
-		shader.setMat4("projection", camera.getPerspectiveMatrix());
+		shader->use();
+		shader->setMat4("view", camera.getViewMatrix());
+		shader->setMat4("projection", camera.getPerspectiveMatrix());
 		
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		shader.setMat4("model", model);
+		shader->setMat4("model", model);
 
-		shader.setVec3("lightPos", camera.getPosition());
-		shader.setVec3("viewPos", camera.getPosition());
+		shader->setVec3("lightPos", camera.getPosition());
+		shader->setVec3("viewPos", camera.getPosition());
 
 		// bind textures to shader
-		shader.setInt("diffuseMap", 0);
-		shader.setInt("specularMap", 1);
-		shader.setInt("normalMap", 2);
+		shader->setInt("diffuseMap", 0);
+		shader->setInt("specularMap", 1);
+		shader->setInt("normalMap", 2);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
 		glActiveTexture(GL_TEXTURE1);
@@ -118,7 +118,7 @@ int main()
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, normalMap);
 		
-		planeModel.Draw(shader);
+		planeModel.Draw(*shader);
 		
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);
