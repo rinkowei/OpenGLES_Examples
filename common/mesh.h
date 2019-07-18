@@ -74,7 +74,7 @@ public:
 				number = std::to_string(heightMap++);
 			}
 
-			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+			glUniform1i(glGetUniformLocation(shader.getID(), (name + number).c_str()), i);
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
 
