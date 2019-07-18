@@ -16,7 +16,7 @@
 
 #include "imgui/imgui.h"
 #include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui_impl_opengles32.h"
 
 using namespace std;
 
@@ -54,12 +54,12 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-	glfwSetCursorPosCallback(window, mouseCallback);
-	glfwSetScrollCallback(window, scrollCallback);
+	//glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+	//glfwSetCursorPosCallback(window, mouseCallback);
+	//glfwSetScrollCallback(window, scrollCallback);
 
 	// capture mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
 	{
