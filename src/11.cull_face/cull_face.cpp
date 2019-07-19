@@ -73,7 +73,7 @@ int main()
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 	
-	Shader shader(resources_dir + "shaders/11.cull_face/model.vs", resources_dir + "shaders/11.cull_face/model.fs");
+	Shader* shader = Shader::createWithFile(resources_dir + "shaders/11.cull_face/model.vs", resources_dir + "shaders/11.cull_face/model.fs");
 	
 	Model venusModel(resources_dir + "models/carnage/carnage.obj");
 
@@ -90,8 +90,8 @@ int main()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shader.setMat4("projection", camera.getPerspectiveMatrix());
-		shader.setMat4("view", camera.getViewMatrix());
+		shader->setMat4("projection", camera.getPerspectiveMatrix());
+		shader->setMat4("view", camera.getViewMatrix());
 		
 		// initialize matrix to identity matrix
 		glm::mat4 model = glm::mat4(1.0f);
@@ -100,10 +100,10 @@ int main()
 
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 
-		shader.setMat4("model", model);
-		shader.use();
+		shader->setMat4("model", model);
+		shader->use();
 
-		venusModel.Draw(shader);
+		venusModel.Draw(*shader);
 
 		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
 		glfwSwapBuffers(window);

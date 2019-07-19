@@ -137,11 +137,11 @@ int main()
 
 	GLuint cubeTexture = textureLoader::loadTexture2D(resources_dir + "textures/12.object_outlining/marble.jpg", true);
 
-	Shader shader(resources_dir + "shaders/12.object_outlining/cube.vs", resources_dir + "shaders/12.object_outlining/cube.fs");
-	Shader outlineShader(resources_dir + "shaders/12.object_outlining/cube.vs", resources_dir + "shaders/12.object_outlining/outline_color.fs");
+	Shader* shader = Shader::createWithFile(resources_dir + "shaders/12.object_outlining/cube.vs", resources_dir + "shaders/12.object_outlining/cube.fs");
+	Shader* outlineShader = Shader::createWithFile(resources_dir + "shaders/12.object_outlining/cube.vs", resources_dir + "shaders/12.object_outlining/outline_color.fs");
 
-	shader.use();
-	shader.setInt("cubeTexture", 0);
+	shader->use();
+	shader->setInt("cubeTexture", 0);
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -164,17 +164,17 @@ int main()
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
 
-		shader.use();
+		shader->use();
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		shader.setMat4("model", model);
-		shader.setMat4("view", camera.getViewMatrix());
-		shader.setMat4("projection", camera.getPerspectiveMatrix());
+		shader->setMat4("model", model);
+		shader->setMat4("view", camera.getViewMatrix());
+		shader->setMat4("projection", camera.getPerspectiveMatrix());
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(1.5f, 0.0f, -1.5f));
-		shader.setMat4("model", model);
+		shader->setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// secondly, draw slightly scaled versions of the cubes, disable stencil write and depth test 
@@ -182,19 +182,19 @@ int main()
 		glStencilMask(0x00);
 		glDisable(GL_DEPTH_TEST);
 	
-		outlineShader.use(); 
+		outlineShader->use(); 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.05f, 1.05f, 1.05f));
-		outlineShader.setMat4("model", model);
-		outlineShader.setMat4("view", camera.getViewMatrix());
-		outlineShader.setMat4("projection", camera.getPerspectiveMatrix());
+		outlineShader->setMat4("model", model);
+		outlineShader->setMat4("view", camera.getViewMatrix());
+		outlineShader->setMat4("projection", camera.getPerspectiveMatrix());
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(1.5f, 0.0f, -1.5f));
 		model = glm::scale(model, glm::vec3(1.05f, 1.05f, 1.05f));
-		outlineShader.setMat4("model", model);
+		outlineShader->setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		glBindVertexArray(0);

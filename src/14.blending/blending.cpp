@@ -114,7 +114,7 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
 	
-	Shader quadShader(resources_dir + "shaders/14.blending/quad.vs", resources_dir + "shaders/14.blending/quad.fs");
+	Shader* quadShader = Shader::createWithFile(resources_dir + "shaders/14.blending/quad.vs", resources_dir + "shaders/14.blending/quad.fs");
 
 	std::array<glm::vec3, 6> quadPositions
 	{
@@ -146,9 +146,9 @@ int main()
 			sortedMap[distance] = quadPositions[i];
 		}
 		
-		quadShader.use();
-		quadShader.setMat4("view", camera.getViewMatrix());
-		quadShader.setMat4("projection", camera.getPerspectiveMatrix());
+		quadShader->use();
+		quadShader->setMat4("view", camera.getViewMatrix());
+		quadShader->setMat4("projection", camera.getPerspectiveMatrix());
 		
 		// render quadrangles from furthest to nearest
 		glm::mat4 model = glm::mat4(1.0f);
@@ -156,7 +156,7 @@ int main()
 		{
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, iter->second);
-			quadShader.setMat4("model", model);
+			quadShader->setMat4("model", model);
 
 			drawQuad();
 		}

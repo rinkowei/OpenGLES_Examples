@@ -116,8 +116,8 @@ int main()
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 	
-	Shader constructionShader(resources_dir + "shaders/15.offscreen_rendering/construction.vs", resources_dir + "shaders/15.offscreen_rendering/construction.fs");
-	Shader screenShader(resources_dir + "shaders/15.offscreen_rendering/screen.vs", resources_dir + "shaders/15.offscreen_rendering/screen.fs");
+	Shader* constructionShader = Shader::createWithFile(resources_dir + "shaders/15.offscreen_rendering/construction.vs", resources_dir + "shaders/15.offscreen_rendering/construction.fs");
+	Shader* screenShader = Shader::createWithFile(resources_dir + "shaders/15.offscreen_rendering/screen.vs", resources_dir + "shaders/15.offscreen_rendering/screen.fs");
 
 	Model constructionModel(resources_dir + "/models/construction-site-rawscan/site.obj");
 
@@ -163,16 +163,16 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		constructionShader.use();
-		constructionShader.setMat4("view", camera.getViewMatrix());
-		constructionShader.setMat4("projection", camera.getPerspectiveMatrix());
+		constructionShader->use();
+		constructionShader->setMat4("view", camera.getViewMatrix());
+		constructionShader->setMat4("projection", camera.getPerspectiveMatrix());
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-		constructionShader.setMat4("model", model);
+		constructionShader->setMat4("model", model);
 
-		constructionModel.Draw(constructionShader);
+		constructionModel.Draw(*constructionShader);
 
 		// switch to default famebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -181,13 +181,13 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		constructionModel.Draw(constructionShader);
+		constructionModel.Draw(*constructionShader);
 
 		// disable depth test for render quad in front of the scene
 		glDisable(GL_DEPTH_TEST);
 
-		screenShader.use();
-		screenShader.setInt("screenTexture", 0);
+		screenShader->use();
+		screenShader->setInt("screenTexture", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, colorAttachment);
 		drawQuad();
