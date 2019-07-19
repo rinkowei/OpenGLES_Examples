@@ -15,8 +15,8 @@
 #include <array>
 
 #include "imgui/imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengles32.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengles32.h"
 
 using namespace std;
 
