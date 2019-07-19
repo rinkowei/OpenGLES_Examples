@@ -44,7 +44,7 @@ int main()
 
 	string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-	Shader shader(resources_dir + "shaders/6.hello_triangle_instancing/triangle.vs", resources_dir + "shaders/6.hello_triangle_instancing/triangle.fs");
+	Shader* shader = Shader::createWithFile(resources_dir + "shaders/6.hello_triangle_instancing/triangle.vs", resources_dir + "shaders/6.hello_triangle_instancing/triangle.fs");
 
 	// create a array of 100 triangle locations
 	std::array<glm::vec2, 100> locations;
@@ -111,7 +111,7 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		shader.use();
+		shader->use();
 		glBindVertexArray(VAO);
 		glDrawElementsInstanced(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0, 100);
 

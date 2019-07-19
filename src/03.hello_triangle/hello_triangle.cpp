@@ -43,7 +43,7 @@ int main()
 
 	string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
 
-	Shader shader(resources_dir + "shaders/3.hello_triangle/triangle.vs", resources_dir + "shaders/3.hello_triangle/triangle.fs");
+	Shader *shader = Shader::createWithFile(resources_dir + "shaders/3.hello_triangle/triangle.vs", resources_dir + "shaders/3.hello_triangle/triangle.fs");
 	float vertices[] = {
 		-0.5f, -0.5f, 0.0f, 
 		 0.5f, -0.5f, 0.0f, 
@@ -73,7 +73,7 @@ int main()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		shader.use();
+		shader->use();
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 

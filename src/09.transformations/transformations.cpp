@@ -67,7 +67,7 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 	
-	Shader shader(resources_dir + "shaders/9.transformations/cube.vs", resources_dir + "shaders/9.transformations/cube.fs");
+	Shader* shader = Shader::createWithFile(resources_dir + "shaders/9.transformations/cube.vs", resources_dir + "shaders/9.transformations/cube.fs");
 	
 	GLfloat vertices[] = {
 		 // positions         // texture coordinates
@@ -149,8 +149,8 @@ int main()
 		glClearColor(0.2f, 0.8f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shader.setMat4("projection", camera.getPerspectiveMatrix());
-		shader.setMat4("view", camera.getViewMatrix());
+		shader->setMat4("projection", camera.getPerspectiveMatrix());
+		shader->setMat4("view", camera.getViewMatrix());
 		
 		// initialize matrix to identity matrix
 		glm::mat4 model = glm::mat4(1.0f);
@@ -164,8 +164,8 @@ int main()
 		float scale = glm::max(glm::sin(currentFrame), 0.2f);
 		model = glm::scale(model, glm::vec3(scale));
 
-		shader.setMat4("model", model);
-		shader.use();
+		shader->setMat4("model", model);
+		shader->use();
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

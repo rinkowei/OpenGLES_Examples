@@ -46,7 +46,7 @@ int main()
 		cout << "Success to initialize GLAD\n";
 	}
 
-	Shader shader(resources_dir + "shaders/7.quad_with_texture/quad.vs", resources_dir + "shaders/7.quad_with_texture/quad.fs");
+	Shader* shader = Shader::createWithFile(resources_dir + "shaders/7.quad_with_texture/quad.vs", resources_dir + "shaders/7.quad_with_texture/quad.fs");
 	
 	GLfloat vertices[] = {
 		 // positions          // texture coordinates
@@ -93,7 +93,7 @@ int main()
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		shader.use();
+		shader->use();
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
