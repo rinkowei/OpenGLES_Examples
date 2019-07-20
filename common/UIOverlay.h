@@ -1,6 +1,9 @@
 #pragma once
 
-class UIOverlay
+namespace es
 {
+	class UIOverlay
+	{
 
-};
+	};
+}
