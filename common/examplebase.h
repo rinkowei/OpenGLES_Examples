@@ -1,16 +1,21 @@
 #pragma once
 
+#define GLFW_INCLUDE_ES32
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #ifdef _WIN32
 #pragma comment(linker, "/subsystem:windows")
 #include <Windows.h>
-#include <fcntl.h>
-#include <io.h>
-#include <ShellScalingApi.h>
+//#include <fcntl.h>
+//#include <io.h>
+//#include <ShellScalingApi.h>
 #endif
 
 #include <iostream>
 #include <chrono>
 #include <sys/stat.h>
+#include <memory>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -23,8 +28,6 @@
 #include "UIOverlay.h"
 #include "camera.h"
 #include "benchmark.h"
-
-using namespace std;
 
 class ExampleBase
 {
@@ -40,6 +43,7 @@ private:
 	void windowResize();
 	void handleMouseMove(GLint xoffset, GLint yoffset);
 protected:
+	GLFWwindow* window;
 	// frame counter to display fps
 	GLuint frameCounter = 0;
 	GLuint lastFPS = 0;
@@ -49,12 +53,12 @@ public:
 	GLuint width = 1280;
 	GLuint height = 720;
 
-	UIOverlay uiOverlay;
+	es::UIOverlay uiOverlay;
 
 	float frameTimer = 1.0f;
 	const std::string getResourcesPath();
 
-	Benchmark benchmark;
+	es::Benchmark benchmark;
 
 	struct Settings
 	{
@@ -78,7 +82,7 @@ public:
 	float rotationSpeed = 1.0f;
 	float zoomSpeed = 1.0f;
 
-	Camera camera;
+	es::Camera camera;
 
 	glm::vec3 rotation = glm::vec3(0.0f);
 	glm::vec3 cameraPos = glm::vec3(0.0f);
@@ -102,7 +106,7 @@ public:
 	} mouseButtons;
 
 #if defined(_WIN32)
-	HWND window;
+	HWND windowHwnd;
 	HINSTANCE windowInstance;
 #endif
 
@@ -112,12 +116,15 @@ public:
 	// deconstructor
 	virtual ~ExampleBase();
 
-	bool initGLFW();
+	bool setupGLFW();
+
+	bool loadGLESFunctions();
 
 #if defined(_WIN32)
 	void setupConsole(std::string title);
 	void setupDPIAwareness();
-	HWND setupWindow(HINSTANCE hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void setupWindow();
+	void handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
 	virtual void render() = 0;
@@ -140,30 +147,5 @@ public:
 
 	void drawUI();
 
-	virtual void onUpdateUIOverlay(UIOverlay* overlay);
-};
-
-// OS specific macros for the example main entry point
-#if defined(_WIN32)
-#define OPENGL_ES_EXAMPLE_MAIN()                                                                    \
-Example* example;                                                                                   \
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						\
-{																									\
-	if (example != NULL)																		    \
-	{																								\
-		example->handleMessages(hWnd, uMsg, wParam, lParam);									    \
-	}																								\
-	return (DefWindowProc(hWnd, uMsg, wParam, lParam));												\
-}                                                                                                   \
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)									\
-{																									\
-for (int32_t i = 0; i < __argc; i++) { Example::args.push_back(__argv[i]); };  			            \
-	example = new Example();															            \
-	example->initGLFW();																	        \
-	example->setupWindow(hInstance, WndProc);													    \
-	example->prepare();																	 	        \
-	example->renderLoop();																	        \
-	delete(example);																			    \
-	return 0;																						\
-}
-#endif
+	virtual void onUpdateUIOverlay(es::UIOverlay* overlay);
+};                                                                            
