@@ -14,7 +14,7 @@ function(buildExample EXAMPLE_NAME)
     file(GLOB SHADERS "${SHADER_DIR}/*.vs" "${SHADER_DIR}/*.fs")
     source_group("Shaders" FILES ${SHADERS})
     if(WIN32)
-        add_executable(${EXAMPLE_NAME} ${SOURCE} ${SHADERS})
+        add_executable(${EXAMPLE_NAME} WIN32 ${SOURCE} ${SHADERS})
         target_link_libraries(${EXAMPLE_NAME} common ${LIBS})
     else()
 
