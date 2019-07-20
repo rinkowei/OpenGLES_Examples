@@ -2,162 +2,209 @@
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-const glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-const float MAX_FOV = 45.0f;
-const float MIN_FOV = 1.0f;
-
-class Camera
+namespace es
 {
-public:
-	enum class CameraMovement
+	class Camera
 	{
-		FORWARD,
-		BACKWARD,
-		LEFT,
-		RIGHT
+	private:
+		float fov;
+		float znear;
+		float zfar;
+
+		void updateViewMatrix()
+		{
+			glm::mat4 rotMatrix = glm::mat4(1.0f);
+			glm::mat4 transMatrix;
+
+			rotMatrix = glm::rotate(rotMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			rotMatrix = glm::rotate(rotMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			rotMatrix = glm::rotate(rotMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+			transMatrix = glm::translate(glm::mat4(1.0f), position);
+
+			if (type == Camera::Type::firstPerson)
+			{
+				matrices.view = rotMatrix * transMatrix;
+			}
+			else
+			{
+				matrices.view = transMatrix * rotMatrix;
+			}
+
+			updated = true;
+		};
+	public:
+		enum class Type
+		{
+			lookAt,
+			firstPerson
+		};
+
+		Camera::Type type = Camera::Type::lookAt;
+
+		glm::vec3 rotation = glm::vec3(0.0f);
+		glm::vec3 position = glm::vec3(0.0f);
+
+		float rotationSpeed = 1.0f;
+		float movementSpeed = 1.0f;
+
+		bool updated = false;
+
+		struct
+		{
+			glm::mat4 projection;
+			glm::mat4 view;
+		} matrices;
+
+		struct
+		{
+			bool left = false;
+			bool right = false;
+			bool up = false;
+			bool down = false;
+		} keys;
+
+		bool moving()
+		{
+			return keys.left || keys.right || keys.up || keys.down;
+		}
+
+		float getNearPlane()
+		{
+			return znear;
+		}
+
+		float getFarPlane()
+		{
+			return zfar;
+		}
+
+		void setPerspective(float fov, float aspect, float znear, float zfar)
+		{
+			this->fov = fov;
+			this->znear = znear;
+			this->zfar = zfar;
+			matrices.projection = glm::perspective(glm::radians(fov), aspect, znear, zfar);
+		}
+
+		void updateAspectRatio(float aspect)
+		{
+			matrices.projection = glm::perspective(glm::radians(fov), aspect, znear, zfar);
+		}
+
+		void setPosition(glm::vec3 position)
+		{
+			this->position = position;
+			updateViewMatrix();
+		}
+
+		void rotate(glm::vec3 delta)
+		{
+			this->rotation += delta;
+			updateViewMatrix();
+		}
+
+		void translate(glm::vec3 delta)
+		{
+			this->position += delta;
+			updateViewMatrix();
+		}
+
+		void update(float deltaTime)
+		{
+			updated = false;
+			if (type == Camera::Type::firstPerson)
+			{
+				if (moving())
+				{
+					glm::vec3 camFront;
+					camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
+					camFront.y = sin(glm::radians(rotation.x));
+					camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
+					camFront = glm::normalize(camFront);
+
+					float moveSpeed = deltaTime * movementSpeed;
+
+					if (keys.up)
+						position += camFront * moveSpeed;
+					if (keys.down)
+						position -= camFront * moveSpeed;
+					if (keys.left)
+						position -= glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+					if (keys.right)
+						position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+
+					updateViewMatrix();
+				}
+			}
+		};
+
+		// Update camera passing separate axis data (gamepad)
+	// Returns true if view or position has been changed
+		bool updatePad(glm::vec2 axisLeft, glm::vec2 axisRight, float deltaTime)
+		{
+			bool retVal = false;
+
+			if (type == Camera::Type::firstPerson)
+			{
+				// Use the common console thumbstick layout		
+				// Left = view, right = move
+
+				const float deadZone = 0.0015f;
+				const float range = 1.0f - deadZone;
+
+				glm::vec3 camFront;
+				camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
+				camFront.y = sin(glm::radians(rotation.x));
+				camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
+				camFront = glm::normalize(camFront);
+
+				float moveSpeed = deltaTime * movementSpeed * 2.0f;
+				float rotSpeed = deltaTime * rotationSpeed * 50.0f;
+
+				// Move
+				if (fabsf(axisLeft.y) > deadZone)
+				{
+					float pos = (fabsf(axisLeft.y) - deadZone) / range;
+					position -= camFront * pos * ((axisLeft.y < 0.0f) ? -1.0f : 1.0f) * moveSpeed;
+					retVal = true;
+				}
+				if (fabsf(axisLeft.x) > deadZone)
+				{
+					float pos = (fabsf(axisLeft.x) - deadZone) / range;
+					position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * pos * ((axisLeft.x < 0.0f) ? -1.0f : 1.0f) * moveSpeed;
+					retVal = true;
+				}
+
+				// Rotate
+				if (fabsf(axisRight.x) > deadZone)
+				{
+					float pos = (fabsf(axisRight.x) - deadZone) / range;
+					rotation.y += pos * ((axisRight.x < 0.0f) ? -1.0f : 1.0f) * rotSpeed;
+					retVal = true;
+				}
+				if (fabsf(axisRight.y) > deadZone)
+				{
+					float pos = (fabsf(axisRight.y) - deadZone) / range;
+					rotation.x -= pos * ((axisRight.y < 0.0f) ? -1.0f : 1.0f) * rotSpeed;
+					retVal = true;
+				}
+			}
+			else
+			{
+				// todo: move code from example base class for look-at
+			}
+
+			if (retVal)
+			{
+				updateViewMatrix();
+			}
+
+			return retVal;
+		}
 	};
-
-	Camera(float aspect, float znear, float zfar, glm::vec3 position = glm::vec3(0.0f, 0.0f, 1.0f))
-	{
-		this->position = position;
-		this->aspectRatio = aspect;
-		this->znear = znear;
-		this->zfar = zfar;
-		setViewMatrix();
-		setPerspectiveMatrix();
-	}
-	
-	void setViewMatrix()
-	{
-		viewMatrix = glm::lookAt(position, position + front, up);
-	}
-
-	glm::mat4 getViewMatrix()
-	{
-		return viewMatrix;
-	}
-
-	void setPerspectiveMatrix()
-	{
-		perspectiveMatrix = glm::perspective(glm::radians(fov), aspectRatio, znear, zfar);
-	}
-
-	glm::mat4 getPerspectiveMatrix()
-	{
-		return perspectiveMatrix;
-	}
-
-	void handleKeyboard(CameraMovement direction, float deltaTime)
-	{
-		float velocity = movementSpeed * deltaTime;
-		if (direction == CameraMovement::FORWARD)
-		{
-			position += front * velocity;
-		}
-		else if (direction == CameraMovement::BACKWARD)
-		{
-			position -= front * velocity;
-		}
-		else if (direction == CameraMovement::LEFT)
-		{
-			position -= right * velocity;
-		}
-		else if (direction == CameraMovement::RIGHT)
-		{
-			position += right * velocity;
-		}
-		setViewMatrix();
-	}
-
-	void handleMouseMovement(float xOffset, float yOffset, GLboolean constrainPitch = true)
-	{
-		xOffset *= mouseSensitivity;
-		yOffset *= mouseSensitivity;
-
-		yaw += xOffset;
-		pitch += yOffset;
-
-		if (constrainPitch)
-		{
-			if (pitch > 89.0f)
-				pitch = 89.0f;
-			else if (pitch < -89.0f)
-				pitch = -89.0f;
-		}
-
-		updateCameraProperties();
-	}
-
-	void handleMouseScroll(float yOffset)
-	{
-		if (fov >= MIN_FOV && fov <= MAX_FOV)
-			fov -= yOffset;
-		if (fov <= MIN_FOV)
-			fov = MIN_FOV;
-		if (fov >= MAX_FOV)
-			fov = MAX_FOV;
-
-		setPerspectiveMatrix();
-	}
-
-	glm::vec3 getPosition()
-	{
-		return position;
-	}
-
-	glm::vec3 getFront()
-	{
-		return front;
-	}
-
-	void rotate(float pitch, float yaw, float roll)
-	{
-		this->pitch += pitch;
-		this->yaw += yaw;
-
-		updateCameraProperties();
-	}
-
-private:
-	// camera's properties
-	float fov = 45.0f;
-	float aspectRatio;
-	glm::vec3 position = glm::vec3(0.0f, 0.0f, 1.0f);
-	glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
-	float znear;
-	float zfar;
-
-	// euler angle rotate around Y-axis
-	float yaw = -90.0f;
-	// euler angle rotate around X-axis
-	float pitch = 0.0f;
-
-	// camera operate options
-	float movementSpeed = 2.5f;
-	float mouseSensitivity = 0.1f;
-
-	// matrices
-	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	glm::mat4 perspectiveMatrix = glm::mat4(1.0f);
-
-	// recalculate the front vector from the camera's updated euler angles
-	void updateCameraProperties()
-	{
-		glm::vec3 updatedFront;
-		updatedFront.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-		updatedFront.y = glm::sin(glm::radians(pitch));
-		updatedFront.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
-		this->front = glm::normalize(updatedFront);
-
-		right = glm::normalize(glm::cross(front, worldUp));
-		up = glm::normalize(glm::cross(right, front));
-
-		setViewMatrix();
-	}
-};
+}
