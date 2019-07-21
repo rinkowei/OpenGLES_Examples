@@ -25,10 +25,18 @@ using namespace std;
 class Model
 {
 public:
-	Model(const std::string& path, bool gamma = false)
-		: gammaCorrection(gamma)
+	Model() = default;
+	~Model() = default;
+
+	static Model* createWithFile(const std::string& path, bool gamma = false)
 	{
-		loadModel(path);
+		Model* model = new (std::nothrow) Model();
+		if (model && model->loadWithFile(path, gamma))
+		{
+			return model;
+		}
+		delete(model);
+		return nullptr;
 	}
 
 	void Draw(Shader shader)
@@ -44,20 +52,22 @@ private:
 	std::vector<Mesh> meshes;
 
 	std::string directory;
-	bool gammaCorrection;
+	bool gammaCorrection = false;
 
-	void loadModel(const std::string& path)
+	bool loadWithFile(const std::string& path, bool gamma)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			throw std::runtime_error("error : " + std::string(importer.GetErrorString()));
-			return;
+			std::cout << importer.GetErrorString() << std::endl;
+			return false;
 		}
 		directory = path.substr(0, path.find_last_of('/'));
 
 		handleNode(scene->mRootNode, scene);
+
+		return true;
 	}
 
 	void handleNode(aiNode* node, const aiScene* scene)

@@ -11,8 +11,8 @@
 class Shader
 {
 public:
-	Shader() {};
-	~Shader() {};
+	Shader() = default;
+	~Shader() = default;
 
 	enum class TYPE {
 		VERTEX,
