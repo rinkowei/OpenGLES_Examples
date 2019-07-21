@@ -7,8 +7,8 @@
 #ifdef _WIN32
 #pragma comment(linker, "/subsystem:windows")
 #include <Windows.h>
-//#include <fcntl.h>
-//#include <io.h>
+#include <fcntl.h>
+#include <io.h>
 //#include <ShellScalingApi.h>
 #endif
 
@@ -45,7 +45,7 @@ private:
 	GLboolean resizing = false;
 
 	void windowResize();
-	void handleMouseMove(GLint xoffset, GLint yoffset);
+	void handleMouseMove(int32_t x, int32_t y);
 protected:
 	GLFWwindow* window;
 	// frame counter to display fps
@@ -126,11 +126,11 @@ public:
 
 	bool loadGLESFunctions();
 
+	void setupValidation();
+
 #if defined(_WIN32)
 	void setupConsole(std::string title);
 	void setupDPIAwareness();
-	void setupWindow();
-	void handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
 	virtual void render() = 0;
@@ -142,6 +142,8 @@ public:
 	virtual void mouseMoved(double x, double y, bool& handled);
 
 	virtual void windowResized();
+
+	virtual void handleInput();
 
 	virtual void prepare();
 

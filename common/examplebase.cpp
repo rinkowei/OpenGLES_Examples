@@ -20,7 +20,7 @@ const std::string ExampleBase::getResourcesPath()
 
 ExampleBase::ExampleBase()
 {
-
+	
 }
 
 ExampleBase::~ExampleBase()
@@ -55,6 +55,7 @@ bool ExampleBase::setupImGui()
 	// enable keyboard controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
+	io.WantCaptureKeyboard = false;
 
 	// setup dear imgui style
 	ImGui::StyleColorsDark();
@@ -78,6 +79,16 @@ bool ExampleBase::loadGLESFunctions()
 		std::cout << "Failed to initialize GLAD\n";
 	}
 	return false;
+}
+
+void ExampleBase::setupValidation()
+{
+#if defined(_WIN32)
+	if (this->settings.validation)
+	{
+		setupConsole("OpenGL ES validation output");
+	}
+#endif
 }
 
 void ExampleBase::prepare()
@@ -161,11 +172,12 @@ void ExampleBase::renderLoop()
 
 	while (!glfwWindowShouldClose(window))
 	{
-		glfwPollEvents();
+		handleInput();
 
 		renderFrame();
 		
 		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
 
 	// clean up
@@ -190,22 +202,33 @@ void ExampleBase::drawUI()
 #if defined(_WIN32)
 void ExampleBase::setupConsole(std::string title)
 {
-
+	AllocConsole();
+	AttachConsole(GetCurrentProcessId());
+	FILE* stream;
+	freopen_s(&stream, "CONOUT$", "w+", stdout);
+	freopen_s(&stream, "CONOUT$", "w+", stderr);
+	SetConsoleTitle(TEXT(title.c_str()));
 }
 
 void ExampleBase::setupDPIAwareness()
 {
+	/*
+	typedef HRESULT* (__stdcall * SetProcessDpiAwarenessFunc)(PROCESS_DPI_AWARENESS);
 
-}
+	HMODULE shCore = LoadLibraryA("Shcore.dll");
+	if (shCore)
+	{
+		SetProcessDpiAwarenessFunc setProcessDpiAwareness =
+			(SetProcessDpiAwarenessFunc)GetProcAddress(shCore, "SetProcessDpiAwareness");
 
-void ExampleBase::setupWindow()
-{
+		if (setProcessDpiAwareness != nullptr)
+		{
+			setProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+		}
 
-}
-
-void ExampleBase::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-
+		FreeLibrary(shCore);
+	}
+	*/
 }
 #endif
 
@@ -228,9 +251,52 @@ void ExampleBase::windowResize()
 
 }
 
-void ExampleBase::handleMouseMove(GLint xoffset, GLint yoffset)
+void ExampleBase::handleInput()
 {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+	
+}
 
+void ExampleBase::handleMouseMove(int32_t x, int32_t y)
+{
+	int32_t dx = (int32_t)mousePos.x - x;
+	int32_t dy = (int32_t)mousePos.y - y;
+
+	bool handled = false;
+
+	if (settings.overlay)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		handled = io.WantCaptureMouse;
+	}
+
+	mouseMoved((double)x, (double)y, handled);
+
+	if (handled)
+	{
+		mousePos = glm::vec2((float)x, (float)y);
+		return;
+	}
+
+	if (mouseButtons.left) {
+		rotation.x += dy * 1.25f * rotationSpeed;
+		rotation.y -= dx * 1.25f * rotationSpeed;
+		camera.rotate(glm::vec3(dy * camera.rotationSpeed, -dx * camera.rotationSpeed, 0.0f));
+		viewUpdated = true;
+	}
+	if (mouseButtons.right) {
+		zoom += dy * 0.005f * zoomSpeed;
+		camera.translate(glm::vec3(-0.0f, 0.0f, dy * 0.005f * zoomSpeed));
+		viewUpdated = true;
+	}
+	if (mouseButtons.middle) {
+		cameraPos.x -= dx * 0.01f;
+		cameraPos.y -= dy * 0.01f;
+		camera.translate(glm::vec3(-dx * 0.01f, -dy * 0.01f, 0.0f));
+		viewUpdated = true;
+	}
+	mousePos = glm::vec2((float)x, (float)y);
 }
 
 void ExampleBase::windowResized()
