@@ -36,12 +36,33 @@ bool ExampleBase::setupGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
+	
 	window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 	if (!window)
 		return false;
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
+	return true;
+}
+
+bool ExampleBase::setupImGui()
+{
+	// setup dear imgui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	(void)io;
+	// enable keyboard controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;
+
+	// setup dear imgui style
+	ImGui::StyleColorsDark();
+
+	// setup platform/renderer bindings
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(apiVersion.c_str());
+
 	return true;
 }
 
@@ -66,19 +87,97 @@ void ExampleBase::prepare()
 
 void ExampleBase::renderFrame()
 {
+	auto timeStart = std::chrono::high_resolution_clock::now();
+	if (viewUpdated)
+	{
+		viewUpdated = false;
+		viewChanged();
+	}
 
+	// start the dear imgui frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	render();
+
+	// Rendering
+	ImGui::Render();
+	int display_w, display_h;
+	glfwGetFramebufferSize(window, &display_w, &display_h);
+	glViewport(0, 0, display_w, display_h);
+	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
+	glClear(GL_COLOR_BUFFER_BIT);
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	
+	frameCounter++;
+	auto timeEnd = std::chrono::high_resolution_clock::now();
+	auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
+	frameTimer = (float)timeDiff / 1000.0f;
+	camera.update(frameTimer);
+	if (camera.moving())
+	{
+		viewUpdated = true;
+	}
+
+	if (!paused)
+	{
+		timer += timerSpeed * frameTimer;
+		if (timer > 1.0f)
+		{
+			timer -= 1.0f;
+		}
+	}
+	float fpsTimer = std::chrono::duration<double, std::milli>(timeEnd - lastTimestamp).count();
+	if (fpsTimer > 1000.0f)
+	{
+		lastFPS = static_cast<uint32_t>((float)frameCounter * (1000.0f / fpsTimer));
+		if (!settings.overlay) {
+			std::string windowTitle = getWindowTitle();
+			glfwSetWindowTitle(window, windowTitle.c_str());
+		}
+		frameCounter = 0;
+		lastTimestamp = timeEnd;
+	}
+	// TODO: Cap UI overlay update rates
+	updateOverlay();
 }
 
 void ExampleBase::renderLoop()
 {
-	while (true)
+	if (benchmark.active)
 	{
-		int i = 0;
-		i++;
+		benchmark.run([=] { render(); });
+		if (benchmark.filename != "")
+		{
+			benchmark.saveResults();
+		}
+		return;
 	}
+
+	destWidth = width;
+	destHeight = height;
+	lastTimestamp = std::chrono::high_resolution_clock::now();
+
+	while (!glfwWindowShouldClose(window))
+	{
+		glfwPollEvents();
+
+		renderFrame();
+		
+		glfwSwapBuffers(window);
+	}
+
+	// clean up
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(window);
+	glfwTerminate();
 }
 
-void ExampleBase::updateUIOverlay()
+void ExampleBase::updateOverlay()
 {
 
 }

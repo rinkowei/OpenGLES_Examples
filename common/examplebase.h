@@ -29,6 +29,10 @@
 #include "camera.h"
 #include "benchmark.h"
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengles32.h>
+
 class ExampleBase
 {
 private:
@@ -90,7 +94,7 @@ public:
 
 	std::string title = "OpenGL_ES Example";
 	std::string name = "ExampleBase";
-	GLuint apiVersion = GL_ES_VERSION_3_2;
+	std::string apiVersion = "#version 320 es";
 
 	struct GamePadState
 	{
@@ -118,6 +122,8 @@ public:
 
 	bool setupGLFW();
 
+	bool setupImGui();
+
 	bool loadGLESFunctions();
 
 #if defined(_WIN32)
@@ -143,7 +149,7 @@ public:
 
 	void renderFrame();
 
-	void updateUIOverlay();
+	void updateOverlay();
 
 	void drawUI();
 
