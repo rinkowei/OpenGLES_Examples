@@ -6,6 +6,8 @@ class Example : public ExampleBase
 public:
 	Example()
 	{
+		settings.overlay = true;
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
 	}
 	~Example()
@@ -56,25 +58,17 @@ public:
 	}
 };
 
-Example *example;
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)						
-{																									
-if (example != nullptr)
-{																								
-	example->handleMessages(hWnd, uMsg, wParam, lParam);
-}																								
-return (DefWindowProc(hWnd, uMsg, wParam, lParam));												
-}																									
+Example *example;																								
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)						
 {			
 	example = new Example();
+	example->setupValidation();
 	if (!example->setupGLFW() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
 		return 0;
 	}
-	example->setupWindow();													            
 	example->prepare();																	
 	example->renderLoop();																
 	delete(example);																	
