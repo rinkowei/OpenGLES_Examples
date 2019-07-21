@@ -41,7 +41,12 @@ bool ExampleBase::setupGLFW()
 	if (!window)
 		return false;
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+
+	if (this->settings.vsync)
+		glfwSwapInterval(1);
+	else
+		glfwSwapInterval(0);
+
 	return true;
 }
 
