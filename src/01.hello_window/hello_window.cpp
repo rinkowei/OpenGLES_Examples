@@ -1,62 +1,37 @@
 ﻿
-#define GLFW_INCLUDE_ES32
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <common.h>
 
-#include <iostream>
-using namespace std;
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void handleInput(GLFWwindow* window);
-
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
-
-int main()
+class Example : public ExampleBase
 {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_ES_API, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGLES_Examples", nullptr, nullptr);
-	if (window == nullptr)
+public:
+	Example()
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
+		title = "hello window";
 	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
-	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+	~Example()
 	{
-		cout << "Failed to initialize GLAD\n";
-		return -1;
-	}
-	else
-	{
-		cout << "Success to initialize GLAD\n";
-	}
-
-	while (!glfwWindowShouldClose(window))
-	{
-		handleInput(window);
 		
-		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
-	glfwTerminate();
+public:
+	virtual void render() override
+	{
+
+	}
+};
+
+Example* example;
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+	example = new Example();
+	example->setupValidation();
+	if (!example->setupGLFW() ||
+		!example->loadGLESFunctions() ||
+		!example->setupImGui())
+	{
+		return 0;
+	}
+	example->prepare();
+	example->renderLoop();
+	delete(example);
 	return 0;
-}
-
-void handleInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
 }
