@@ -15,7 +15,7 @@ public:
 public:
 	virtual void render()
 	{
-
+		
 	}
 };
 
@@ -35,4 +35,3 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	delete(example);
 	return 0;
 }
-
