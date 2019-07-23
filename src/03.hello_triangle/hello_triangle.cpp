@@ -1,101 +1,65 @@
 ﻿
-#define GLFW_INCLUDE_ES32
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <common.h>
-#include <iostream>
-using namespace std;
+using namespace es;
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void handleInput(GLFWwindow* window);
-
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
-
-int main()
+class Example final : public ExampleBase
 {
-	// initialize and configure glfw
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_ES_API, GLFW_OPENGL_CORE_PROFILE);
-	
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGLES_Examples", nullptr, nullptr);
-	if (window == nullptr)
+public:
+	Mesh* triangle;
+	Shader* shader;
+	std::vector<Vertex> vertices = {};
+	Example()
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
+		title = "hello triangle";
+		settings.validation = true;
+		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-
-	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+	~Example()
 	{
-		cout << "Failed to initialize GLAD\n";
-		return -1;
+		delete(shader);
+		delete(triangle);
 	}
-	else
+public:
+	virtual void prepare() override final
 	{
-		cout << "Success to initialize GLAD\n";
-	}
-
-	string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
-
-	Shader *shader = Shader::createWithFile(resources_dir + "shaders/3.hello_triangle/triangle.vs", resources_dir + "shaders/3.hello_triangle/triangle.fs");
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f, 
-		 0.5f, -0.5f, 0.0f, 
-		 0.0f,  0.5f, 0.0f  
-	};
-
-	unsigned int VAO, VBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	// render loop
-	while (!glfwWindowShouldClose(window))
-	{
-		handleInput(window);
+		std::vector<GLfloat> vertexPositions = {
+			-0.5f, -0.5f, 0.0f,
+			0.5f, -0.5f, 0.0f,
+			0.0f,  0.5f, 0.0f
+		};
 		
-		// clear color buffer
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			Vertex vertex;
+			vertex.Position = glm::vec3(vertexPositions[i * 3], vertexPositions[i * 3 + 1], vertexPositions[i * 3 + 2]);
+			vertices.push_back(vertex);
+		}
+		
+		triangle = Mesh::createWithData(vertices, {}, {});
 
-		shader->use();
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		shader = Shader::createWithFile(getResourcesPath() + "shaders/3.hello_triangle/triangle.vs", getResourcesPath() + "shaders/3.hello_triangle/triangle.fs");
 	}
+	virtual void render() override final
+	{
+		triangle->Draw(shader);
+	}
+};
 
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-
-	glfwTerminate();
+Example* example;
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+	example = new Example();
+	example->setupValidation();
+	if (!example->setupGLFW() ||
+		!example->loadGLESFunctions() ||
+		!example->setupImGui())
+	{
+		return 0;
+	}
+	example->prepare();
+	example->renderLoop();
+	delete(example);
 	return 0;
 }
 
-void handleInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-}

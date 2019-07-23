@@ -1,7 +1,7 @@
 #version 320 es
-layout(location = 0) in vec4 vPos;
+layout(location = 0) in vec3 vPos;
 
 void main()
 {
-	gl_Position = vPos;
+	gl_Position = vec4(vPos, 1.0f);
 }
