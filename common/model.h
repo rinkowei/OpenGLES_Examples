@@ -21,6 +21,7 @@
 #include "textureLoader.h"
 
 using namespace std;
+using namespace es;
 
 class Model
 {
@@ -43,7 +44,7 @@ public:
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
-			meshes[i].Draw(shader);
+			meshes[i].Draw(&shader);
 		}
 	}
 
@@ -96,9 +97,7 @@ private:
 			
 			if (mesh->HasPositions())
 			{
-				vertex.Position.x = mesh->mVertices[i].x;
-				vertex.Position.y = mesh->mVertices[i].y;
-				vertex.Position.z = mesh->mVertices[i].z;
+				vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 			}
 			else
 			{
@@ -107,9 +106,7 @@ private:
 
 			if (mesh->HasNormals())
 			{
-				vertex.Normal.x = mesh->mNormals[i].x;
-				vertex.Normal.y = mesh->mNormals[i].y;
-				vertex.Normal.z = mesh->mNormals[i].z;
+				vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 			}
 			else
 			{
@@ -118,8 +115,7 @@ private:
 
 			if (mesh->HasTextureCoords(0))
 			{
-				vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
-				vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+				vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 			}
 			else
 			{
@@ -128,13 +124,8 @@ private:
 
 			if (mesh->HasTangentsAndBitangents())
 			{
-				vertex.Tangent.x = mesh->mTangents[i].x;
-				vertex.Tangent.y = mesh->mTangents[i].y;
-				vertex.Tangent.z = mesh->mTangents[i].z;
-
-				vertex.Bitangent.x = mesh->mBitangents[i].x;
-				vertex.Bitangent.y = mesh->mBitangents[i].y;
-				vertex.Bitangent.z = mesh->mBitangents[i].z;
+				vertex.Tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+				vertex.Bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
 			}
 			else
 			{
@@ -159,19 +150,19 @@ private:
 		
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		
-		std::vector<Texture> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "textureDiffuse");
+		std::vector<Texture> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuseMap");
 		textures.insert(textures.end(), diffuseTextures.begin(), diffuseTextures.end());
 		
-		std::vector<Texture> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, "textureSpecular");
+		std::vector<Texture> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, "specularMap");
 		textures.insert(textures.end(), specularTextures.begin(), specularTextures.end());
 
-		std::vector<Texture> normalTextures = loadMaterialTextures(material, aiTextureType_NORMALS, "textureNormals");
+		std::vector<Texture> normalTextures = loadMaterialTextures(material, aiTextureType_NORMALS, "normalMap");
 		textures.insert(textures.end(), normalTextures.begin(), normalTextures.end());
 
-		std::vector<Texture> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, "textureHeight");
+		std::vector<Texture> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, "heightMap");
 		textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
 		
-		return Mesh(vertices, indices, textures);
+		return *Mesh::createWithData(vertices, indices, textures);
 	}
 
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
