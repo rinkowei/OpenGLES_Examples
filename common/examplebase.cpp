@@ -25,7 +25,7 @@ ExampleBase::ExampleBase()
 
 ExampleBase::~ExampleBase()
 {
-
+	
 }
 
 bool ExampleBase::setupGLFW()
@@ -34,7 +34,7 @@ bool ExampleBase::setupGLFW()
 		return false;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_ES_API, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	
 	window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
@@ -115,8 +115,6 @@ void ExampleBase::renderFrame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	render();
-
 	// Rendering
 	ImGui::Render();
 	int display_w, display_h;
@@ -124,6 +122,9 @@ void ExampleBase::renderFrame()
 	glViewport(0, 0, display_w, display_h);
 	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	render();
+
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	
 	frameCounter++;
