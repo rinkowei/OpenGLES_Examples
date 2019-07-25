@@ -7,12 +7,13 @@ class Example final : public ExampleBase
 public:
 	Mesh* triangle;
 	Shader* shader;
-	std::vector<Vertex> vertices = {};
 	Example()
 	{
 		title = "hello triangle";
 		settings.validation = true;
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
+
+		shadersPath = getResourcesPath(ResourceType::Shader) + "/03.hello_triangle/";
 	}
 	~Example()
 	{
@@ -20,7 +21,7 @@ public:
 		delete(triangle);
 	}
 public:
-	virtual void prepare() override final
+	virtual void prepare() override
 	{
 		std::vector<GLfloat> vertexPositions = {
 			-0.5f, -0.5f, 0.0f,
@@ -28,6 +29,7 @@ public:
 			0.0f,  0.5f, 0.0f
 		};
 		
+		std::vector<Vertex> vertices = {};
 		for (unsigned int i = 0; i < 3; i++)
 		{
 			Vertex vertex;
@@ -35,12 +37,15 @@ public:
 			vertices.push_back(vertex);
 		}
 		
+		// create triangle mesh
 		triangle = Mesh::createWithData(vertices, {}, {});
 
-		shader = Shader::createWithFile(getResourcesPath() + "shaders/3.hello_triangle/triangle.vs", getResourcesPath() + "shaders/3.hello_triangle/triangle.fs");
+		// create triangle shader
+		shader = Shader::createWithFile(shadersPath + "triangle.vs", shadersPath + "triangle.fs");
 	}
-	virtual void render() override final
+	virtual void render() override
 	{
+		// render mesh
 		triangle->Draw(shader);
 	}
 };
