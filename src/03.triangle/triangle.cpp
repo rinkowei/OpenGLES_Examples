@@ -9,11 +9,10 @@ public:
 	Shader* shader;
 	Example()
 	{
-		title = "hello triangle";
-		settings.validation = true;
+		title = "triangle";
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
-		shadersPath = getResourcesPath(ResourceType::Shader) + "/03.hello_triangle/";
+		shadersPath = getResourcesPath(ResourceType::Shader) + "/03.triangle/";
 	}
 	~Example()
 	{
@@ -30,7 +29,7 @@ public:
 		};
 		
 		std::vector<Vertex> vertices = {};
-		for (unsigned int i = 0; i < 3; i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexPositions.size() / 3); i++)
 		{
 			Vertex vertex;
 			vertex.Position = glm::vec3(vertexPositions[i * 3], vertexPositions[i * 3 + 1], vertexPositions[i * 3 + 2]);

@@ -36,10 +36,10 @@ endfunction(buildExamples)
 set(EXAMPLES
     01.hello_window
     02.hello_window_color_clear
-    03.hello_triangle
-    04.hello_triangle_indices
-    05.hello_triangle_restart_index
-    06.hello_triangle_instancing
+    03.triangle
+    04.quadrangle_indices
+    05.triangle_restart_index
+    06.triangle_instancing
     07.quad_with_texture
     08.cube_with_camera
     09.transformations
