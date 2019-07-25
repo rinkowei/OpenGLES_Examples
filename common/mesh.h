@@ -36,11 +36,21 @@ namespace es
 	class Mesh
 	{
 	public:
-		Mesh() = default;
-		~Mesh()
+		std::vector<Vertex> vertices;
+		std::vector<GLuint> indices;
+		std::vector<Texture> textures;
+
+		enum class DrawType
 		{
-			std::cout << "mesh \n";
-		}
+			Arrays,
+			Arrays_Indirect,
+			Arrays_Instanced,
+			Elements,
+			Elements_Restart_Index
+		};
+		
+		Mesh() = default;
+		~Mesh() = default;
 
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures)
 		{
@@ -106,10 +116,6 @@ namespace es
 
 			glActiveTexture(GL_TEXTURE0);
 		}
-
-		std::vector<Vertex> vertices;
-		std::vector<GLuint> indices;
-		std::vector<Texture> textures;
 
 	private:
 		GLuint VAO = 0;
