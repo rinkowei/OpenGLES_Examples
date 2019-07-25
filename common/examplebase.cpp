@@ -9,13 +9,29 @@ std::string ExampleBase::getWindowTitle()
 	return title;
 }
 
-const std::string ExampleBase::getResourcesPath()
+const std::string ExampleBase::getResourcesPath(ResourceType type)
 {
+	std::string resName = "";
+	switch (type)
+	{
+	case ResourceType::Model:
+		resName = "models";
+		break;
+	case ResourceType::Shader:
+		resName = "shaders";
+		break;
+	case ResourceType::Texture:
+		resName = "textures";
+		break;
+	}
+
+	std::string resDir = "";
 #if defined(ES_EXAMPLE_RESOURCES_DIR)
-	return ES_EXAMPLE_RESOURCES_DIR;
+	resDir =  ES_EXAMPLE_RESOURCES_DIR;
 #else
-	return "./../resources/";
+	resDir = "./../resources/";
 #endif
+	return resDir + resName;
 }
 
 ExampleBase::ExampleBase()

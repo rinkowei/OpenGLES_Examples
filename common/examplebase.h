@@ -47,11 +47,21 @@ private:
 	void windowResize();
 	void handleMouseMove(int32_t x, int32_t y);
 protected:
+	enum class ResourceType
+	{
+		Model,
+		Shader,
+		Texture
+	};
 	GLFWwindow* window;
 	// frame counter to display fps
 	GLuint frameCounter = 0;
 	GLuint lastFPS = 0;
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastTimestamp;
+
+	std::string modelsPath;
+	std::string shadersPath;
+	std::string texturesPath;
 public:
 	bool prepared = false;
 	GLuint width = 1280;
@@ -60,7 +70,7 @@ public:
 	es::UIOverlay uiOverlay;
 
 	float frameTimer = 1.0f;
-	const std::string getResourcesPath();
+	const std::string getResourcesPath(ResourceType type);
 
 	es::Benchmark benchmark;
 
