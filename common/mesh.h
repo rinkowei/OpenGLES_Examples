@@ -52,15 +52,10 @@ namespace es
 		Mesh() = default;
 		~Mesh() = default;
 
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures)
-		{
-			initWithData(vertices, indices, textures);
-		}
-
-		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures)
+		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures, DrawType type)
 		{
 			Mesh* mesh = new (std::nothrow) Mesh();
-			if (mesh && mesh->initWithData(vertices, indices, textures))
+			if (mesh && mesh->initWithData(vertices, indices, textures, type))
 			{
 				return mesh;
 			}
@@ -108,25 +103,43 @@ namespace es
 
 			shader->use();
 			glBindVertexArray(VAO);
-			if (!indices.empty())
-				glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-			else
+			switch (drawType)
+			{
+			case DrawType::Arrays:
 				glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+				break;
+			case DrawType::Arrays_Indirect:
+				break;
+			case DrawType::Arrays_Instanced:
+				break;
+			case DrawType::Elements:
+				glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+				break;
+			case DrawType::Elements_Restart_Index:
+				break;
+			}
 			glBindVertexArray(0);
-
 			glActiveTexture(GL_TEXTURE0);
+		}
+
+		void setDrawType(DrawType type)
+		{
+			this->drawType = type;
 		}
 
 	private:
 		GLuint VAO = 0;
 		GLuint VBO = 0;;
 		GLuint EBO = 0;
+		DrawType drawType = DrawType::Elements;
 
-		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures)
+		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures, DrawType type)
 		{
 			this->vertices = vertices;
 			this->indices = indices;
 			this->textures = textures;
+
+			setDrawType(type);
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);

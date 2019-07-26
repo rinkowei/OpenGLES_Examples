@@ -162,7 +162,7 @@ private:
 		std::vector<Texture> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, "heightMap");
 		textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
 		
-		return *Mesh::createWithData(vertices, indices, textures);
+		return *Mesh::createWithData(vertices, indices, textures, Mesh::DrawType::Elements);
 	}
 
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
