@@ -50,7 +50,12 @@ namespace es
 		};
 		
 		Mesh() = default;
-		~Mesh() = default;
+		~Mesh()
+		{
+			glDeleteBuffers(1, &EBO);
+			glDeleteBuffers(1, &VAO);
+			glDeleteVertexArrays(1, &VAO);
+		}
 
 		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures, DrawType type)
 		{
@@ -105,19 +110,29 @@ namespace es
 			glBindVertexArray(VAO);
 			switch (drawType)
 			{
-			case DrawType::Arrays:
-				glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-				break;
-			case DrawType::Arrays_Indirect:
-				break;
-			case DrawType::Arrays_Instanced:
-				break;
-			case DrawType::Elements:
-				glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-				break;
-			case DrawType::Elements_Restart_Index:
-				glDrawElements(GL_TRIANGLE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
-				break;
+				case DrawType::Arrays:
+				{
+					glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+					break;
+				}
+				case DrawType::Arrays_Indirect:
+					break;
+				case DrawType::Arrays_Instanced:
+					break;
+				case DrawType::Elements:
+				{
+					glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+					break;
+				}
+				case DrawType::Elements_Restart_Index:
+				{
+					// enable primitive restart
+					glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+					glDrawElements(GL_TRIANGLE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+					// disable primitive restart
+					glDisable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+					break;
+				}
 			}
 			glBindVertexArray(0);
 			glActiveTexture(GL_TEXTURE0);
