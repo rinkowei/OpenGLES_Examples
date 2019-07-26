@@ -37,7 +37,7 @@ public:
 		}
 		
 		// create triangle mesh
-		triangle = Mesh::createWithData(vertices, {}, {});
+		triangle = Mesh::createWithData(vertices, {}, {}, Mesh::DrawType::Arrays);
 
 		// create triangle shader
 		shader = Shader::createWithFile(shadersPath + "triangle.vs", shadersPath + "triangle.fs");
