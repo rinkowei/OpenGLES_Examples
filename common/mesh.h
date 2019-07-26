@@ -116,6 +116,7 @@ namespace es
 				glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 				break;
 			case DrawType::Elements_Restart_Index:
+				glDrawElements(GL_TRIANGLE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
 				break;
 			}
 			glBindVertexArray(0);

@@ -43,7 +43,7 @@ public:
 		}
 
 		// create quadrangle mesh
-		quadrangle = Mesh::createWithData(vertices, indices, {});
+		quadrangle = Mesh::createWithData(vertices, indices, {}, Mesh::DrawType::Elements);
 
 		// create triangle shader
 		shader = Shader::createWithFile(shadersPath + "quadrangle.vs", shadersPath + "quadrangle.fs");
