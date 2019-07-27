@@ -1,123 +1,77 @@
 ﻿
-#define GLFW_INCLUDE_ES32
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
 #include <common.h>
+using namespace es;
 
-#include <iostream>
-#include <array>
-using namespace std;
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void handleInput(GLFWwindow* window);
-
-const GLuint SCREEN_WIDTH = 800;
-const GLuint SCREEN_HEIGHT = 600;
-
-const string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
-
-int main()
+class Example final : public ExampleBase
 {
-	// initialize and configure glfw
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_ES_API, GLFW_OPENGL_CORE_PROFILE);
-	
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGLES_Examples", nullptr, nullptr);
-	if (window == nullptr)
+public:
+	Mesh* quad;
+	Shader* shader;
+	Example()
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+		title = "quad with texture";
+		defaultClearColor = glm::vec4(0.2f, 0.2f, 0.4f, 1.0f);
 
-	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+		shadersPath = getResourcesPath(ResourceType::Shader) + "/07.quad_with_texture/";
+		texturesPath = getResourcesPath(ResourceType::Texture) + "/07.quad_with_texture/";
+	}
+	~Example()
 	{
-		cout << "Failed to initialize GLAD\n";
-		return -1;
+		delete(shader);
+		delete(quad);
 	}
-	else
+public:
+	virtual void prepare() override
 	{
-		cout << "Success to initialize GLAD\n";
+		std::vector<GLfloat> vertexAttrs = {
+			// positions          // texture coordinates
+			0.5f,  0.5f, 0.0f,    1.0f, 1.0f,
+			0.5f, -0.5f, 0.0f,    1.0f, 0.0f,
+		   -0.5f, -0.5f, 0.0f,    0.0f, 0.0f,
+		   -0.5f,  0.5f, 0.0f,    0.0f, 1.0f
+		};
+
+		std::vector<GLuint> indices = {
+			0, 1, 3,
+			1, 2, 3
+		};
+
+		std::vector<Vertex> vertices = {};
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 5); i++)
+		{
+			Vertex vertex;
+			vertex.Position = glm::vec3(vertexAttrs[i * 5], vertexAttrs[i * 5 + 1], vertexAttrs[i * 5 + 2]);
+			vertex.TexCoords = glm::vec2(vertexAttrs[i * 5 + 3], vertexAttrs[i * 5 + 4]);
+			vertices.push_back(vertex);
+		}
+
+		std::vector<Texture*> textures = {};
+		Texture* texture = Texture::createWithFile(texturesPath + "timg.png", Texture::Type::Diffuse);
+		textures.push_back(texture);
+
+		quad = Mesh::createWithData(vertices, indices, textures, Mesh::DrawType::Elements);
+		// create triangle shader
+		shader = Shader::createWithFile(shadersPath + "quad.vs", shadersPath + "quad.fs");
 	}
-
-	Shader* shader = Shader::createWithFile(resources_dir + "shaders/7.quad_with_texture/quad.vs", resources_dir + "shaders/7.quad_with_texture/quad.fs");
-	
-	GLfloat vertices[] = {
-		 // positions          // texture coordinates
-		 0.5f,  0.5f, 0.0f,    1.0f, 1.0f, 
-		 0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 
-		-0.5f, -0.5f, 0.0f,    0.0f, 0.0f, 
-		-0.5f,  0.5f, 0.0f,    0.0f, 1.0f  
-	};
-	GLuint indices[] = {
-		0, 1, 3,
-		1, 2, 3 
-	};
-	
-	GLuint VAO, VBO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-	
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	GLuint timgID = textureLoader::loadTexture2D(resources_dir + "textures/7.quad_with_texture/timg.png", true);
-	glBindTexture(GL_TEXTURE_2D, timgID);
-
-	// render loop
-	while (!glfwWindowShouldClose(window))
+	virtual void render() override
 	{
-		handleInput(window);
-		
-		// clear color buffer
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		shader->use();
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		quad->Draw(shader);
 	}
+};
 
-	glDeleteTextures(1, &timgID);
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	
-	glfwTerminate();
+Example* example;
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+	example = new Example();
+	example->setupValidation();
+	if (!example->setupGLFW() ||
+		!example->loadGLESFunctions() ||
+		!example->setupImGui())
+	{
+		return 0;
+	}
+	example->prepare();
+	example->renderLoop();
+	delete(example);
 	return 0;
-}
-
-void handleInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
 }
