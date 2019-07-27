@@ -49,7 +49,7 @@ public:
 	}
 
 private:
-	std::vector<Texture> texturesLoaded;
+	std::vector<Texture*> texturesLoaded;
 	std::vector<Mesh> meshes;
 
 	std::string directory;
@@ -89,7 +89,7 @@ private:
 	{
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
-		std::vector<Texture> textures;
+		std::vector<Texture*> textures;
 	
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
@@ -150,24 +150,24 @@ private:
 		
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		
-		std::vector<Texture> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuseMap");
+		std::vector<Texture*> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture::Type::Diffuse);
 		textures.insert(textures.end(), diffuseTextures.begin(), diffuseTextures.end());
 		
-		std::vector<Texture> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, "specularMap");
+		std::vector<Texture*> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, Texture::Type::Specular);
 		textures.insert(textures.end(), specularTextures.begin(), specularTextures.end());
 
-		std::vector<Texture> normalTextures = loadMaterialTextures(material, aiTextureType_NORMALS, "normalMap");
+		std::vector<Texture*> normalTextures = loadMaterialTextures(material, aiTextureType_NORMALS, Texture::Type::Normal);
 		textures.insert(textures.end(), normalTextures.begin(), normalTextures.end());
 
-		std::vector<Texture> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, "heightMap");
+		std::vector<Texture*> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, Texture::Type::Height);
 		textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
 		
 		return *Mesh::createWithData(vertices, indices, textures, Mesh::DrawType::Elements);
 	}
 
-	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
+	std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, Texture::Type texType)
 	{
-		std::vector<Texture> textures;
+		std::vector<Texture*> textures;
 		for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 		{
 			aiString str;
@@ -188,7 +188,7 @@ private:
 			bool alreadyLoaded = false;
 			for (unsigned int j = 0; j < texturesLoaded.size(); j++)
 			{
-				if (std::strcmp(texturesLoaded[j].path.data(), str.C_Str()) == 0)
+				if (std::strcmp(texturesLoaded[j]->getFilePath().data(), str.C_Str()) == 0)
 				{
 					textures.push_back(texturesLoaded[j]);
 					alreadyLoaded = true;
@@ -197,10 +197,7 @@ private:
 			}
 			if (!alreadyLoaded)
 			{
-				Texture tex;
-				tex.id = textureLoader::loadTexture2D(texPath, true);
-				tex.type = typeName;
-				tex.path = texPath;
+				Texture* tex = Texture::createWithFile(texPath, texType);
 				textures.push_back(tex);
 				texturesLoaded.push_back(tex);
 			}

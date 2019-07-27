@@ -26,19 +26,12 @@ namespace es
 		std::optional<glm::vec3> Color;
 	};
 
-	struct Texture
-	{
-		GLuint id;
-		string type;
-		string path;
-	};
-
 	class Mesh
 	{
 	public:
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
-		std::vector<Texture> textures;
+		std::vector<Texture*> textures;
 
 		enum class DrawType
 		{
@@ -57,7 +50,7 @@ namespace es
 			glDeleteVertexArrays(1, &VAO);
 		}
 
-		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures, DrawType type)
+		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture*>& textures, DrawType type)
 		{
 			Mesh* mesh = new (std::nothrow) Mesh();
 			if (mesh && mesh->initWithData(vertices, indices, textures, type))
@@ -83,26 +76,31 @@ namespace es
 				{
 					glActiveTexture(GL_TEXTURE0 + i);
 					string number;
-					string name = textures[i].type;
-					if (name == "diffuseMap")
+					string name;
+					Texture::Type type = textures[i]->getType();
+					if (type == Texture::Type::Diffuse)
 					{
+						name = "diffuseMap";
 						number = std::to_string(diffuseMap++);
 					}
-					else if (name == "specularMap")
+					else if (type == Texture::Type::Specular)
 					{
+						name = "specularMap";
 						number = std::to_string(specularMap++);
 					}
-					else if (name == "normalMap")
+					else if (type == Texture::Type::Normal)
 					{
+						name = "normalMap";
 						number = std::to_string(NormalMap++);
 					}
-					else if (name == "heightMap")
+					else if (type == Texture::Type::Height)
 					{
+						name = "heightMap";
 						number = std::to_string(heightMap++);
 					}
 
 					shader->setInt((name + number).c_str(), i);
-					glBindTexture(GL_TEXTURE_2D, textures[i].id);
+					glBindTexture(GL_TEXTURE_2D, textures[i]->getID());
 				}
 			}
 
@@ -149,7 +147,7 @@ namespace es
 		GLuint EBO = 0;
 		DrawType drawType = DrawType::Elements;
 
-		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture>& textures, DrawType type)
+		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture*>& textures, DrawType type)
 		{
 			this->vertices = vertices;
 			this->indices = indices;
