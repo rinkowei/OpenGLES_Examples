@@ -26,7 +26,7 @@ public:
 	static Material* createWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths)
 	{
 		Material* material = new (std::nothrow) Material();
-		if (material && material->initWithFile(shaderPaths))
+		if (material && material->loadWithFile(shaderPaths))
 		{
 			return material;
 		}
@@ -108,36 +108,63 @@ private:
 	GLuint programID = 0;
 	GLboolean isLinkSucceed = false;
 
-	bool initWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths)
+	bool loadWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths)
 	{
 		return true;
 	}
 
-	GLuint compileWithFile(Material::ShaderType type, const std::string& filePath)
+	bool compileWithFile(Material::ShaderType type, const std::string& filePath, GLuint* shaderID)
 	{
-		GLuint shaderID = 0;
-		if (type == Material::ShaderType::Vertex)
+		struct stat info;
+		if (stat(filePath.c_str(), &info) != 0)
 		{
-
+			std::cout << "failed to locate shader file in " + filePath << std::endl;
+			return false;
 		}
+
+		std::ifstream shaderFile;
+		shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+		const GLchar* shaderCode;
+		try {
+			shaderFile.open(filePath, std::ios::in | std::ios::binary);
+
+			std::stringstream shaderStream;
+			shaderStream << shaderFile.rdbuf();
+
+			shaderFile.close();
+
+			shaderCode = shaderStream.str().c_str();
+		}
+		catch (std::ifstream::failure e)
+		{
+			std::cout << "failed to read shader file in " + filePath << std::endl;
+		}
+
+		return compileWithSource(type, shaderCode, shaderID);
 	}
 
-	GLuint compileWithSource(Material::ShaderType type, const GLchar* source)
+	bool compileWithSource(Material::ShaderType type, const GLchar* source, GLuint* shaderID)
 	{
-		GLuint shaderID = 0;
-
 		if (type == Material::ShaderType::Vertex)
 		{
-			shaderID = glCreateShader(GL_VERTEX_SHADER);
+			*shaderID = glCreateShader(GL_VERTEX_SHADER);
 		}
 		else if (type == Material::ShaderType::Geometry)
 		{
-			shaderID = glCreateShader(GL_GEOMETRY_SHADER);
+			*shaderID = glCreateShader(GL_GEOMETRY_SHADER);
 		}
 		else if (type == Material::ShaderType::Fragment)
 		{
-			shaderID = glCreateShader(GL_FRAGMENT_SHADER);
+			*shaderID = glCreateShader(GL_FRAGMENT_SHADER);
 		}
+		glShaderSource(*shaderID, 1, &source, nullptr);
+		glCompileShader(*shaderID);
+		if (!checkCompiled(*shaderID, type))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	bool checkCompiled(GLuint shader, ShaderType type)
