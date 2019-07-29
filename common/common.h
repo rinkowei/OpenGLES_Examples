@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "textureLoader.h"
 #include "shader.h"
+#include "material.h"
 #include "mesh.h"
 #include "model.h"
 #include "benchmark.h"
