@@ -7,6 +7,7 @@ class Example final : public ExampleBase
 public:
 	Mesh* triangle;
 	Shader* shader;
+	Material* material;
 	Example()
 	{
 		title = "triangle";
@@ -39,12 +40,20 @@ public:
 		// create triangle mesh
 		triangle = Mesh::createWithData(vertices, {}, {}, Mesh::DrawType::Arrays);
 
-		// create triangle shader
 		shader = Shader::createWithFile(shadersPath + "triangle.vs", shadersPath + "triangle.fs");
+
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersPath + "triangle.vs" },
+			{ Material::ShaderType::Fragment, shadersPath + "triangle.fs" }
+		};
+		// create triangle material
+		material = Material::createWithFile(shaderPaths);
 	}
 	virtual void render() override
 	{
-		// render mesh
+		// apply material for render triangle
+		material->apply();
 		triangle->Draw(shader);
 	}
 };
