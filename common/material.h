@@ -34,7 +34,7 @@ public:
 		return nullptr;
 	}
 
-	void use()
+	void apply()
 	{
 		if (programID != 0 && isLinkSucceed)
 		{
@@ -110,6 +110,48 @@ private:
 
 	bool loadWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths)
 	{
+		programID = glCreateProgram();
+
+		GLuint vertShaderID = 0;
+		auto& shader = shaderPaths.find(Material::ShaderType::Vertex);
+		if (shader != shaderPaths.end())
+		{
+			if (compileWithFile(Material::ShaderType::Vertex, shader->second, &vertShaderID))
+			{
+				glAttachShader(programID, vertShaderID);
+			}
+		}
+
+		GLuint geomShaderID = 0;
+		shader = shaderPaths.find(Material::ShaderType::Geometry);
+		if (shader != shaderPaths.end())
+		{
+			if (compileWithFile(Material::ShaderType::Geometry, shader->second, &geomShaderID))
+			{
+				glAttachShader(programID, geomShaderID);
+			}
+		}
+
+		GLuint fragShaderID = 0;
+		shader = shaderPaths.find(Material::ShaderType::Fragment);
+		if (shader != shaderPaths.end())
+		{
+			if (compileWithFile(Material::ShaderType::Fragment, shader->second, &fragShaderID))
+			{
+				glAttachShader(programID, fragShaderID);
+			}
+		}
+
+		glLinkProgram(programID);
+		if (!checkCompiled(programID, Material::ShaderType::Program))
+		{
+			return false;
+		}
+
+		glDeleteShader(vertShaderID);
+		glDeleteShader(geomShaderID);
+		glDeleteShader(fragShaderID);
+
 		return true;
 	}
 
@@ -125,23 +167,20 @@ private:
 		std::ifstream shaderFile;
 		shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-		const GLchar* shaderCode;
+		std::stringstream shaderStream;
 		try {
 			shaderFile.open(filePath, std::ios::in | std::ios::binary);
 
-			std::stringstream shaderStream;
 			shaderStream << shaderFile.rdbuf();
 
 			shaderFile.close();
-
-			shaderCode = shaderStream.str().c_str();
 		}
 		catch (std::ifstream::failure e)
 		{
 			std::cout << "failed to read shader file in " + filePath << std::endl;
 		}
 
-		return compileWithSource(type, shaderCode, shaderID);
+		return compileWithSource(type, shaderStream.str().c_str(), shaderID);
 	}
 
 	bool compileWithSource(Material::ShaderType type, const GLchar* source, GLuint* shaderID)

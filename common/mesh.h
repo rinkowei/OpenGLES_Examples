@@ -104,7 +104,6 @@ namespace es
 				}
 			}
 
-			shader->use();
 			glBindVertexArray(VAO);
 			switch (drawType)
 			{
