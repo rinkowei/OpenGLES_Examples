@@ -6,7 +6,6 @@ class Example final : public ExampleBase
 {
 public:
 	Mesh* triangle;
-	Shader* shader;
 	Material* material;
 	Example()
 	{
@@ -17,7 +16,7 @@ public:
 	}
 	~Example()
 	{
-		delete(shader);
+		delete(material);
 		delete(triangle);
 	}
 public:
@@ -40,8 +39,6 @@ public:
 		// create triangle mesh
 		triangle = Mesh::createWithData(vertices, {}, {}, Mesh::DrawType::Arrays);
 
-		shader = Shader::createWithFile(shadersPath + "triangle.vs", shadersPath + "triangle.fs");
-
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
 			{ Material::ShaderType::Vertex, shadersPath + "triangle.vs" },
@@ -54,7 +51,7 @@ public:
 	{
 		// apply material for render triangle
 		material->apply();
-		triangle->Draw(shader);
+		triangle->Draw();
 	}
 };
 
