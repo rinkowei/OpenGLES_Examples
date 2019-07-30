@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "camera.h"
-#include "textureLoader.h"
+#include "texture.h"
 #include "shader.h"
 #include "material.h"
 #include "mesh.h"

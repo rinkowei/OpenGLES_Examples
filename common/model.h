@@ -16,9 +16,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "mesh.h"
-#include "shader.h"
-#include "textureLoader.h"
+#include <common.h>
 
 using namespace std;
 using namespace es;

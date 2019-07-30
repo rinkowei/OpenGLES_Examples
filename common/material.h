@@ -108,6 +108,7 @@ private:
 	GLuint programID = 0;
 	GLboolean isLinkSucceed = false;
 
+
 	bool loadWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths)
 	{
 		programID = glCreateProgram();
