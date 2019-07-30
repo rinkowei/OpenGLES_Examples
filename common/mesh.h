@@ -61,48 +61,10 @@ namespace es
 			return nullptr;
 		}
 
-		void Draw(Shader* shader)
+		void Draw()
 		{
 			if (vertices.empty())
 				return;
-
-			if (!textures.empty())
-			{
-				GLuint diffuseMap = 1;
-				GLuint specularMap = 1;
-				GLuint NormalMap = 1;
-				GLuint heightMap = 1;
-				for (GLuint i = 0; i < textures.size(); i++)
-				{
-					glActiveTexture(GL_TEXTURE0 + i);
-					string number;
-					string name;
-					Texture::Type type = textures[i]->getType();
-					if (type == Texture::Type::Diffuse)
-					{
-						name = "diffuseMap";
-						number = std::to_string(diffuseMap++);
-					}
-					else if (type == Texture::Type::Specular)
-					{
-						name = "specularMap";
-						number = std::to_string(specularMap++);
-					}
-					else if (type == Texture::Type::Normal)
-					{
-						name = "normalMap";
-						number = std::to_string(NormalMap++);
-					}
-					else if (type == Texture::Type::Height)
-					{
-						name = "heightMap";
-						number = std::to_string(heightMap++);
-					}
-
-					shader->setInt((name + number).c_str(), i);
-					glBindTexture(GL_TEXTURE_2D, textures[i]->getID());
-				}
-			}
 
 			glBindVertexArray(VAO);
 			switch (drawType)
