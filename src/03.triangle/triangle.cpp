@@ -44,8 +44,11 @@ public:
 			{ Material::ShaderType::Vertex, shadersPath + "triangle.vs" },
 			{ Material::ShaderType::Fragment, shadersPath + "triangle.fs" }
 		};
+
+		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
+		
 		// create triangle material
-		material = Material::createWithFile(shaderPaths);
+		material = Material::createWithFile(shaderPaths, texturePaths);
 	}
 	virtual void render() override
 	{

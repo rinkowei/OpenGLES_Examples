@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <algorithm>
 
 namespace es
 {
@@ -41,10 +42,10 @@ namespace es
 			Program
 		};
 
-		static Material* createWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, const std::unordered_multimap<Texture::Type, std::string>& textures = {})
+		static Material* createWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, std::vector<std::pair<Texture::Type, std::string>>& texturePaths)
 		{
 			Material* material = new (std::nothrow) Material();
-			if (material && material->loadWithFile(shaderPaths, textures))
+			if (material && material->loadWithFile(shaderPaths, texturePaths))
 			{
 				return material;
 			}
@@ -125,10 +126,10 @@ namespace es
 	private:
 		GLuint programID = 0;
 		GLboolean isLinkSucceed = false;
-
+		 
 		std::vector<Texture*> textures;
-
-		bool loadWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, const std::unordered_multimap<Texture::Type, std::string>& texturePaths)
+		
+		bool loadWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, std::vector<std::pair<Texture::Type, std::string>>& texturePaths)
 		{
 			return loadShaders(shaderPaths) && loadTextures(texturePaths);
 		}
@@ -188,8 +189,15 @@ namespace es
 			return true;
 		}
 
-		bool loadTextures(const std::unordered_multimap<Texture::Type, std::string>& texturePaths)
+		bool loadTextures(std::vector<std::pair<Texture::Type, std::string>>& texturePaths)
 		{
+			if (!texturePaths.empty())
+			{
+				std::sort(texturePaths.begin(), texturePaths.end(), [&](const std::pair<Texture::Type, std::string>& a, const std::pair<Texture::Type, std::string>& b) {
+					return a.first < b.first;
+				});
+			}
+
 			if (!textures.empty())
 			{
 				for (auto texture : textures)
@@ -223,17 +231,17 @@ namespace es
 					name = "diffuseMap_";
 					number = std::to_string(diffuseMap++);
 				}
-				else if (texturePath.first == Texture::Type::Specular)
+				else if (texturePath.first == Texture::Type::Diffuse)
 				{
 					name = "specularMap_";
 					number = std::to_string(specularMap++);
 				}
-				else if (texturePath.first == Texture::Type::Normal)
+				else if (texturePath.first == Texture::Type::Diffuse)
 				{
 					name = "normalMap_";
 					number = std::to_string(normalMap++);
 				}
-				else if (texturePath.first == Texture::Type::Height)
+				else if (texturePath.first == Texture::Type::Diffuse)
 				{
 					name = "heightMap_";
 					number = std::to_string(heightMap++);
