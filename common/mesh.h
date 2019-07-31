@@ -31,7 +31,6 @@ namespace es
 	public:
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
-		std::vector<Texture*> textures;
 
 		enum class DrawType
 		{
@@ -50,10 +49,10 @@ namespace es
 			glDeleteVertexArrays(1, &VAO);
 		}
 
-		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture*>& textures, DrawType type)
+		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, Material* material = nullptr)
 		{
 			Mesh* mesh = new (std::nothrow) Mesh();
-			if (mesh && mesh->initWithData(vertices, indices, textures, type))
+			if (mesh && mesh->initWithData(vertices, indices, type, material))
 			{
 				return mesh;
 			}
@@ -65,6 +64,11 @@ namespace es
 		{
 			if (vertices.empty())
 				return;
+
+			if (material != nullptr)
+			{
+				material->apply();
+			}
 
 			glBindVertexArray(VAO);
 			switch (drawType)
@@ -102,19 +106,29 @@ namespace es
 			this->drawType = type;
 		}
 
+		void setMaterial(Material* material)
+		{
+			if (this->material != nullptr)
+			{
+				delete(this->material);
+			}
+			this->material = material;
+		}
+
 	private:
 		GLuint VAO = 0;
 		GLuint VBO = 0;;
 		GLuint EBO = 0;
 		DrawType drawType = DrawType::Elements;
 
-		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, const std::vector<Texture*>& textures, DrawType type)
+		Material* material;
+
+		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, Material* material)
 		{
 			this->vertices = vertices;
 			this->indices = indices;
-			this->textures = textures;
-
-			setDrawType(type);
+			this->drawType = type;
+			this->material = material;
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);

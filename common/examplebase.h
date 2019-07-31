@@ -59,9 +59,9 @@ protected:
 	GLuint lastFPS = 0;
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastTimestamp;
 
-	std::string modelsPath;
-	std::string shadersPath;
-	std::string texturesPath;
+	std::string modelsDirectory;
+	std::string shadersDirectory;
+	std::string texturesDirectory;
 public:
 	bool prepared = false;
 	GLuint width = 1280;
