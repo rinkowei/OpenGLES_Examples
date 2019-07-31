@@ -6,18 +6,17 @@ class Example final : public ExampleBase
 {
 public:
 	Mesh* quad;
-	Shader* shader;
+	Material* material;
 	Example()
 	{
 		title = "quad with texture";
 		defaultClearColor = glm::vec4(0.2f, 0.2f, 0.4f, 1.0f);
 
-		shadersPath = getResourcesPath(ResourceType::Shader) + "/07.quad_with_texture/";
-		texturesPath = getResourcesPath(ResourceType::Texture) + "/07.quad_with_texture/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/07.quad_with_texture/";
+		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/07.quad_with_texture/";
 	}
 	~Example()
 	{
-		delete(shader);
 		delete(quad);
 	}
 public:
@@ -45,17 +44,26 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		std::vector<Texture*> textures = {};
-		Texture* texture = Texture::createWithFile(texturesPath + "timg.png", Texture::Type::Diffuse);
-		textures.push_back(texture);
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "quad.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "quad.frag" }
+		};
 
-		quad = Mesh::createWithData(vertices, indices, textures, Mesh::DrawType::Elements);
-		// create triangle shader
-		shader = Shader::createWithFile(shadersPath + "quad.vs", shadersPath + "quad.fs");
+		std::vector<std::pair<Texture::Type, std::string>> texturePaths = 
+		{
+			std::make_pair(Texture::Type::Diffuse, texturesDirectory + "timg.png")
+		};
+
+		// create quad material
+		material = Material::createWithFile(shaderPaths, texturePaths);
+
+		quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 	}
 	virtual void render() override
 	{
-		quad->Draw(shader);
+		// render quad mesh
+		quad->Draw();
 	}
 };
 
