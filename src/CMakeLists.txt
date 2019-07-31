@@ -11,7 +11,7 @@ function(buildExample EXAMPLE_NAME)
     endif()
     # Add shaders
     SET(SHADER_DIR "../resources/shaders/${EXAMPLE_NAME}")
-    file(GLOB SHADERS "${SHADER_DIR}/*.vs" "${SHADER_DIR}/*.fs")
+    file(GLOB SHADERS "${SHADER_DIR}/*.vert" "${SHADER_DIR}/*.frag")
     source_group("Shaders" FILES ${SHADERS})
     if(WIN32)
         add_executable(${EXAMPLE_NAME} WIN32 ${SOURCE} ${SHADERS})
