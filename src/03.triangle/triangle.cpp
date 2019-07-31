@@ -12,7 +12,7 @@ public:
 		title = "triangle";
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
-		shadersPath = getResourcesPath(ResourceType::Shader) + "/03.triangle/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/03.triangle/";
 	}
 	~Example()
 	{
@@ -41,8 +41,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersPath + "triangle.vs" },
-			{ Material::ShaderType::Fragment, shadersPath + "triangle.fs" }
+			{ Material::ShaderType::Vertex, shadersDirectory + "triangle.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "triangle.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
