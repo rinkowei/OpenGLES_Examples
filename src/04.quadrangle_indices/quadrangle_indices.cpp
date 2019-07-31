@@ -6,17 +6,17 @@ class Example final : public ExampleBase
 {
 public:
 	Mesh* quadrangle;
-	Shader* shader;
+	Material* material;
 	Example()
 	{
 		title = "quadrangle indices";
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
-		shadersPath = getResourcesPath(ResourceType::Shader) + "/04.quadrangle_indices/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/04.quadrangle_indices/";
 	}
 	~Example()
 	{
-		delete(shader);
+		delete(material);
 		delete(quadrangle);
 	}
 public:
@@ -45,13 +45,22 @@ public:
 		// create quadrangle mesh
 		quadrangle = Mesh::createWithData(vertices, indices, {}, Mesh::DrawType::Elements);
 
-		// create triangle shader
-		shader = Shader::createWithFile(shadersPath + "quadrangle.vs", shadersPath + "quadrangle.fs");
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "quadrangle.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "quadrangle.frag" }
+		};
+
+		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
+
+		// create triangle material
+		material = Material::createWithFile(shaderPaths, texturePaths);
 	}
 	virtual void render() override
 	{
-		// render mesh
-		quadrangle->Draw(shader);
+		// apply material for render quadrangle
+		material->apply();
+		quadrangle->Draw();
 	}
 };
 
