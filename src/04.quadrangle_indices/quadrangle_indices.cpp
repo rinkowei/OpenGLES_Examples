@@ -57,8 +57,7 @@ public:
 	}
 	virtual void render() override
 	{
-		// apply material for render quadrangle
-		material->apply();
+		// render quadrangle mesh
 		quadrangle->Draw();
 	}
 };

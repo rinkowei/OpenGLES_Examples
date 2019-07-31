@@ -6,17 +6,16 @@ class Example final : public ExampleBase
 {
 public:
 	Mesh* triangle;
-	Shader* shader;
+	Material* material;
 	Example()
 	{
 		title = "triangle restart index";
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
-		shadersPath = getResourcesPath(ResourceType::Shader) + "/05.triangle_restart_index/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/05.triangle_restart_index/";
 	}
 	~Example()
 	{
-		delete(shader);
 		delete(triangle);
 	}
 public:
@@ -44,16 +43,24 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		// create triangle mesh
-		triangle = Mesh::createWithData(vertices, indices, {}, Mesh::DrawType::Elements_Restart_Index);
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "triangle.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "triangle.frag" }
+		};
 
-		// create triangle shader
-		shader = Shader::createWithFile(shadersPath + "triangle.vs", shadersPath + "triangle.fs");
+		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
+
+		// create triangle material
+		material = Material::createWithFile(shaderPaths, texturePaths);
+
+		// create triangle mesh
+		triangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements_Restart_Index, material);
 	}
 	virtual void render() override
 	{
-		// render mesh
-		triangle->Draw(shader);
+		// render triangle mesh
+		triangle->Draw();
 	}
 };
 
