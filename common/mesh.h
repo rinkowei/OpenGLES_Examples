@@ -44,6 +44,11 @@ namespace es
 		Mesh() = default;
 		~Mesh()
 		{
+			if (material != nullptr)
+			{
+				delete(material);
+				material = nullptr;
+			}
 			glDeleteBuffers(1, &EBO);
 			glDeleteBuffers(1, &VAO);
 			glDeleteVertexArrays(1, &VAO);

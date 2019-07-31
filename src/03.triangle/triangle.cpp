@@ -16,7 +16,6 @@ public:
 	}
 	~Example()
 	{
-		delete(material);
 		delete(triangle);
 	}
 public:
@@ -35,9 +34,6 @@ public:
 			vertex.Position = glm::vec3(vertexPositions[i * 3], vertexPositions[i * 3 + 1], vertexPositions[i * 3 + 2]);
 			vertices.push_back(vertex);
 		}
-		
-		// create triangle mesh
-		triangle = Mesh::createWithData(vertices, {}, {}, Mesh::DrawType::Arrays);
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
@@ -46,14 +42,16 @@ public:
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
-		
+
 		// create triangle material
 		material = Material::createWithFile(shaderPaths, texturePaths);
+		
+		// create triangle mesh
+		triangle = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 	}
 	virtual void render() override
 	{
-		// apply material for render triangle
-		material->apply();
+		// render triangle mesh
 		triangle->Draw();
 	}
 };

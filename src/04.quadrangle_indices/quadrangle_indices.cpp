@@ -16,7 +16,6 @@ public:
 	}
 	~Example()
 	{
-		delete(material);
 		delete(quadrangle);
 	}
 public:
@@ -42,9 +41,6 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		// create quadrangle mesh
-		quadrangle = Mesh::createWithData(vertices, indices, {}, Mesh::DrawType::Elements);
-
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
 			{ Material::ShaderType::Vertex, shadersDirectory + "quadrangle.vert" },
@@ -55,6 +51,9 @@ public:
 
 		// create triangle material
 		material = Material::createWithFile(shaderPaths, texturePaths);
+
+		// create quadrangle mesh
+		quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 	}
 	virtual void render() override
 	{

@@ -160,7 +160,7 @@ private:
 		std::vector<Texture*> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, Texture::Type::Height);
 		textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
 		
-		return *Mesh::createWithData(vertices, indices, textures, Mesh::DrawType::Elements);
+		return *Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements);
 	}
 
 	std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, Texture::Type texType)
