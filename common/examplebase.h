@@ -56,7 +56,7 @@ protected:
 	};
 	GLFWwindow* window;
 	// frame counter to display fps
-	GLuint frameCounter = 0;
+	GLuint64 frameCounter = 0;
 	GLuint lastFPS = 0;
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastTimestamp;
 
@@ -91,8 +91,9 @@ public:
 
 	float timer = 0.0f;
 	float timerSpeed = 0.25f;
+	float timePassed = 0.0;
 
-	bool paused = false;
+	GLboolean paused = false;
 
 	float rotationSpeed = 1.0f;
 	float zoomSpeed = 1.0f;

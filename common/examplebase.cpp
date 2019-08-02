@@ -160,6 +160,7 @@ void ExampleBase::renderFrame()
 		{
 			timer -= 1.0f;
 		}
+		timePassed += frameTimer;
 	}
 	float fpsTimer = std::chrono::duration<double, std::milli>(timeEnd - lastTimestamp).count();
 	if (fpsTimer > 1000.0f)
@@ -286,25 +287,28 @@ void ExampleBase::handleInput()
 void ExampleBase::handleKeyboardInput()
 {
 	// handle keyboard input
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE))
 		glfwSetWindowShouldClose(window, true);
+	
+	if (ImGui::IsKeyPressed(GLFW_KEY_P))
+		paused = !paused;
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if (ImGui::IsKeyPressed(GLFW_KEY_W))
 		camera.keys.up = true;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	if (ImGui::IsKeyPressed(GLFW_KEY_S))
 		camera.keys.down = true;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	if (ImGui::IsKeyPressed(GLFW_KEY_A))
 		camera.keys.left = true;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	if (ImGui::IsKeyPressed(GLFW_KEY_D))
 		camera.keys.right = true;
 	
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
+	if (ImGui::IsKeyReleased(GLFW_KEY_W))
 		camera.keys.up = false;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
+	if (ImGui::IsKeyReleased(GLFW_KEY_S))
 		camera.keys.down = false;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
+	if (ImGui::IsKeyReleased(GLFW_KEY_A))
 		camera.keys.left = false;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
+	if (ImGui::IsKeyReleased(GLFW_KEY_D))
 		camera.keys.right = false;
 }
 
