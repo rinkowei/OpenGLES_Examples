@@ -228,9 +228,7 @@ public:
 	Example()
 	{
 		title = "cube with camera";
-		settings.validation = true;
-		settings.overlay = true;
-		defaultClearColor = glm::vec4(0.2f, 0.2f, 0.4f, 1.0f);
+		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/08.cube_with_camera/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/08.cube_with_camera/";
@@ -242,6 +240,11 @@ public:
 public:
 	virtual void prepare() override
 	{
+		// setup camera
+		camera.type = Camera::Type::lookAt;
+		camera.rotationSpeed = 0.5f;
+		camera.setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+
 		glEnable(GL_DEPTH_TEST);
 
 		std::vector<GLfloat> vertexAttrs = {
@@ -316,7 +319,6 @@ public:
 	}
 	virtual void render() override
 	{
-		material->apply();
 		material->setMat4("model", glm::mat4(1.0f));
 		material->setMat4("view", camera.matrices.view);
 		material->setMat4("projection", camera.matrices.projection);
