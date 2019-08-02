@@ -36,7 +36,8 @@ const std::string ExampleBase::getResourcesPath(ResourceType type)
 
 ExampleBase::ExampleBase()
 {
-	
+	camera.setPosition(glm::vec3(0.0f, 0.0f, 5.0f));
+	camera.setPerspective(45.0f, (float)width / (float)height, 0.1f, 10.0f);
 }
 
 ExampleBase::~ExampleBase()
@@ -137,7 +138,7 @@ void ExampleBase::renderFrame()
 	glfwGetFramebufferSize(window, &display_w, &display_h);
 	glViewport(0, 0, display_w, display_h);
 	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	render();
 

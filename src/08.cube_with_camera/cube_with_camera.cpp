@@ -240,6 +240,8 @@ public:
 public:
 	virtual void prepare() override
 	{
+		glEnable(GL_DEPTH_TEST);
+
 		std::vector<GLfloat> vertexAttrs = {
 			// positions         // texture coordinates
 		   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -312,6 +314,11 @@ public:
 	}
 	virtual void render() override
 	{
+		material->apply();
+		material->setMat4("model", glm::mat4(1.0f));
+		material->setMat4("view", camera.matrices.view);
+		material->setMat4("projection", camera.matrices.projection);
+
 		// render quad mesh
 		cube->Draw();
 	}

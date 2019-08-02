@@ -25,7 +25,7 @@ namespace es
 			rotMatrix = glm::rotate(rotMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
 			transMatrix = glm::translate(glm::mat4(1.0f), position);
-
+			
 			if (type == Camera::Type::firstPerson)
 			{
 				matrices.view = rotMatrix * transMatrix;
