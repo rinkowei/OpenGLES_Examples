@@ -36,7 +36,7 @@ const std::string ExampleBase::getResourcesPath(ResourceType type)
 
 ExampleBase::ExampleBase()
 {
-	camera.setPosition(glm::vec3(0.0f, 0.0f, 5.0f));
+	camera.setPosition(glm::vec3(0.0f, 0.0f, -5.0f));
 	camera.setPerspective(45.0f, (float)width / (float)height, 0.1f, 10.0f);
 }
 
@@ -214,7 +214,13 @@ void ExampleBase::renderLoop()
 
 void ExampleBase::updateOverlay()
 {
+	if (!settings.overlay)
+		return;
 
+	ImGuiIO& io = ImGui::GetIO();
+
+	io.DisplaySize = ImVec2((float)width, (float)height);
+	io.DeltaTime = frameTimer;
 }
 
 void ExampleBase::drawUI()
@@ -278,7 +284,22 @@ void ExampleBase::handleInput()
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		camera.keys.up = true;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		camera.keys.down = true;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		camera.keys.left = true;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		camera.keys.right = true;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
+		camera.keys.up = false;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
+		camera.keys.down = false;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
+		camera.keys.left = false;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
+		camera.keys.right = false;
 }
 
 void ExampleBase::handleMouseMove(int32_t x, int32_t y)

@@ -44,7 +44,7 @@ namespace es
 			firstPerson
 		};
 
-		Camera::Type type = Camera::Type::lookAt;
+		Camera::Type type = Camera::Type::firstPerson;
 
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f);

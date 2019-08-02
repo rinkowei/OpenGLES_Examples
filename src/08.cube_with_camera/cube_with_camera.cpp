@@ -228,6 +228,8 @@ public:
 	Example()
 	{
 		title = "cube with camera";
+		settings.validation = true;
+		settings.overlay = true;
 		defaultClearColor = glm::vec4(0.2f, 0.2f, 0.4f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/08.cube_with_camera/";
