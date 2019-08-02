@@ -36,8 +36,7 @@ const std::string ExampleBase::getResourcesPath(ResourceType type)
 
 ExampleBase::ExampleBase()
 {
-	camera.setPosition(glm::vec3(0.0f, 0.0f, -5.0f));
-	camera.setPerspective(45.0f, (float)width / (float)height, 0.1f, 10.0f);
+	camera.setPerspective(45.0f, (float)width / (float)height, 0.1f, 100.0f);
 }
 
 ExampleBase::~ExampleBase()
@@ -196,9 +195,7 @@ void ExampleBase::renderLoop()
 	while (!glfwWindowShouldClose(window))
 	{
 		handleInput();
-
 		renderFrame();
-		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -282,8 +279,16 @@ void ExampleBase::windowResize()
 
 void ExampleBase::handleInput()
 {
+	handleKeyboardInput();
+	handleMouseMove();
+}
+
+void ExampleBase::handleKeyboardInput()
+{
+	// handle keyboard input
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.keys.up = true;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -292,6 +297,7 @@ void ExampleBase::handleInput()
 		camera.keys.left = true;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.keys.right = true;
+	
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
 		camera.keys.up = false;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
@@ -302,45 +308,34 @@ void ExampleBase::handleInput()
 		camera.keys.right = false;
 }
 
-void ExampleBase::handleMouseMove(int32_t x, int32_t y)
+void ExampleBase::handleMouseMove()
 {
-	int32_t dx = (int32_t)mousePos.x - x;
-	int32_t dy = (int32_t)mousePos.y - y;
-
-	bool handled = false;
-
-	if (settings.overlay)
+	ImGuiIO& io = ImGui::GetIO();
+	float deltaX = io.MouseDelta.x;
+	float deltaY = io.MouseDelta.y;
+	// mouse left button down
+	if (ImGui::IsMouseDown(0))
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		handled = io.WantCaptureMouse;
+		rotation.x += deltaY * 1.25f * rotationSpeed;
+		rotation.y -= deltaX * 1.25f * rotationSpeed;
+		camera.rotate(glm::vec3(deltaY * camera.rotationSpeed, deltaX * camera.rotationSpeed, 0.0f));
+		viewUpdated = true;
 	}
-
-	mouseMoved((double)x, (double)y, handled);
-
-	if (handled)
+	// mouse right button down
+	if (ImGui::IsMouseDown(1))
 	{
-		mousePos = glm::vec2((float)x, (float)y);
-		return;
-	}
-
-	if (mouseButtons.left) {
-		rotation.x += dy * 1.25f * rotationSpeed;
-		rotation.y -= dx * 1.25f * rotationSpeed;
-		camera.rotate(glm::vec3(dy * camera.rotationSpeed, -dx * camera.rotationSpeed, 0.0f));
+		zoom += deltaY * 0.005f * zoomSpeed;
+		camera.translate(glm::vec3(-0.0f, 0.0f, deltaY * 0.005f * zoomSpeed));
 		viewUpdated = true;
 	}
-	if (mouseButtons.right) {
-		zoom += dy * 0.005f * zoomSpeed;
-		camera.translate(glm::vec3(-0.0f, 0.0f, dy * 0.005f * zoomSpeed));
+	// mouse middle button down
+	if (ImGui::IsMouseDown(2))
+	{
+		cameraPos.x -= deltaX * 0.01f;
+		cameraPos.y -= deltaY * 0.01f;
+		camera.translate(glm::vec3(-deltaX * 0.01f, deltaY * 0.01f, 0.0f));
 		viewUpdated = true;
 	}
-	if (mouseButtons.middle) {
-		cameraPos.x -= dx * 0.01f;
-		cameraPos.y -= dy * 0.01f;
-		camera.translate(glm::vec3(-dx * 0.01f, -dy * 0.01f, 0.0f));
-		viewUpdated = true;
-	}
-	mousePos = glm::vec2((float)x, (float)y);
 }
 
 void ExampleBase::windowResized()

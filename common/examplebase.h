@@ -45,7 +45,8 @@ private:
 	GLboolean resizing = false;
 
 	void windowResize();
-	void handleMouseMove(int32_t x, int32_t y);
+	void handleKeyboardInput();
+	void handleMouseMove();
 protected:
 	enum class ResourceType
 	{
