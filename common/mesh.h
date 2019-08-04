@@ -23,7 +23,7 @@ namespace es
 		std::optional<glm::vec3> Normal;
 		std::optional<glm::vec3> Tangent;
 		std::optional<glm::vec3> Bitangent;
-		std::optional<glm::vec3> Color;
+		std::optional<glm::vec4> Color;
 	};
 
 	class Mesh
@@ -182,10 +182,10 @@ namespace es
 
 			if (vertices[0].Color.has_value())
 			{
-				glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+				glVertexAttribPointer(attrLocation, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
 				glEnableVertexAttribArray(attrLocation);
 			}
-
+			
 			glBindVertexArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -39,18 +39,17 @@ namespace es
 			return nullptr;
 		}
 
-		void Draw(Shader shader)
+		void Draw()
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
-				meshes[i].Draw();
+				meshes[i]->Draw();
 			}
 		}
 
 	private:
-		std::vector<Texture*> texturesLoaded;
-		std::vector<Mesh> meshes;
-
+		std::vector<Mesh*> meshes;
+		
 		std::string directory;
 		bool gammaCorrection = false;
 
@@ -84,42 +83,30 @@ namespace es
 			}
 		}
 
-		Mesh handleMesh(aiMesh* mesh, const aiScene* scene)
+		Mesh* handleMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			std::vector<Vertex> vertices;
 			std::vector<GLuint> indices;
 			std::vector<Texture*> textures;
-
+			
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
 				Vertex vertex;
 
 				if (mesh->HasPositions())
-				{
 					vertex.Position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-				}
 				else
-				{
 					vertex.Position = glm::vec3(0.0f);
-				}
-
-				if (mesh->HasNormals())
-				{
-					vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-				}
-				else
-				{
-					vertex.Normal = glm::vec3(0.0f);
-				}
 
 				if (mesh->HasTextureCoords(0))
-				{
 					vertex.TexCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-				}
 				else
-				{
 					vertex.TexCoords = glm::vec2(0.0f);
-				}
+
+				if (mesh->HasNormals())
+					vertex.Normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+				else
+					vertex.Normal = glm::vec3(0.0f);
 
 				if (mesh->HasTangentsAndBitangents())
 				{
@@ -131,6 +118,11 @@ namespace es
 					vertex.Tangent = glm::vec3(0.0f);
 					vertex.Bitangent = glm::vec3(0.0f);
 				}
+
+				if (mesh->HasVertexColors(0))
+					vertex.Color = glm::vec4(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
+				else
+					vertex.Color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 				vertices.push_back(vertex);
 			}
@@ -148,23 +140,23 @@ namespace es
 			}
 
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			
+			std::vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE);
+			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-			std::vector<Texture*> diffuseTextures = loadMaterialTextures(material, aiTextureType_DIFFUSE, Texture::Type::Diffuse);
-			textures.insert(textures.end(), diffuseTextures.begin(), diffuseTextures.end());
+			std::vector<Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR);
+			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-			std::vector<Texture*> specularTextures = loadMaterialTextures(material, aiTextureType_SPECULAR, Texture::Type::Specular);
-			textures.insert(textures.end(), specularTextures.begin(), specularTextures.end());
+			std::vector<Texture*> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS);
+			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-			std::vector<Texture*> normalTextures = loadMaterialTextures(material, aiTextureType_NORMALS, Texture::Type::Normal);
-			textures.insert(textures.end(), normalTextures.begin(), normalTextures.end());
+			std::vector<Texture*> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT);
+			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-			std::vector<Texture*> heightTextures = loadMaterialTextures(material, aiTextureType_HEIGHT, Texture::Type::Height);
-			textures.insert(textures.end(), heightTextures.begin(), heightTextures.end());
-
-			return *Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements);
+			return Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements);
 		}
 
-		std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type, Texture::Type texType)
+		std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type)
 		{
 			std::vector<Texture*> textures;
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
@@ -184,22 +176,32 @@ namespace es
 
 				std::string texPath = directory + '/' + texName;
 
-				bool alreadyLoaded = false;
-				for (unsigned int j = 0; j < texturesLoaded.size(); j++)
+				Texture::Type texType;
+				switch (type)
 				{
-					if (std::strcmp(texturesLoaded[j]->getFilePath().data(), str.C_Str()) == 0)
+					case aiTextureType_DIFFUSE:
 					{
-						textures.push_back(texturesLoaded[j]);
-						alreadyLoaded = true;
+						texType = Texture::Type::Diffuse;
+						break;
+					}
+					case aiTextureType_SPECULAR:
+					{
+						texType = Texture::Type::Specular;
+						break;
+					}
+					case aiTextureType_NORMALS:
+					{
+						texType = Texture::Type::Normal;
+						break;
+					}
+					case aiTextureType_HEIGHT:
+					{
+						texType = Texture::Type::Height;
 						break;
 					}
 				}
-				if (!alreadyLoaded)
-				{
-					Texture* tex = Texture::createWithFile(texPath, texType);
-					textures.push_back(tex);
-					texturesLoaded.push_back(tex);
-				}
+				Texture* texture = Texture::createWithFile(texPath, texType);
+				textures.push_back(texture);
 			}
 			return textures;
 		}
