@@ -158,20 +158,19 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Model* model;
-	Material* material;
+	Model* carnageModel;
 	Example()
 	{
 		title = "model loading";
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		modelsDirectory = getResourcesPath(ResourceType::Model) + "/10.model_loading/";
+		modelsDirectory = getResourcesPath(ResourceType::Model);
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/10.model_loading/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/10.model_loading/";
 	}
 	~Example()
 	{
-		delete(model);
+		delete(carnageModel);
 	}
 public:
 	virtual void prepare() override
@@ -179,7 +178,7 @@ public:
 		// setup camera
 		camera.type = Camera::Type::firstPerson;
 		camera.rotationSpeed = 0.5f;
-		camera.setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+		camera.setPosition(glm::vec3(0.0f, -0.5f, -2.0f));
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -189,35 +188,15 @@ public:
 			{ Material::ShaderType::Fragment, shadersDirectory + "model.frag" }
 		};
 
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
-		{
-			std::make_pair(Texture::Type::Diffuse, texturesDirectory + "face.png")
-		};
-
-		// create quad material
-		material = Material::createWithFile(shaderPaths, texturePaths);
+		carnageModel = Model::createWithFile(modelsDirectory + "/carnage/carnage.obj", shaderPaths);
 	}
 	virtual void render() override
 	{
-		if (!paused || camera.updated)
-		{
-			// initialize matrix to identity matrix
-			glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
 
-			// translation
-			model = glm::translate(model, glm::vec3(0.1f, 0.4f, 0.3f));
-
-			// rotation
-			model = glm::rotate(model, timePassed * 2.0f * glm::radians(90.0f), glm::vec3(0.5f, 0.2f, 0.8f));
-
-			// scale
-			float scale = glm::max(glm::sin((double)timePassed * 2.0), 0.3);
-			model = glm::scale(model, glm::vec3(scale));
-
-			material->setMat4("model", model);
-			material->setMat4("view", camera.matrices.view);
-			material->setMat4("projection", camera.matrices.projection);
-		}
+		carnageModel->Draw({ model, camera.matrices.view, camera.matrices.projection });
 	}
 };
 

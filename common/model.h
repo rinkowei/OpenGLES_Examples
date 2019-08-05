@@ -22,16 +22,23 @@ using namespace std;
 
 namespace es
 {
+	struct UniformData
+	{
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+	};
+
 	class Model
 	{
 	public:
 		Model() = default;
 		~Model() = default;
 
-		static Model* createWithFile(const std::string& path, bool gamma = false)
+		static Model* createWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shaders)
 		{
 			Model* model = new (std::nothrow) Model();
-			if (model && model->loadWithFile(path, gamma))
+			if (model && model->loadWithFile(path, shaders))
 			{
 				return model;
 			}
@@ -39,21 +46,24 @@ namespace es
 			return nullptr;
 		}
 
-		void Draw()
+		void Draw(UniformData data)
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
+				meshes[i]->getMaterial()->setMat4("model", data.model);
+				meshes[i]->getMaterial()->setMat4("view", data.view);
+				meshes[i]->getMaterial()->setMat4("projection", data.projection);
+
 				meshes[i]->Draw();
 			}
 		}
 
 	private:
 		std::vector<Mesh*> meshes;
-		
+		std::unordered_map<Material::ShaderType, std::string> shaders;
 		std::string directory;
-		bool gammaCorrection = false;
 
-		bool loadWithFile(const std::string& path, bool gamma)
+		bool loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shaders)
 		{
 			Assimp::Importer importer;
 			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices);
@@ -62,7 +72,9 @@ namespace es
 				std::cout << importer.GetErrorString() << std::endl;
 				return false;
 			}
-			directory = path.substr(0, path.find_last_of('/'));
+			this->directory = path.substr(0, path.find_last_of('/'));
+
+			this->shaders = shaders;
 
 			handleNode(scene->mRootNode, scene);
 
@@ -87,7 +99,7 @@ namespace es
 		{
 			std::vector<Vertex> vertices;
 			std::vector<GLuint> indices;
-			std::vector<Texture*> textures;
+			std::vector<std::pair<Texture::Type, std::string>> textures;
 			
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
@@ -138,27 +150,27 @@ namespace es
 					}
 				}
 			}
-
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 			
-			std::vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE);
+			std::vector<std::pair<Texture::Type, std::string>> diffuseMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_DIFFUSE);
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-			std::vector<Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR);
+			std::vector<std::pair<Texture::Type, std::string>> specularMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_SPECULAR);
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-			std::vector<Texture*> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS);
+			std::vector<std::pair<Texture::Type, std::string>> normalMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_NORMALS);
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-			std::vector<Texture*> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT);
+			std::vector<std::pair<Texture::Type, std::string>> heightMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_HEIGHT);
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-			return Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements);
+			Material* material = Material::createWithFile(shaders, textures);
+
+			return Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 		}
 
-		std::vector<Texture*> loadMaterialTextures(aiMaterial* mat, aiTextureType type)
+		std::vector<std::pair<Texture::Type, std::string>> loadMaterialTextures(aiMaterial* mat, aiTextureType type)
 		{
-			std::vector<Texture*> textures;
+			std::vector<std::pair<Texture::Type, std::string>> textures;
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 			{
 				aiString str;
@@ -200,8 +212,8 @@ namespace es
 						break;
 					}
 				}
-				Texture* texture = Texture::createWithFile(texPath, texType);
-				textures.push_back(texture);
+
+				textures.push_back(std::make_pair(texType, texPath));
 			}
 			return textures;
 		}

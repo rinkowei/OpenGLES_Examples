@@ -120,6 +120,11 @@ namespace es
 			this->material = material;
 		}
 
+		Material* getMaterial()
+		{
+			return this->material;
+		}
+
 	private:
 		GLuint VAO = 0;
 		GLuint VBO = 0;;
