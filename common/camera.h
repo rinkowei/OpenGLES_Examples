@@ -34,7 +34,7 @@ namespace es
 			{
 				matrices.view = transMatrix * rotMatrix;
 			}
-
+		
 			updated = true;
 		};
 	public:

@@ -6,6 +6,7 @@
 #include "texture.h"
 #include "shader.h"
 #include "material.h"
+#include "object.h"
 #include "mesh.h"
 #include "model.h"
 #include "benchmark.h"

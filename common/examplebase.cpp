@@ -139,6 +139,11 @@ void ExampleBase::renderFrame()
 	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	for (size_t i = 0; i < objectPool.size(); i++)
+	{
+		objectPool[i]->Draw();
+	}
+
 	render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -175,6 +180,11 @@ void ExampleBase::renderFrame()
 	}
 	// TODO: Cap UI overlay update rates
 	updateOverlay();
+}
+
+void ExampleBase::addObject(Object* obj)
+{
+	objectPool.push_back(obj);
 }
 
 void ExampleBase::renderLoop()

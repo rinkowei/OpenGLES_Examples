@@ -3,8 +3,6 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "shader.h"
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -26,7 +24,7 @@ namespace es
 		std::optional<glm::vec4> Color;
 	};
 
-	class Mesh
+	class Mesh : public Object
 	{
 	public:
 		std::vector<Vertex> vertices;
@@ -65,7 +63,7 @@ namespace es
 			return nullptr;
 		}
 
-		void Draw()
+		virtual void Draw() override
 		{
 			if (vertices.empty())
 				return;

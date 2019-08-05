@@ -48,11 +48,13 @@ public:
 		
 		// create triangle mesh
 		triangle = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
+		
+		addObject(static_cast<Object*>(triangle));
 	}
 	virtual void render() override
 	{
 		// render triangle mesh
-		triangle->Draw();
+		//triangle->Draw();
 	}
 };
 
