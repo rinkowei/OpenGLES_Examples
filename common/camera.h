@@ -1,7 +1,5 @@
 #pragma once
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,6 +10,7 @@ namespace es
 	{
 	private:
 		float fov;
+		float aspect;
 		float znear;
 		float zfar;
 
@@ -43,6 +42,22 @@ namespace es
 			lookAt,
 			firstPerson
 		};
+
+		Camera()
+		{
+			this->type = Camera::Type::firstPerson;
+			setPerspective(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
+			updateViewMatrix();
+		}
+
+		Camera(float fov, float aspect, float znear, float zfar, Camera::Type type)
+		{
+			this->type = type;
+			setPerspective(fov, aspect, znear, zfar);
+			updateViewMatrix();
+		}
+
+		~Camera() = default;
 
 		Camera::Type type = Camera::Type::firstPerson;
 
@@ -86,6 +101,7 @@ namespace es
 		void setPerspective(float fov, float aspect, float znear, float zfar)
 		{
 			this->fov = fov;
+			this->aspect = aspect;
 			this->znear = znear;
 			this->zfar = zfar;
 			matrices.projection = glm::perspective(glm::radians(fov), aspect, znear, zfar);
@@ -144,7 +160,7 @@ namespace es
 		};
 
 		// Update camera passing separate axis data (gamepad)
-	// Returns true if view or position has been changed
+	    // Returns true if view or position has been changed
 		bool updatePad(glm::vec2 axisLeft, glm::vec2 axisRight, float deltaTime)
 		{
 			bool retVal = false;

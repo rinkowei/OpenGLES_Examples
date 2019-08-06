@@ -1,6 +1,7 @@
 ﻿// Implementation of Common library
 
 #include "examplebase.h"
+#include "world.h"
 
 std::vector<const char*> ExampleBase::args;
 
@@ -36,7 +37,7 @@ const std::string ExampleBase::getResourcesPath(ResourceType type)
 
 ExampleBase::ExampleBase()
 {
-	camera.setPerspective(45.0f, (float)width / (float)height, 0.1f, 100.0f);
+	camera1 = World::getWorld()->getMainCamera();
 }
 
 ExampleBase::~ExampleBase()

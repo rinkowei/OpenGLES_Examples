@@ -22,6 +22,7 @@
 #include <vector>
 #include <numeric>
 
+#include "world.h"
 #include "object.h"
 #include "camera.h"
 #include "benchmark.h"
@@ -67,6 +68,8 @@ namespace es
 		std::string texturesDirectory;
 
 		std::vector<Object*> objectPool;
+
+		Camera* camera1;
 	public:
 		bool prepared = false;
 		GLuint width = 1280;
@@ -78,7 +81,7 @@ namespace es
 		const std::string getResourcesPath(ResourceType type);
 
 		es::Benchmark benchmark;
-
+	    
 		struct Settings
 		{
 			bool validation = false;
