@@ -69,7 +69,7 @@ namespace es
 
 		std::vector<Object*> objectPool;
 
-		Camera* camera1;
+		Camera* camera;
 	public:
 		bool prepared = false;
 		GLuint width = 1280;
@@ -92,8 +92,6 @@ namespace es
 
 		glm::vec4 defaultClearColor = glm::vec4(0.025f, 0.025f, 0.025f, 1.0f);
 
-		float zoom = 0.0f;
-
 		static std::vector<const char*> args;
 
 		float timer = 0.0f;
@@ -101,15 +99,6 @@ namespace es
 		float timePassed = 0.0;
 
 		GLboolean paused = false;
-
-		float rotationSpeed = 1.0f;
-		float zoomSpeed = 1.0f;
-
-		es::Camera camera;
-
-		glm::vec3 rotation = glm::vec3(0.0f);
-		glm::vec3 cameraPos = glm::vec3(0.0f);
-		glm::vec2 mousePos;
 
 		std::string title = "OpenGL_ES Example";
 		std::string name = "ExampleBase";

@@ -37,7 +37,7 @@ const std::string ExampleBase::getResourcesPath(ResourceType type)
 
 ExampleBase::ExampleBase()
 {
-	camera1 = World::getWorld()->getMainCamera();
+	camera = World::getWorld()->getMainCamera();
 }
 
 ExampleBase::~ExampleBase()
@@ -153,8 +153,8 @@ void ExampleBase::renderFrame()
 	auto timeEnd = std::chrono::high_resolution_clock::now();
 	auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 	frameTimer = (float)timeDiff / 1000.0f;
-	camera.update(frameTimer);
-	if (camera.moving())
+	camera->update(frameTimer);
+	if (camera->moving())
 	{
 		viewUpdated = true;
 	}
@@ -305,22 +305,22 @@ void ExampleBase::handleKeyboardInput()
 		paused = !paused;
 
 	if (ImGui::IsKeyPressed(GLFW_KEY_W))
-		camera.keys.up = true;
+		camera->keys.up = true;
 	if (ImGui::IsKeyPressed(GLFW_KEY_S))
-		camera.keys.down = true;
+		camera->keys.down = true;
 	if (ImGui::IsKeyPressed(GLFW_KEY_A))
-		camera.keys.left = true;
+		camera->keys.left = true;
 	if (ImGui::IsKeyPressed(GLFW_KEY_D))
-		camera.keys.right = true;
+		camera->keys.right = true;
 	
 	if (ImGui::IsKeyReleased(GLFW_KEY_W))
-		camera.keys.up = false;
+		camera->keys.up = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_S))
-		camera.keys.down = false;
+		camera->keys.down = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_A))
-		camera.keys.left = false;
+		camera->keys.left = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_D))
-		camera.keys.right = false;
+		camera->keys.right = false;
 }
 
 void ExampleBase::handleMouseMove()
@@ -331,24 +331,19 @@ void ExampleBase::handleMouseMove()
 	// mouse left button down
 	if (ImGui::IsMouseDown(0))
 	{
-		rotation.x += deltaY * 1.25f * rotationSpeed;
-		rotation.y -= deltaX * 1.25f * rotationSpeed;
-		camera.rotate(glm::vec3(deltaY * camera.rotationSpeed, deltaX * camera.rotationSpeed, 0.0f));
+		camera->rotate(glm::vec3(deltaY * camera->rotationSpeed, deltaX * camera->rotationSpeed, 0.0f));
 		viewUpdated = true;
 	}
 	// mouse right button down
 	if (ImGui::IsMouseDown(1))
 	{
-		zoom += deltaY * 0.005f * zoomSpeed;
-		camera.translate(glm::vec3(-0.0f, 0.0f, deltaY * 0.005f * zoomSpeed));
+		camera->translate(glm::vec3(-0.0f, 0.0f, deltaY * 0.005f * camera->zoomSpeed));
 		viewUpdated = true;
 	}
 	// mouse middle button down
 	if (ImGui::IsMouseDown(2))
 	{
-		cameraPos.x -= deltaX * 0.01f;
-		cameraPos.y -= deltaY * 0.01f;
-		camera.translate(glm::vec3(-deltaX * 0.01f, deltaY * 0.01f, 0.0f));
+		camera->translate(glm::vec3(-deltaX * 0.01f, deltaY * 0.01f, 0.0f));
 		viewUpdated = true;
 	}
 }

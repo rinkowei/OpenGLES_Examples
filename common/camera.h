@@ -66,6 +66,7 @@ namespace es
 
 		float rotationSpeed = 1.0f;
 		float movementSpeed = 1.0f;
+		float zoomSpeed = 1.0f;
 
 		bool updated = false;
 

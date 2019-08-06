@@ -23,9 +23,9 @@ public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera.type = Camera::Type::firstPerson;
-		camera.rotationSpeed = 0.5f;
-		camera.setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+		camera->type = Camera::Type::firstPerson;
+		camera->rotationSpeed = 0.5f;
+		camera->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -101,7 +101,7 @@ public:
 	}
 	virtual void render() override
 	{
-		if (!paused || camera.updated)
+		if (!paused || camera->updated)
 		{
 			// initialize matrix to identity matrix
 			glm::mat4 model = glm::mat4(1.0f);
