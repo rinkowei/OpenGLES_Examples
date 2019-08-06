@@ -63,7 +63,7 @@ namespace es
 			return nullptr;
 		}
 
-		virtual void Draw() override
+		virtual void render() override
 		{
 			if (vertices.empty())
 				return;

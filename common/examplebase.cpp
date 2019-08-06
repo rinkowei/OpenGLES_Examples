@@ -141,7 +141,7 @@ void ExampleBase::renderFrame()
 
 	for (size_t i = 0; i < objectPool.size(); i++)
 	{
-		objectPool[i]->Draw();
+		objectPool[i]->render();
 	}
 
 	render();

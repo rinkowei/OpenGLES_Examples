@@ -106,15 +106,15 @@ public:
 			// initialize matrix to identity matrix
 			glm::mat4 model = glm::mat4(1.0f);
 
+			// scale
+			float scale = glm::max(glm::sin((double)timePassed * 2.0), 0.3);
+			model = glm::scale(model, glm::vec3(scale));
+
 			// translation
 			model = glm::translate(model, glm::vec3(0.1f, 0.4f, 0.3f));
 
 			// rotation
 			model = glm::rotate(model, timePassed * 2.0f * glm::radians(90.0f), glm::vec3(0.5f, 0.2f, 0.8f));
-
-			// scale
-			float scale = glm::max(glm::sin((double)timePassed * 2.0), 0.3);
-			model = glm::scale(model, glm::vec3(scale));
 
 			material->setMat4("model", model);
 			material->setMat4("view", camera.matrices.view);
@@ -122,7 +122,7 @@ public:
 		}
 
 		// render quad mesh
-		cube->Draw();
+		cube->render();
 	}
 };
 

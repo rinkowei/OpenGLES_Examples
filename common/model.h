@@ -54,7 +54,7 @@ namespace es
 				meshes[i]->getMaterial()->setMat4("view", data.view);
 				meshes[i]->getMaterial()->setMat4("projection", data.projection);
 
-				meshes[i]->Draw();
+				meshes[i]->render();
 			}
 		}
 
