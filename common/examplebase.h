@@ -157,6 +157,8 @@ namespace es
 
 		virtual void prepare();
 
+		virtual void update();
+
 		void renderLoop();
 
 		void renderFrame();

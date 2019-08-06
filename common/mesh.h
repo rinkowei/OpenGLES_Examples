@@ -109,6 +109,11 @@ namespace es
 			glActiveTexture(GL_TEXTURE0);
 		}
 
+		virtual void update() override
+		{
+
+		}
+
 		void setDrawType(DrawType type)
 		{
 			this->drawType = type;

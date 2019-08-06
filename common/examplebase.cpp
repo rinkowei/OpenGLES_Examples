@@ -188,6 +188,11 @@ void ExampleBase::addObject(Object* obj)
 	objectPool.push_back(obj);
 }
 
+void ExampleBase::update()
+{
+
+}
+
 void ExampleBase::renderLoop()
 {
 	if (benchmark.active)

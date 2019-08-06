@@ -115,14 +115,15 @@ public:
 
 			// rotation
 			model = glm::rotate(model, timePassed * 2.0f * glm::radians(90.0f), glm::vec3(0.5f, 0.2f, 0.8f));
-
-			//material->setMat4("model", model);
-			//material->setMat4("view", camera.matrices.view);
-			//material->setMat4("projection", camera.matrices.projection);
 		}
 
 		// render quad mesh
 		cube->render();
+	}
+
+	virtual void update() override
+	{
+		
 	}
 };
 

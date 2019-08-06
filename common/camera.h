@@ -113,19 +113,19 @@ namespace es
 			matrices.projection = glm::perspective(glm::radians(fov), aspect, znear, zfar);
 		}
 
-		void setPosition(glm::vec3 position)
+		void setPosition(const glm::vec3& position)
 		{
 			this->position = position;
 			updateViewMatrix();
 		}
 
-		void rotate(glm::vec3 delta)
+		void rotate(const glm::vec3& delta)
 		{
 			this->rotation += delta;
 			updateViewMatrix();
 		}
 
-		void translate(glm::vec3 delta)
+		void translate(const glm::vec3& delta)
 		{
 			this->position += delta;
 			updateViewMatrix();
@@ -162,7 +162,7 @@ namespace es
 
 		// Update camera passing separate axis data (gamepad)
 	    // Returns true if view or position has been changed
-		bool updatePad(glm::vec2 axisLeft, glm::vec2 axisRight, float deltaTime)
+		bool updatePad(const glm::vec2& axisLeft, const glm::vec2& axisRight, float deltaTime)
 		{
 			bool retVal = false;
 
