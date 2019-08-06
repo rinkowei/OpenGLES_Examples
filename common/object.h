@@ -4,6 +4,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "world.h"
+
+using namespace es;
+
 namespace es
 {
 	class Object
@@ -15,6 +19,8 @@ namespace es
 			this->rotation = glm::vec3(0.0f);
 			this->scaling = glm::vec3(1.0f);
 			this->model = glm::mat4(1.0f);
+
+			camera = World::getWorld()->getMainCamera();
 		};
 
 		virtual ~Object() = default;
@@ -31,17 +37,20 @@ namespace es
 		
 		void translate(const glm::vec3& deltaPosition)
 		{
+			this->position += deltaPosition;
 			model = glm::translate(model, deltaPosition);
 		}
 
 		void rotate(const glm::vec3& deltaRotation)
 		{
+			this->rotation += deltaRotation;
 			glm::qua<float> q = glm::qua<float>(glm::radians(deltaRotation));
 			model = glm::mat4_cast(q) * model;
 		}
 
 		void scale(const glm::vec3& deltaScale)
 		{
+			this->scaling += deltaScale;
 			model = glm::scale(model, deltaScale);
 		}
 	protected:
@@ -50,7 +59,7 @@ namespace es
 		glm::vec3 scaling;
 
 		glm::mat4 model;
-	private:
 
+		Camera* camera;
 	};
 }

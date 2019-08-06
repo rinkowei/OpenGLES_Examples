@@ -10,6 +10,8 @@
 #include <vector>
 #include <optional>
 
+#include "world.h"
+
 using namespace std;
 
 namespace es
@@ -71,6 +73,9 @@ namespace es
 			if (material != nullptr)
 			{
 				material->apply();
+				material->setMat4("model", model);
+				material->setMat4("view", camera->matrices.view);
+				material->setMat4("projection", camera->matrices.projection);
 			}
 
 			glBindVertexArray(VAO);
