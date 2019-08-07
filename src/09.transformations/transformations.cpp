@@ -10,6 +10,7 @@ public:
 	Example()
 	{
 		title = "transformations";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/09.transformations/";
@@ -17,7 +18,7 @@ public:
 	}
 	~Example()
 	{
-		delete(cube);
+		
 	}
 public:
 	virtual void prepare() override
@@ -98,32 +99,15 @@ public:
 		material = Material::createWithFile(shaderPaths, texturePaths);
 
 		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
-	}
-	virtual void render() override
-	{
-		if (!paused || camera->updated)
-		{
-			// initialize matrix to identity matrix
-			glm::mat4 model = glm::mat4(1.0f);
 
-			// scale
-			float scale = glm::max(glm::sin((double)timePassed * 2.0), 0.3);
-			model = glm::scale(model, glm::vec3(scale));
-
-			// translation
-			model = glm::translate(model, glm::vec3(0.1f, 0.4f, 0.3f));
-
-			// rotation
-			model = glm::rotate(model, timePassed * 2.0f * glm::radians(90.0f), glm::vec3(0.5f, 0.2f, 0.8f));
-		}
-
-		// render quad mesh
-		cube->render();
+		addObject(static_cast<Object*>(cube));
 	}
 
 	virtual void update() override
 	{
-		
+		cube->rotate(glm::vec3(1.0f, 1.0f, 0.0f));
+		cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 2.0), 0.3)));
+		cube->setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
 	}
 };
 

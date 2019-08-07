@@ -42,7 +42,11 @@ ExampleBase::ExampleBase()
 
 ExampleBase::~ExampleBase()
 {
-	
+	for (size_t i = 0; i < objectPool.size(); i++)
+	{
+		delete(objectPool[i]);
+	}
+	objectPool.swap(std::vector<Object*>());
 }
 
 bool ExampleBase::setupGLFW()
@@ -58,7 +62,7 @@ bool ExampleBase::setupGLFW()
 	if (!window)
 		return false;
 	glfwMakeContextCurrent(window);
-
+	
 	if (this->settings.vsync)
 		glfwSwapInterval(1);
 	else
@@ -140,12 +144,17 @@ void ExampleBase::renderFrame()
 	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	update();
+
+	for (size_t i = 0; i < objectPool.size(); i++)
+	{
+		objectPool[i]->update();
+	}
+
 	for (size_t i = 0; i < objectPool.size(); i++)
 	{
 		objectPool[i]->render();
 	}
-
-	render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	
@@ -197,7 +206,7 @@ void ExampleBase::renderLoop()
 {
 	if (benchmark.active)
 	{
-		benchmark.run([=] { render(); });
+		benchmark.run([=] { update(); });
 		if (benchmark.filename != "")
 		{
 			benchmark.saveResults();

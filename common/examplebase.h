@@ -143,8 +143,6 @@ namespace es
 
 		void addObject(Object* obj);
 
-		virtual void render() = 0;
-
 		virtual void viewChanged();
 
 		virtual void keyPressed(GLuint);
@@ -157,7 +155,7 @@ namespace es
 
 		virtual void prepare();
 
-		virtual void update();
+		virtual void update() = 0;
 
 		void renderLoop();
 
