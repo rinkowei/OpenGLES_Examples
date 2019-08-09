@@ -17,15 +17,15 @@ public:
 	}
 	~Example()
 	{
-		delete(cube);
+		
 	}
 public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera.type = Camera::Type::lookAt;
-		camera.rotationSpeed = 0.5f;
-		camera.setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+		camera->type = Camera::Type::lookAt;
+		camera->rotationSpeed = 0.5f;
+		camera->setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -98,15 +98,12 @@ public:
 		material = Material::createWithFile(shaderPaths, texturePaths);
 
 		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
-	}
-	virtual void render() override
-	{
-		material->setMat4("model", glm::mat4(1.0f));
-		material->setMat4("view", camera.matrices.view);
-		material->setMat4("projection", camera.matrices.projection);
 
-		// render quad mesh
-		cube->Draw();
+		addObject(static_cast<Object*>(cube));
+	}
+	virtual void update() override
+	{
+
 	}
 };
 
