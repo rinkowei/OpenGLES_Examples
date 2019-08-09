@@ -16,7 +16,7 @@ public:
 	}
 	~Example()
 	{
-	
+		
 	}
 public:
 	virtual void prepare() override
