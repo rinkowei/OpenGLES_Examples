@@ -16,7 +16,7 @@ public:
 	}
 	~Example()
 	{
-		delete(triangle);
+		
 	}
 public:
 	virtual void prepare() override
@@ -56,11 +56,12 @@ public:
 
 		// create triangle mesh
 		triangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements_Restart_Index, material);
+
+		addObject(static_cast<Object*>(triangle));
 	}
-	virtual void render() override
+	virtual void update() override
 	{
-		// render triangle mesh
-		triangle->Draw();
+
 	}
 };
 
