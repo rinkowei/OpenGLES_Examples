@@ -16,24 +16,24 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <common.h>
+#include "world.h"
 
 using namespace std;
 
 namespace es
 {
-	struct UniformData
-	{
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::mat4 projection;
-	};
-
-	class Model
+	class Model : public Object
 	{
 	public:
 		Model() = default;
-		~Model() = default;
+		~Model()
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				delete(meshes[i]);
+			}
+			meshes.swap(std::vector<Mesh*>());
+		}
 
 		static Model* createWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shaders)
 		{
@@ -46,15 +46,20 @@ namespace es
 			return nullptr;
 		}
 
-		void Draw(UniformData data)
+		virtual void render() override
 		{
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setMat4("model", data.model);
-				meshes[i]->getMaterial()->setMat4("view", data.view);
-				meshes[i]->getMaterial()->setMat4("projection", data.projection);
-
 				meshes[i]->render();
+			}
+		}
+
+		virtual void update() override
+		{
+			Object::update();
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->setModelMatrix(model);
 			}
 		}
 

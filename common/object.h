@@ -89,6 +89,11 @@ namespace es
 			isDirty = true;
 		}
 
+		void setModelMatrix(const glm::mat4& model)
+		{
+			this->model = model;
+		}
+
 	protected:
 		glm::vec3 position;
 		glm::vec3 rotation;
