@@ -15,12 +15,15 @@ namespace es
 	public:
 		Object()
 		{
-			this->position = glm::vec3(0.0f);
-			this->rotation = glm::vec3(0.0f);
-			this->scaling = glm::vec3(1.0f);
-			this->model = glm::mat4(1.0f);
+			position = glm::vec3(0.0f);
+			rotation = glm::vec3(0.0f);
+			scaling = glm::vec3(1.0f);
+			model = glm::mat4(1.0f);
 
 			camera = World::getWorld()->getMainCamera();
+
+			transformUpdated = true;
+			isDirty = false;
 		};
 
 		virtual ~Object() = default;
@@ -32,66 +35,58 @@ namespace es
 
 		virtual void update()
 		{
+			transformUpdated = false;
+			if (isDirty)
+			{
+				model = glm::mat4(1.0f);
 
+				model = glm::translate(model, position);
+
+				model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+				model = glm::scale(model, scaling);
+
+				isDirty = false;
+			}
+			transformUpdated = true;
 		}
 		
 		void translate(const glm::vec3& deltaPosition)
 		{
 			this->position += deltaPosition;
-			model = glm::translate(model, deltaPosition);
+			isDirty = true;
 		}
 
-		void rotate(const glm::vec3& deltaRotation)
+		void rotate(const glm::vec3& deltaEuler)
 		{
-			this->rotation += deltaRotation;
-			//glm::qua<float> q = glm::qua<float>(deltaRotation);
-			//model = glm::mat4_cast(q) * model;
-	
-			model = glm::rotate(model, glm::radians(deltaRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(deltaRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(deltaRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-			
+			this->rotation += deltaEuler;
+			isDirty = true;
 		}
 
 		void scale(const glm::vec3& deltaScale)
 		{
 			this->scaling += deltaScale;
-			model = glm::scale(model, deltaScale);
+			isDirty = true;
 		}
 
 		void setPosition(const glm::vec3& position)
 		{
-			model = glm::translate(model, -this->position);
-			model = glm::translate(model, position);
 			this->position = position;
+			isDirty = true;
 		}
 
-		void setRotation(const glm::vec3& rotation)
+		void setRotation(const glm::vec3& euler)
 		{
-			model = glm::rotate(model, glm::radians(-this->rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(-this->rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(-this->rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-			
-			/*
-			model = glm::mat4(1.0f);
-			model = glm::scale(model, this->scaling);
-			model = glm::translate(model, this->position);
-			model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-			*/
-			this->rotation = rotation;
+			this->rotation = euler;
+			isDirty = true;
 		}
 
 		void setScale(const glm::vec3& scale)
 		{
-			model = glm::scale(model, 1.0f / this->scaling);
-			model = glm::scale(model, scale);
 			this->scaling = scale;
+			isDirty = true;
 		}
 
 	protected:
@@ -102,5 +97,9 @@ namespace es
 		glm::mat4 model;
 
 		Camera* camera;
+
+		GLboolean transformUpdated;
+	private:
+		GLboolean isDirty;
 	};
 }

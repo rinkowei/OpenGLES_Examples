@@ -70,6 +70,9 @@ namespace es
 			if (vertices.empty())
 				return;
 
+			if (!transformUpdated)
+				return;
+
 			if (material != nullptr)
 			{
 				material->apply();
@@ -111,7 +114,7 @@ namespace es
 
 		virtual void update() override
 		{
-
+			Object::update();
 		}
 
 		void setDrawType(DrawType type)
