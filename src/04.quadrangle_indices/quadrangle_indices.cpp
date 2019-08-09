@@ -16,7 +16,7 @@ public:
 	}
 	~Example()
 	{
-		delete(quadrangle);
+		
 	}
 public:
 	virtual void prepare() override
@@ -54,11 +54,12 @@ public:
 
 		// create quadrangle mesh
 		quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+
+		addObject(static_cast<Object*>(quadrangle));
 	}
-	virtual void render() override
+	virtual void update() override
 	{
-		// render quadrangle mesh
-		quadrangle->Draw();
+
 	}
 };
 
