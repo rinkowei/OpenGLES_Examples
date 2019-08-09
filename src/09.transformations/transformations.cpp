@@ -101,13 +101,14 @@ public:
 		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 
 		addObject(static_cast<Object*>(cube));
+
+		cube->setPosition(glm::vec3(0.5f, 0.4f, -0.3f));
 	}
 
 	virtual void update() override
 	{
-		cube->rotate(glm::vec3(1.0f, 1.0f, 0.0f));
+		cube->rotate(glm::vec3(1.0f, 1.0f, 1.0f));
 		cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 2.0), 0.3)));
-		cube->setPosition(glm::vec3(0.0f, 2.0f, 0.0f));
 	}
 };
 
