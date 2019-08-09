@@ -10,14 +10,14 @@ public:
 	Example()
 	{
 		title = "quad with texture";
-		defaultClearColor = glm::vec4(0.2f, 0.2f, 0.4f, 1.0f);
+		defaultClearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/07.quad_with_texture/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/07.quad_with_texture/";
 	}
 	~Example()
 	{
-		delete(quad);
+		
 	}
 public:
 	virtual void prepare() override
@@ -58,12 +58,14 @@ public:
 		// create quad material
 		material = Material::createWithFile(shaderPaths, texturePaths);
 
+		// create quad mesh
 		quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+
+		addObject(static_cast<Object*>(quad));
 	}
-	virtual void render() override
+	virtual void update() override
 	{
-		// render quad mesh
-		quad->Draw();
+
 	}
 };
 
