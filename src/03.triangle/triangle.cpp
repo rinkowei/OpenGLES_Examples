@@ -16,7 +16,7 @@ public:
 	}
 	~Example()
 	{
-		delete(triangle);
+	
 	}
 public:
 	virtual void prepare() override
@@ -51,10 +51,10 @@ public:
 		
 		addObject(static_cast<Object*>(triangle));
 	}
-	virtual void render() override
+
+	virtual void update() override
 	{
-		// render triangle mesh
-		//triangle->Draw();
+
 	}
 };
 
