@@ -9,6 +9,7 @@ public:
 	Example()
 	{
 		title = "cull face";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
