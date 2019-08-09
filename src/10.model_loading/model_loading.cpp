@@ -9,6 +9,7 @@ public:
 	Example()
 	{
 		title = "model loading";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
