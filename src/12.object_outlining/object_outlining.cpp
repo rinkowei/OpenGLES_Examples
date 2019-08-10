@@ -1,4 +1,4 @@
-﻿
+﻿/*
 #define GLFW_INCLUDE_ES32
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -255,4 +255,165 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
 	camera.handleMouseScroll(yOffset);
+}
+*/
+
+
+#include <common.h>
+using namespace es;
+
+class Example final : public ExampleBase
+{
+public:
+	Mesh* cube;
+	Mesh* outlineCube;
+
+	Example()
+	{
+		title = "object outlining";
+		settings.vsync = false;
+		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/12.object_outlining/";
+		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/12.object_outlining/";
+	}
+	~Example()
+	{
+		delete(cube);
+		delete(outlineCube);
+	}
+public:
+	virtual void prepare() override
+	{
+		// setup camera
+		camera->type = Camera::Type::firstPerson;
+		camera->rotationSpeed = 0.5f;
+		camera->movementSpeed = 1.0f;
+		camera->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+
+		// enable depth test
+		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+		std::vector<GLfloat> vertexAttrs = {
+			// positions          // texture Coords
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		};
+
+		std::vector<Vertex> vertices = {};
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 5); i++)
+		{
+			Vertex vertex;
+			vertex.Position = glm::vec3(vertexAttrs[i * 5], vertexAttrs[i * 5 + 1], vertexAttrs[i * 5 + 2]);
+			vertex.TexCoords = glm::vec2(vertexAttrs[i * 5 + 3], vertexAttrs[i * 5 + 4]);
+			vertices.push_back(vertex);
+		}
+
+		std::unordered_map<Material::ShaderType, std::string> cubeShaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "cube.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "cube.frag" }
+		};
+
+		std::unordered_map<Material::ShaderType, std::string> outlineShaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "cube.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "outline_color.frag" }
+		};
+
+		std::vector<std::pair<Texture::Type, std::string>> cubeTexturePaths =
+		{
+			std::make_pair(Texture::Type::Diffuse, texturesDirectory + "marble.jpg")
+		};
+
+		std::vector<std::pair<Texture::Type, std::string>> outlineTexturePaths =
+		{
+
+		};
+
+		// create cube material
+		Material* cubeMat = Material::createWithFile(cubeShaderPaths, cubeTexturePaths);
+		Material* outlineMat = Material::createWithFile(outlineShaderPaths, outlineTexturePaths);
+
+		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, cubeMat);
+		outlineCube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, outlineMat);
+		outlineCube->setScale(glm::vec3(1.2f, 1.2f, 1.2f));
+	}
+
+	virtual void update() override
+	{
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+
+		cube->render();
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+
+		outlineCube->render();
+
+		glStencilMask(0xFF);
+		glEnable(GL_DEPTH_TEST);
+	}
+};
+
+Example* example;
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+	example = new Example();
+	example->setupValidation();
+	if (!example->setupGLFW() ||
+		!example->loadGLESFunctions() ||
+		!example->setupImGui())
+	{
+		return 0;
+	}
+	example->prepare();
+	example->renderLoop();
+	delete(example);
+	return 0;
 }
