@@ -8,8 +8,11 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <algorithm>
+
+using namespace es;
 
 namespace es
 {
@@ -55,6 +58,13 @@ namespace es
 
 		void apply()
 		{
+		
+			for (size_t i = 0; i < textures.size(); i++)
+			{
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(GL_TEXTURE_2D, textures[i]->getID());
+			}
+
 			if (programID != 0 && isLinkSucceed)
 			{
 				glUseProgram(programID);
@@ -128,6 +138,8 @@ namespace es
 		GLboolean isLinkSucceed = false;
 		 
 		std::vector<Texture*> textures;
+
+		static std::set<Texture*> loadedTextures;
 		
 		bool loadWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, std::vector<std::pair<Texture::Type, std::string>>& texturePaths)
 		{
@@ -213,17 +225,34 @@ namespace es
 			GLuint heightMap = 0;
 
 			GLuint count = 0;
-			textures.resize(texturePaths.size());
+
 			for (auto& texturePath : texturePaths)
 			{
-				struct stat info;
-				if (stat(texturePath.second.c_str(), &info) != 0)
+				GLboolean skip = false;
+				for (auto& loadedTexture : loadedTextures)
 				{
-					std::cout << "failed to locate texture file in " + texturePath.second << std::endl;
-					return false;
+					if (std::strcmp(texturePath.second.c_str(), loadedTexture->getFilePath().c_str()) == 0)
+					{
+						textures.push_back(loadedTexture);
+						skip = true;
+						break;
+					}
 				}
 
-				Texture* texture = Texture::createWithFile(texturePath.second, texturePath.first);
+				if (!skip)
+				{
+					struct stat info;
+					if (stat(texturePath.second.c_str(), &info) != 0)
+					{
+						std::cout << "failed to locate texture file in " + texturePath.second << std::endl;
+						return false;
+					}
+
+					Texture* texture = Texture::createWithFile(texturePath.second, texturePath.first);
+					textures.push_back(texture);
+					loadedTextures.insert(texture);
+				}
+
 				std::string number;
 				std::string name;
 				if (texturePath.first == Texture::Type::Diffuse)
@@ -231,27 +260,23 @@ namespace es
 					name = "diffuseMap_";
 					number = std::to_string(diffuseMap++);
 				}
-				else if (texturePath.first == Texture::Type::Diffuse)
+				else if (texturePath.first == Texture::Type::Specular)
 				{
 					name = "specularMap_";
 					number = std::to_string(specularMap++);
 				}
-				else if (texturePath.first == Texture::Type::Diffuse)
+				else if (texturePath.first == Texture::Type::Normal)
 				{
 					name = "normalMap_";
 					number = std::to_string(normalMap++);
 				}
-				else if (texturePath.first == Texture::Type::Diffuse)
+				else if (texturePath.first == Texture::Type::Height)
 				{
 					name = "heightMap_";
 					number = std::to_string(heightMap++);
 				}
 
-				glActiveTexture(GL_TEXTURE0 + count);
-				glBindTexture(GL_TEXTURE_2D, texture->getID());
-				this->setInt((name + number).c_str(), count++);
-
-				textures.push_back(texture);
+				setInt((name + number).c_str(), count++);
 			}
 			return true;
 		}
@@ -339,4 +364,5 @@ namespace es
 			return false;
 		}
 	};
+	std::set<Texture*> Material::loadedTextures = {};
 }
