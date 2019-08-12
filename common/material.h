@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <set>
 #include <unordered_map>
@@ -16,12 +17,27 @@ using namespace es;
 
 namespace es
 {
-	class Material
+	class Material : public std::enable_shared_from_this<Material>
 	{
 	public:
+		enum class ShaderType
+		{
+			Vertex,
+			Geometry,
+			Fragment,
+			Program
+		};
+
 		Material() = default;
+
+		Material(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, std::vector<std::pair<Texture::Type, std::string>>& texturePaths)
+		{
+			loadWithFile(shaderPaths, texturePaths);
+		}
+
 		~Material()
 		{
+			std::cout << "~Material\n";
 			if (programID != 0 && isLinkSucceed)
 			{
 				glDeleteProgram(programID);
@@ -37,13 +53,10 @@ namespace es
 			}
 		}
 
-		enum class ShaderType
+		std::shared_ptr<Material> getSharedPtr()
 		{
-			Vertex,
-			Geometry,
-			Fragment,
-			Program
-		};
+			return shared_from_this();
+		}
 
 		static Material* createWithFile(const std::unordered_map<Material::ShaderType, std::string>& shaderPaths, std::vector<std::pair<Texture::Type, std::string>>& texturePaths)
 		{
@@ -58,7 +71,6 @@ namespace es
 
 		void apply()
 		{
-		
 			for (size_t i = 0; i < textures.size(); i++)
 			{
 				glActiveTexture(GL_TEXTURE0 + i);

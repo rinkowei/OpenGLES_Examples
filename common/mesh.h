@@ -46,7 +46,7 @@ namespace es
 		{
 			if (material != nullptr)
 			{
-				delete(material);
+				material.reset();
 				material = nullptr;
 			}
 			glDeleteBuffers(1, &EBO);
@@ -54,7 +54,7 @@ namespace es
 			glDeleteVertexArrays(1, &VAO);
 		}
 
-		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, Material* material = nullptr)
+		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, std::shared_ptr<Material> material = nullptr)
 		{
 			Mesh* mesh = new (std::nothrow) Mesh();
 			if (mesh && mesh->initWithData(vertices, indices, type, material))
@@ -122,16 +122,16 @@ namespace es
 			this->drawType = type;
 		}
 
-		void setMaterial(Material* material)
+		void setMaterial(std::shared_ptr<Material> material)
 		{
 			if (this->material != nullptr)
 			{
-				delete(this->material);
+				this->material.reset();
 			}
 			this->material = material;
 		}
 
-		Material* getMaterial()
+		std::shared_ptr<Material> getMaterial()
 		{
 			return this->material;
 		}
@@ -142,9 +142,9 @@ namespace es
 		GLuint EBO = 0;
 		DrawType drawType = DrawType::Elements;
 
-		Material* material;
+		std::shared_ptr<Material> material;
 
-		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, Material* material)
+		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, std::shared_ptr<Material> material)
 		{
 			this->vertices = vertices;
 			this->indices = indices;

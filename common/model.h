@@ -168,7 +168,7 @@ namespace es
 			std::vector<std::pair<Texture::Type, std::string>> heightMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_HEIGHT);
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-			Material* material = Material::createWithFile(shaders, textures);
+			std::shared_ptr<Material> material = std::make_shared<Material>(shaders, textures);
 
 			return Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 		}
