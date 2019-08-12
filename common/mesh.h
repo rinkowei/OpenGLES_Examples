@@ -54,7 +54,7 @@ namespace es
 			glDeleteVertexArrays(1, &VAO);
 		}
 
-		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, std::shared_ptr<Material> material = nullptr)
+		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, std::shared_ptr<Material> material)
 		{
 			Mesh* mesh = new (std::nothrow) Mesh();
 			if (mesh && mesh->initWithData(vertices, indices, type, material))
@@ -124,7 +124,7 @@ namespace es
 
 		void setMaterial(std::shared_ptr<Material> material)
 		{
-			if (this->material != nullptr)
+			if (!this->material)
 			{
 				this->material.reset();
 			}
@@ -150,7 +150,7 @@ namespace es
 			this->indices = indices;
 			this->drawType = type;
 			this->material = material;
-
+			
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
 
