@@ -63,6 +63,7 @@ namespace es
 
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f);
+		glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
 
 		float rotationSpeed = 1.0f;
 		float movementSpeed = 1.0f;
@@ -142,18 +143,18 @@ namespace es
 					camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
 					camFront.y = sin(glm::radians(rotation.x));
 					camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
-					camFront = glm::normalize(camFront);
+					front = glm::normalize(camFront);
 
 					float moveSpeed = deltaTime * movementSpeed;
 
 					if (keys.up)
-						position += camFront * moveSpeed;
+						position += front * moveSpeed;
 					if (keys.down)
-						position -= camFront * moveSpeed;
+						position -= front * moveSpeed;
 					if (keys.left)
-						position -= glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+						position -= glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
 					if (keys.right)
-						position += glm::normalize(glm::cross(camFront, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+						position += glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
 
 					updateViewMatrix();
 				}
