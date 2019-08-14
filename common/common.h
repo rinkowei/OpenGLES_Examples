@@ -6,6 +6,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
+#include "frustum.h"
 #include "camera.h"
 #include "texture.h"
 #include "shader.h"
