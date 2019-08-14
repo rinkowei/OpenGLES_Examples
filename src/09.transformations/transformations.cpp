@@ -6,12 +6,11 @@ class Example final : public ExampleBase
 {
 public:
 	Mesh* cube;
-	std::shared_ptr<Material> material;
+	
 	Example()
 	{
 		title = "transformations";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/09.transformations/";
@@ -97,7 +96,7 @@ public:
 		};
 
 		// create quad material
-		material = std::make_shared<Material>(shaderPaths, texturePaths);
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 
