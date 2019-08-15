@@ -6,6 +6,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
+#include "plane.h"
 #include "frustum.h"
 #include "camera.h"
 #include "texture.h"
