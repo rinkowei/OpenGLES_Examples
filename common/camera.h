@@ -31,6 +31,39 @@ namespace es
 
 		void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
 
+		const glm::mat4& getProjectionMatrix() const;
+
+		const glm::mat4& getViewMatrix() const;
+
+		const glm::mat4& getViewProjectionMatrix() const;
+
+		float getDepthInView(const glm::mat4& transform) const;
+
+		void setDepth(int8_t depth);
+
+		int8_t getDepth() const
+		{
+			return depth;
+		}
+
+		int getRenderOrder() const;
+
+		float getFarPlane() const
+		{
+			return farPlane;
+		}
+
+		float getNearPlane() const
+		{
+			return nearPlane;
+		}
+	public:
+		Camera();
+		~Camera();
+
+		bool initDefault();
+		bool initPerspective(float fov, float aspectRatio, float nearPlane, float farPlane);
+		bool initOrthoGraphic(float zoomX, float zoomY, float nearPlane, float farPlane);
 	protected:
 		Camera::Type type;
 
