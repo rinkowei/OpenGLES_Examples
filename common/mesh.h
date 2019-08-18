@@ -77,8 +77,8 @@ namespace es
 			{
 				material->apply();
 				material->setMat4("model", model);
-				material->setMat4("view", World::getWorld()->getMainCamera()->getViewMatrix());
-				material->setMat4("projection", World::getWorld()->getMainCamera()->getProjectionMatrix());
+				material->setMat4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
+				material->setMat4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
 			}
 
 			glBindVertexArray(VAO);

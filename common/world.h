@@ -14,10 +14,10 @@ namespace es
 
 		static World* getWorld();
 
-		Camera* getMainCamera();
+		Camera* getDefaultCamera() const;
 		
 	private:
-		std::unique_ptr<Camera> mainCamera;
+		Camera* defaultCamera;
 		static World* world;
 	};
 }

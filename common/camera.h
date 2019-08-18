@@ -4,6 +4,7 @@
 #include <array>
 #include "object.h"
 #include "frustum.h"
+#include "world.h"
 
 namespace es
 {

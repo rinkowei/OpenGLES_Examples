@@ -39,12 +39,12 @@ namespace es
 
 	Camera* Camera::getDefaultCamera()
 	{
-		return World::getWorld()->getMainCamera();
+		return World::getWorld()->getDefaultCamera();
 	}
 
 	Camera::Camera()
 	{
-		frustum.setClipZ(true);
+		
 	}
 
 	Camera::~Camera()

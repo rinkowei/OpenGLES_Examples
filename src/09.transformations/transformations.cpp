@@ -24,7 +24,6 @@ public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera->type = Camera::Type::firstPerson;
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
 

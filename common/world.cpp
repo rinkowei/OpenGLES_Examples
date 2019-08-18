@@ -1,30 +1,32 @@
 
 #include "world.h"
 
-using namespace es;
-
-World* World::world = nullptr;
-
-World::World()
+namespace es
 {
-	mainCamera = std::make_unique<Camera>();
-}
+	World* World::world = nullptr;
 
-World::~World()
-{
-
-}
-
-World* World::getWorld()
-{
-	if (world == nullptr)
+	World::World()
 	{
-		world = new (std::nothrow) World();
+		defaultCamera = Camera::create();
 	}
-	return world;
-}
 
-Camera* World::getMainCamera()
-{
-	return mainCamera.get();
+	World::~World()
+	{
+		delete(defaultCamera);
+		defaultCamera = nullptr;
+	}
+
+	World* World::getWorld()
+	{
+		if (world == nullptr)
+		{
+			world = new (std::nothrow) World();
+		}
+		return world;
+	}
+
+	Camera* World::getDefaultCamera() const
+	{
+		return defaultCamera;
+	}
 }

@@ -1,12 +1,9 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-#include "world.h"
-
-using namespace es;
 
 namespace es
 {
@@ -91,7 +88,6 @@ namespace es
 		{
 			this->model = model;
 		}
-
 	protected:
 		glm::vec3 position;
 		glm::vec3 rotation;
@@ -99,7 +95,6 @@ namespace es
 		glm::mat4 model;
 
 		GLboolean transformUpdated;
-	private:
 		GLboolean isDirty;
 	};
 }
