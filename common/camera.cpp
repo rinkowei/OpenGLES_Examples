@@ -49,7 +49,7 @@ namespace es
 
 	Camera::~Camera()
 	{
-
+	
 	}
 
 	void Camera::lookAt(const glm::vec3& target, const glm::vec3& up)
@@ -120,4 +120,31 @@ namespace es
 			this->depth = depth;
 		}
 	}
+
+	void Camera::update(float deltaTime)
+	{
+		if (viewProjectionDirty)
+		{
+			view = glm::mat4(1.0f);
+			glm::translate(view, position);
+			glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			viewProjectionDirty = false;
+		}
+	}
+
+	void Camera::translate(const glm::vec3& deltaPosition)
+	{
+		this->position += deltaPosition;
+		viewProjectionDirty = true;
+	}
+
+	void Camera::rotate(const glm::vec3& deltaEuler)
+	{
+		this->rotation += deltaEuler;
+		viewProjectionDirty = true;
+	}
+
+	
 }

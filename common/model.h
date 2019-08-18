@@ -54,9 +54,9 @@ namespace es
 			}
 		}
 
-		virtual void update() override
+		virtual void update(float deltaTime) override
 		{
-			Object::update();
+			Object::update(deltaTime);
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
 				meshes[i]->setModelMatrix(model);

@@ -148,7 +148,7 @@ void ExampleBase::renderFrame()
 
 	for (size_t i = 0; i < objectPool.size(); i++)
 	{
-		objectPool[i]->update();
+		objectPool[i]->update(frameTimer);
 	}
 
 	for (size_t i = 0; i < objectPool.size(); i++)
@@ -163,10 +163,8 @@ void ExampleBase::renderFrame()
 	auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 	frameTimer = (float)timeDiff / 1000.0f;
 	camera->update(frameTimer);
-	if (camera->moving())
-	{
-		viewUpdated = true;
-	}
+
+	viewUpdated = true;
 
 	if (!paused)
 	{

@@ -31,7 +31,7 @@ namespace es
 
 		}
 
-		virtual void update()
+		virtual void update(float deltaTime)
 		{
 			transformUpdated = false;
 			if (isDirty)
@@ -51,37 +51,37 @@ namespace es
 			transformUpdated = true;
 		}
 		
-		void translate(const glm::vec3& deltaPosition)
+		virtual void translate(const glm::vec3& deltaPosition)
 		{
 			this->position += deltaPosition;
 			isDirty = true;
 		}
 
-		void rotate(const glm::vec3& deltaEuler)
+		virtual void rotate(const glm::vec3& deltaEuler)
 		{
 			this->rotation += deltaEuler;
 			isDirty = true;
 		}
 
-		void scale(const glm::vec3& deltaScale)
+		virtual void scale(const glm::vec3& deltaScale)
 		{
 			this->scaling += deltaScale;
 			isDirty = true;
 		}
 
-		void setPosition(const glm::vec3& position)
+		virtual void setPosition(const glm::vec3& position)
 		{
 			this->position = position;
 			isDirty = true;
 		}
 
-		void setRotation(const glm::vec3& euler)
+		virtual void setRotation(const glm::vec3& euler)
 		{
 			this->rotation = euler;
 			isDirty = true;
 		}
 
-		void setScale(const glm::vec3& scale)
+		virtual void setScale(const glm::vec3& scale)
 		{
 			this->scaling = scale;
 			isDirty = true;

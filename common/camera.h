@@ -53,6 +53,12 @@ namespace es
 		{
 			return nearPlane;
 		}
+
+		virtual void update(float deltaTime) override;
+
+		virtual void translate(const glm::vec3& deltaPosition) override;
+
+		virtual void rotate(const glm::vec3& deltaEuler) override;
 	public:
 		Camera();
 		~Camera();
@@ -60,6 +66,18 @@ namespace es
 		bool initDefault();
 		bool initPerspective(float fov, float aspectRatio, float nearPlane, float farPlane);
 		bool initOrthoGraphic(float zoomX, float zoomY, float nearPlane, float farPlane);
+	public:
+		float rotationSpeed = 1.0f;
+		float movementSpeed = 1.0f;
+		float zoomSpeed = 1.0f;
+
+		struct
+		{
+			bool left = false;
+			bool right = false;
+			bool up = false;
+			bool down = false;
+		} keys;
 	protected:
 		Camera::Type type;
 

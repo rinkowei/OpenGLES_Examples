@@ -77,8 +77,8 @@ namespace es
 			{
 				material->apply();
 				material->setMat4("model", model);
-				material->setMat4("view", camera->matrices.view);
-				material->setMat4("projection", camera->matrices.projection);
+				material->setMat4("view", World::getWorld()->getMainCamera()->getViewMatrix());
+				material->setMat4("projection", World::getWorld()->getMainCamera()->getProjectionMatrix());
 			}
 
 			glBindVertexArray(VAO);
@@ -112,9 +112,9 @@ namespace es
 			glActiveTexture(GL_TEXTURE0);
 		}
 
-		virtual void update() override
+		virtual void update(float deltaTime) override
 		{
-			Object::update();
+			Object::update(deltaTime);
 		}
 
 		void setDrawType(DrawType type)
