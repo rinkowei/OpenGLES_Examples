@@ -20,8 +20,6 @@ namespace es
 			scaling = glm::vec3(1.0f);
 			model = glm::mat4(1.0f);
 
-			camera = World::getWorld()->getMainCamera();
-
 			transformUpdated = true;
 			isDirty = false;
 		};
@@ -98,10 +96,7 @@ namespace es
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scaling;
-
 		glm::mat4 model;
-
-		Camera* camera;
 
 		GLboolean transformUpdated;
 	private:

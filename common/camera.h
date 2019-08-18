@@ -7,7 +7,7 @@
 
 namespace es
 {
-	class Camera
+	class Camera : public Object
 	{
 	public:
 		enum class Type
@@ -37,16 +37,12 @@ namespace es
 
 		const glm::mat4& getViewProjectionMatrix() const;
 
-		float getDepthInView(const glm::mat4& transform) const;
-
 		void setDepth(int8_t depth);
 
 		int8_t getDepth() const
 		{
 			return depth;
 		}
-
-		int getRenderOrder() const;
 
 		float getFarPlane() const
 		{
