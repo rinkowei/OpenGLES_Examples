@@ -64,7 +64,6 @@ namespace es
 
 	const glm::mat4& Camera::getViewMatrix() const
 	{
-		
 		return view;
 	}
 
@@ -126,10 +125,10 @@ namespace es
 		if (viewProjectionDirty)
 		{
 			view = glm::mat4(1.0f);
-			glm::translate(view, position);
-			glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			//glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			//glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			//glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			//glm::translate(view, position);
 			viewProjectionDirty = false;
 		}
 	}
