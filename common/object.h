@@ -84,6 +84,21 @@ namespace es
 			isDirty = true;
 		}
 
+		const glm::vec3& getPosition() const
+		{
+			return position;
+		}
+
+		const glm::vec3& getRotation() const
+		{
+			return rotation;
+		}
+
+		const glm::vec3& getScaling() const
+		{
+			return scaling;
+		}
+
 		void setModelMatrix(const glm::mat4& model)
 		{
 			this->model = model;

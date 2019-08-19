@@ -60,6 +60,18 @@ namespace es
 		virtual void translate(const glm::vec3& deltaPosition) override;
 
 		virtual void rotate(const glm::vec3& deltaEuler) override;
+
+		virtual void setPosition(const glm::vec3& position) override;
+
+		virtual void setRotation(const glm::vec3& euler) override;
+
+		const glm::vec3& getFrontVector() const;
+
+		const glm::vec3& getRightVector() const;
+
+		const glm::vec3& getUpVector() const;
+
+		bool moving() const;
 	public:
 		Camera();
 		~Camera();
@@ -87,6 +99,8 @@ namespace es
 		mutable glm::mat4 viewInv;
 		mutable glm::mat4 viewProjection;
 
+		glm::vec3 front;
+		glm::vec3 right;
 		glm::vec3 up;
 
 		std::array<float, 2> zoom;
@@ -101,5 +115,7 @@ namespace es
 		mutable bool frustumDirty = true;
 
 		int8_t depth = -1;
+	private:
+		void updateViewMatrix();
 	};
 }

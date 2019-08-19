@@ -426,7 +426,6 @@ public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera->type = Camera::Type::firstPerson;
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
 
@@ -530,7 +529,7 @@ public:
 
 	virtual void update() override
 	{
-		material->setVec3("viewPos", camera->position);
+		material->setVec3("viewPos", camera->getPosition());
 		material->setFloat("shininess", 32.0f);
 		// directional light
 		material->setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
@@ -546,8 +545,8 @@ public:
 		material->setFloat("pointLight.linear", 0.022f);
 		material->setFloat("pointLight.quadratic", 0.0019f);
 		// spot light
-		material->setVec3("spotLight.position", camera->position);
-		material->setVec3("spotLight.direction", camera->front);
+		material->setVec3("spotLight.position", camera->getPosition());
+		material->setVec3("spotLight.direction", camera->getFrontVector());
 		material->setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
 		material->setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
 		material->setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);

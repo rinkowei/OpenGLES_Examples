@@ -44,7 +44,9 @@ namespace es
 
 	Camera::Camera()
 	{
-		
+		front = glm::vec3(0.0f, 0.0f, -1.0f);
+		right = glm::vec3(1.0f, 0.0f, 0.0f);
+		up = glm::vec3(0.0f, 1.0f, 0.0f);
 	}
 
 	Camera::~Camera()
@@ -122,15 +124,36 @@ namespace es
 
 	void Camera::update(float deltaTime)
 	{
-		if (viewProjectionDirty)
+		if (moving())
 		{
-			view = glm::mat4(1.0f);
-			//glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			//glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			//glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-			//glm::translate(view, position);
-			viewProjectionDirty = false;
+			glm::vec3 camFront;
+			//camFront.x = cos(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
+			//camFront.y = sin(glm::radians(rotation.x));
+			//camFront.z = sin(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
+			
+			camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
+			camFront.y = sin(glm::radians(rotation.x));
+			camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
+			
+			front = glm::normalize(camFront);
+			right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
+			up = glm::normalize(glm::cross(right, front));
+
+			float moveSpeed = deltaTime * movementSpeed;
+
+			if (keys.up)
+				position += front * moveSpeed;
+			if (keys.down)
+				position -= front * moveSpeed;
+			if (keys.left)
+				//position -= glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+				position -= right * moveSpeed;
+			if (keys.right)
+				//position += glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
+				position += right * moveSpeed;
+
 		}
+		updateViewMatrix();
 	}
 
 	void Camera::translate(const glm::vec3& deltaPosition)
@@ -145,5 +168,54 @@ namespace es
 		viewProjectionDirty = true;
 	}
 
-	
+	void Camera::setPosition(const glm::vec3& position)
+	{
+		this->position = position;
+		viewProjectionDirty = true;
+	}
+
+	void Camera::setRotation(const glm::vec3& euler)
+	{
+		this->rotation = euler;
+		viewProjectionDirty = true;
+	}
+
+	const glm::vec3& Camera::getFrontVector() const
+	{
+		return front;
+	}
+
+	const glm::vec3& Camera::getRightVector() const
+	{
+		return right;
+	}
+
+	const glm::vec3& Camera::getUpVector() const
+	{
+		return up;
+	}
+
+	bool Camera::moving() const
+	{
+		return keys.left || keys.right || keys.up || keys.down;
+	}
+
+	void Camera::updateViewMatrix()
+	{
+		if (viewProjectionDirty)
+		{
+			glm::mat4 rotM = glm::mat4(1.0f);
+			glm::mat4 transM = glm::mat4(1.0f);
+
+			rotM = glm::rotate(rotM, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			rotM = glm::rotate(rotM, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+			transM = glm::translate(transM, position);
+
+			view = rotM * transM;
+
+			viewProjectionDirty = false;
+		}
+	}
 }
