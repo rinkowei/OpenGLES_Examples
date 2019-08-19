@@ -44,6 +44,8 @@ namespace es
 
 	Camera::Camera()
 	{
+		rotation = glm::vec3(0.0f, -90.0f, 0.0f);
+
 		front = glm::vec3(0.0f, 0.0f, -1.0f);
 		right = glm::vec3(1.0f, 0.0f, 0.0f);
 		up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -64,19 +66,14 @@ namespace es
 		return projection;
 	}
 
-	const glm::mat4& Camera::getViewMatrix() const
+	glm::mat4 Camera::getViewMatrix()
 	{
 		return view;
 	}
 
 	const glm::mat4& Camera::getViewProjectionMatrix() const
 	{
-		if (viewProjectionDirty)
-		{
-			viewProjection = projection * view;
-			viewProjectionDirty = false;
-		}
-		return viewProjection;
+		return projection * view;
 	}
 
 	bool Camera::initDefault()
@@ -93,7 +90,7 @@ namespace es
 		this->nearPlane = nearPlane;
 		this->farPlane = farPlane;
 		projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
-		viewProjectionDirty = true;
+		viewDirty = true;
 		frustumDirty = true;
 		type = Camera::Type::Perspective;
 
@@ -107,7 +104,7 @@ namespace es
 		this->nearPlane = nearPlane;
 		this->farPlane = farPlane;
 		projection = glm::ortho(0.0f, zoomX, 0.0f, zoomY, nearPlane, farPlane);
-		viewProjectionDirty = true;
+		viewDirty = true;
 		frustumDirty = true;
 		type = Camera::Type::Orthographic;
 
@@ -124,16 +121,12 @@ namespace es
 
 	void Camera::update(float deltaTime)
 	{
-		if (moving())
+		if (viewDirty)
 		{
 			glm::vec3 camFront;
-			//camFront.x = cos(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
-			//camFront.y = sin(glm::radians(rotation.x));
-			//camFront.z = sin(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
-			
-			camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
+			camFront.x = cos(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
 			camFront.y = sin(glm::radians(rotation.x));
-			camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
+			camFront.z = sin(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
 			
 			front = glm::normalize(camFront);
 			right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -146,38 +139,38 @@ namespace es
 			if (keys.down)
 				position -= front * moveSpeed;
 			if (keys.left)
-				//position -= glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
 				position -= right * moveSpeed;
 			if (keys.right)
-				//position += glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f))) * moveSpeed;
 				position += right * moveSpeed;
 
+			updateViewMatrix();
+
+			viewDirty = false;
 		}
-		updateViewMatrix();
 	}
 
 	void Camera::translate(const glm::vec3& deltaPosition)
 	{
 		this->position += deltaPosition;
-		viewProjectionDirty = true;
+		viewDirty = true;
 	}
 
 	void Camera::rotate(const glm::vec3& deltaEuler)
 	{
 		this->rotation += deltaEuler;
-		viewProjectionDirty = true;
+		viewDirty = true;
 	}
 
 	void Camera::setPosition(const glm::vec3& position)
 	{
 		this->position = position;
-		viewProjectionDirty = true;
+		viewDirty = true;
 	}
 
 	void Camera::setRotation(const glm::vec3& euler)
 	{
 		this->rotation = euler;
-		viewProjectionDirty = true;
+		viewDirty = true;
 	}
 
 	const glm::vec3& Camera::getFrontVector() const
@@ -202,20 +195,6 @@ namespace es
 
 	void Camera::updateViewMatrix()
 	{
-		if (viewProjectionDirty)
-		{
-			glm::mat4 rotM = glm::mat4(1.0f);
-			glm::mat4 transM = glm::mat4(1.0f);
-
-			rotM = glm::rotate(rotM, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			rotM = glm::rotate(rotM, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			transM = glm::translate(transM, position);
-
-			view = rotM * transM;
-
-			viewProjectionDirty = false;
-		}
+		view = glm::lookAt(position, position + front, up);
 	}
 }

@@ -32,9 +32,9 @@ namespace es
 
 		void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
 
-		const glm::mat4& getProjectionMatrix() const;
+		glm::mat4 getViewMatrix();
 
-		const glm::mat4& getViewMatrix() const;
+		const glm::mat4& getProjectionMatrix() const;
 
 		const glm::mat4& getViewProjectionMatrix() const;
 
@@ -108,8 +108,7 @@ namespace es
 		float aspectRatio;
 		float nearPlane;
 		float farPlane;
-		mutable bool viewProjectionDirty = true;
-		bool viewProjectionUpdated = false;
+		mutable bool viewDirty = true;
 
 		mutable Frustum frustum;
 		mutable bool frustumDirty = true;

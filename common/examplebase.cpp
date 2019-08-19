@@ -343,7 +343,7 @@ void ExampleBase::handleMouseMove()
 	// mouse left button down
 	if (ImGui::IsMouseDown(0))
 	{
-		camera->rotate(glm::vec3(deltaY * camera->rotationSpeed, deltaX * camera->rotationSpeed, 0.0f));
+		camera->rotate(glm::vec3(-deltaY * camera->rotationSpeed, deltaX * camera->rotationSpeed, 0.0f));
 		viewUpdated = true;
 	}
 	// mouse right button down
