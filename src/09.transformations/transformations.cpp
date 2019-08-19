@@ -25,7 +25,7 @@ public:
 	{
 		// setup camera
 		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -107,7 +107,7 @@ public:
 	virtual void update() override
 	{
 		cube->rotate(glm::vec3(1.0f, 1.0f, 1.0f));
-		//cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 4.0), 0.3)));
+		cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 4.0), 0.3)));
 	}
 };
 
