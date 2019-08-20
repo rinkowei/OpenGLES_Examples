@@ -5,11 +5,10 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Mesh* quad;
-	Material* material;
 	Example()
 	{
 		title = "quad with texture";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/07.quad_with_texture/";
@@ -56,14 +55,14 @@ public:
 		};
 
 		// create quad material
-		material = Material::createWithFile(shaderPaths, texturePaths);
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create quad mesh
-		quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+		Mesh* quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 
 		addObject(static_cast<Object*>(quad));
 	}
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 
 	}
