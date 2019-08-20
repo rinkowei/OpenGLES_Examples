@@ -27,6 +27,7 @@ public:
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 
+		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
 		std::vector<GLfloat> vertexAttrs = {
@@ -94,9 +95,10 @@ public:
 			std::make_pair(Texture::Type::Diffuse, texturesDirectory + "face.png")
 		};
 
-		// create quad material
+		// create cube material
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
+		// create cube mesh
 		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 
 		addObject(static_cast<Object*>(cube));
@@ -104,7 +106,7 @@ public:
 		cube->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 		cube->rotate(glm::vec3(1.0f, 1.0f, 1.0f));
 		cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 4.0), 0.3)));
