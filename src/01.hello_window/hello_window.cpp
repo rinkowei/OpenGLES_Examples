@@ -7,13 +7,14 @@ public:
 	Example()
 	{
 		title = "hello window";
+		settings.vsync = true;
 	}
 	~Example()
 	{
 
 	}
 public:
-	virtual void render()
+	virtual void update() override
 	{
 		
 	}
