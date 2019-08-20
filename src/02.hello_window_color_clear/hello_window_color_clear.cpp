@@ -7,6 +7,7 @@ public:
 	Example()
 	{
 		title = "hello window color clear";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.45f, 0.50f, 0.60f, 1.0f);
 	}
 	~Example()
@@ -14,7 +15,7 @@ public:
 
 	}
 public:
-	virtual void render()
+	virtual void update(float deltaTime) override
 	{
 
 	}
