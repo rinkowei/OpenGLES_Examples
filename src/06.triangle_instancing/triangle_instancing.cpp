@@ -10,6 +10,7 @@ public:
 	Example()
 	{
 		title = "triangle instancing";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/06.triangle_instancing/";
@@ -39,7 +40,7 @@ public:
 		}
 
 		std::vector<GLfloat> vertexAttrs = {
-			// positions           // colors
+			 // positions           // colors
 			 0.05f, -0.05f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,
 			-0.05f, -0.05f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,
 			-0.05f,  0.05f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,
@@ -91,7 +92,7 @@ public:
 		material = Material::createWithFile(shaderPaths, texturePaths);
 
 	}
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 		material->apply();
 		glBindVertexArray(VAO);
