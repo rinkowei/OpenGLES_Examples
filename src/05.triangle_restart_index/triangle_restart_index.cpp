@@ -5,11 +5,10 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Mesh* triangle;
-	Material* material;
 	Example()
 	{
 		title = "triangle restart index";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/05.triangle_restart_index/";
@@ -52,14 +51,14 @@ public:
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
 
 		// create triangle material
-		material = Material::createWithFile(shaderPaths, texturePaths);
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create triangle mesh
-		triangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements_Restart_Index, material);
+		Mesh* triangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements_Restart_Index, material);
 
 		addObject(static_cast<Object*>(triangle));
 	}
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 
 	}
