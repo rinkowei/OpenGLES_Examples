@@ -226,7 +226,7 @@ public:
 	Example()
 	{
 		title = "blending";
-		settings.vsync = true;
+		settings.vsync = false;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/14.blending/";
@@ -239,7 +239,7 @@ public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera->movementSpeed = 10.0f;
+		camera->movementSpeed = 1.0f;
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 
