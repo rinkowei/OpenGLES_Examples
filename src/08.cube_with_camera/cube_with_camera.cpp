@@ -5,11 +5,10 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Mesh* cube;
-	Material* material;
 	Example()
 	{
 		title = "cube with camera";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/08.cube_with_camera/";
@@ -23,10 +22,10 @@ public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera->type = Camera::Type::lookAt;
 		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, -3.0f));
+		camera->setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
+		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
 		std::vector<GLfloat> vertexAttrs = {
@@ -94,14 +93,15 @@ public:
 			std::make_pair(Texture::Type::Diffuse, texturesDirectory + "face.png")
 		};
 
-		// create quad material
-		material = Material::createWithFile(shaderPaths, texturePaths);
+		// create cube material
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
-		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
+		// create cube mesh
+		Mesh* cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 
 		addObject(static_cast<Object*>(cube));
 	}
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 
 	}
