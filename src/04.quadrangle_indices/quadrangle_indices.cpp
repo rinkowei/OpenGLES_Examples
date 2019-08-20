@@ -5,11 +5,10 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Mesh* quadrangle;
-	Material* material;
 	Example()
 	{
 		title = "quadrangle indices";
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/04.quadrangle_indices/";
@@ -49,15 +48,16 @@ public:
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
 
-		// create triangle material
-		material = Material::createWithFile(shaderPaths, texturePaths);
+		// create quadrangle material
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create quadrangle mesh
-		quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+		Mesh* quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 
 		addObject(static_cast<Object*>(quadrangle));
 	}
-	virtual void update() override
+
+	virtual void update(float deltaTime) override
 	{
 
 	}
