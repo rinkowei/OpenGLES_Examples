@@ -124,7 +124,7 @@ public:
 		}
 	}
 
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 		material->setVec3("viewPos", camera->getPosition());
 		material->setFloat("shininess", 32.0f);
