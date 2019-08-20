@@ -77,7 +77,7 @@ namespace es
 
 		es::UIOverlay uiOverlay;
 
-		float frameTimer = 1.0f;
+		float frameTimer = 1.0f / 60.0f;
 		const std::string getResourcesPath(ResourceType type);
 
 		es::Benchmark benchmark;
@@ -155,7 +155,7 @@ namespace es
 
 		virtual void prepare();
 
-		virtual void update() = 0;
+		virtual void update(float deltaTime) = 0;
 
 		void renderLoop();
 

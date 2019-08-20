@@ -144,7 +144,7 @@ void ExampleBase::renderFrame()
 	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	update();
+	update(frameTimer);
 
 	for (size_t i = 0; i < objectPool.size(); i++)
 	{
@@ -195,16 +195,11 @@ void ExampleBase::addObject(Object* obj)
 	objectPool.push_back(obj);
 }
 
-void ExampleBase::update()
-{
-
-}
-
 void ExampleBase::renderLoop()
 {
 	if (benchmark.active)
 	{
-		benchmark.run([=] { update(); });
+		benchmark.run([=] { update(frameTimer); });
 		if (benchmark.filename != "")
 		{
 			benchmark.saveResults();
