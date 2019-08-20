@@ -5,7 +5,6 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Model* model;
 	Example()
 	{
 		title = "model loading";
@@ -24,9 +23,8 @@ public:
 	virtual void prepare() override
 	{
 		// setup camera
-		camera->type = Camera::Type::firstPerson;
 		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, -0.5f, -2.0f));
+		camera->setPosition(glm::vec3(0.0f, 0.5f, 2.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -37,7 +35,7 @@ public:
 			{ Material::ShaderType::Fragment, shadersDirectory + "model.frag" }
 		};
 
-		model = Model::createWithFile(modelsDirectory + "/carnage/carnage.obj", shaderPaths);
+		Model* model = Model::createWithFile(modelsDirectory + "/carnage/carnage.obj", shaderPaths);
 
 		addObject(static_cast<Object*>(model));
 
@@ -45,7 +43,7 @@ public:
 		model->setScale(glm::vec3(2.0f, 2.0f, 2.0f));
 	}
 
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 
 	}
