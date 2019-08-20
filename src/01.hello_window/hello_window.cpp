@@ -14,7 +14,7 @@ public:
 
 	}
 public:
-	virtual void update() override
+	virtual void update(float deltaTime) override
 	{
 		
 	}
