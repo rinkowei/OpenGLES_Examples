@@ -317,14 +317,16 @@ public:
 		// create quad material
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
+		Framebuffer* framebuffer = Framebuffer::create(width, height, (uint32_t)Framebuffer::AttachmentType::ColorBuffer_1 | (uint32_t)Framebuffer::AttachmentType::RenderBuffer);
+		
 		Model* model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", shaderPaths);
 
-		addObject(static_cast<Object*>(model));
+		//addObject(static_cast<Object*>(model));
 	}
 
 	virtual void update(float deltaTime) override
 	{
-
+		
 	}
 };
 
