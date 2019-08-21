@@ -1,4 +1,4 @@
-﻿
+﻿/*
 #define GLFW_INCLUDE_ES32
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -247,4 +247,100 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
 	camera.handleMouseScroll(yOffset);
+}
+*/
+
+
+#include <common.h>
+using namespace es;
+
+class Example final : public ExampleBase
+{
+public:
+	Example()
+	{
+		title = "offscreen rendering";
+		settings.vsync = true;
+		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		modelsDirectory = getResourcesPath(ResourceType::Model);
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/15.offscreen_rendering/";
+	}
+	~Example()
+	{
+
+	}
+public:
+	virtual void prepare() override
+	{
+		ExampleBase::prepare();
+
+		// setup camera
+		camera->movementSpeed = 1.0f;
+		camera->rotationSpeed = 0.5f;
+		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+
+		// enable depth test
+		glEnable(GL_DEPTH_TEST);
+
+		std::vector<GLfloat> vertexAttrs = {
+			// positions         // texture coordinates
+			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+			0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+			1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+		};
+
+		std::vector<Vertex> vertices = {};
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 8); i++)
+		{
+			Vertex vertex;
+			vertex.Position = glm::vec3(vertexAttrs[i * 5], vertexAttrs[i * 5 + 1], vertexAttrs[i * 5 + 2]);
+			vertex.TexCoords = glm::vec2(vertexAttrs[i * 5 + 3], vertexAttrs[i * 5 + 4]);
+			vertices.push_back(vertex);
+		}
+
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "construction.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "construction.frag" }
+		};
+
+		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
+		{
+
+		};
+
+		// create quad material
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
+
+		Model* model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", shaderPaths);
+
+		addObject(static_cast<Object*>(model));
+	}
+
+	virtual void update(float deltaTime) override
+	{
+
+	}
+};
+
+Example* example;
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+	example = new Example();
+	example->setupValidation();
+	if (!example->setupGLFW() ||
+		!example->loadGLESFunctions() ||
+		!example->setupImGui())
+	{
+		return 0;
+	}
+	example->prepare();
+	example->renderLoop();
+	delete(example);
+	return 0;
 }
