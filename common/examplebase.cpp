@@ -37,7 +37,7 @@ const std::string ExampleBase::getResourcesPath(ResourceType type)
 
 ExampleBase::ExampleBase()
 {
-	camera = World::getWorld()->getDefaultCamera();
+	
 }
 
 ExampleBase::~ExampleBase()
@@ -119,7 +119,10 @@ void ExampleBase::setupValidation()
 
 void ExampleBase::prepare()
 {
+	// default camera
+	camera = World::getWorld()->getDefaultCamera();
 
+	objectPool.clear();
 }
 
 void ExampleBase::renderFrame()
