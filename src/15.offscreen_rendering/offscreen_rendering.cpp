@@ -259,6 +259,7 @@ class Example final : public ExampleBase
 public:
 	Framebuffer* framebuffer;
 	Model* model;
+	Mesh* quad;
 	Example()
 	{
 		title = "offscreen rendering";
@@ -287,14 +288,19 @@ public:
 
 		std::vector<GLfloat> vertexAttrs = {
 			 // positions       // texture coordinates
-			 0.4f, 1.3f, 0.0f,  1.0f, 1.0f,
-			 0.4f, 0.3f, 0.0f,  1.0f, 0.0f,
-			-0.4f, 0.3f, 0.0f,  0.0f, 0.0f,
-			-0.4f, 1.3f, 0.0f,  0.0f, 1.0f
+			 0.5f, 0.5f, 0.0f,  1.0f, 1.0f,
+			 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+			-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
+			-0.5f, 0.5f, 0.0f,  0.0f, 1.0f
+		};
+
+		std::vector<GLuint> indices = {
+			0, 1, 3,
+			1, 2, 3
 		};
 
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 8); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 5); i++)
 		{
 			Vertex vertex;
 			vertex.Position = glm::vec3(vertexAttrs[i * 5], vertexAttrs[i * 5 + 1], vertexAttrs[i * 5 + 2]);
@@ -304,8 +310,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "construction.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "construction.frag" }
+			{ Material::ShaderType::Vertex, shadersDirectory + "screen.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "screen.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
@@ -316,9 +322,15 @@ public:
 		// create quad material
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
+		quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+
 		framebuffer = Framebuffer::create(width, height, (uint32_t)Framebuffer::AttachmentType::ColorBuffer_1 | (uint32_t)Framebuffer::AttachmentType::RenderBuffer);
 		
-		model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", shaderPaths);
+		model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", 
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "construction.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "construction.frag" }
+		});
 
 		//addObject(static_cast<Object*>(model));
 	}
@@ -326,7 +338,19 @@ public:
 	virtual void update(float deltaTime) override
 	{
 		framebuffer->apply();
+		glEnable(GL_DEPTH_TEST);
 		model->render();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		model->render();
+
+		glDisable(GL_DEPTH_TEST);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, framebuffer->getColorBuffer());
+		quad->getMaterial()->setInt("screenTexture", 0);
+		quad->render();
 	}
 };
 
