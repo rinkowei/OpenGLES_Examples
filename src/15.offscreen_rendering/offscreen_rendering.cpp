@@ -257,6 +257,8 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	Framebuffer* framebuffer;
+	Model* model;
 	Example()
 	{
 		title = "offscreen rendering";
@@ -284,14 +286,11 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
 		std::vector<GLfloat> vertexAttrs = {
-			// positions         // texture coordinates
-			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-			0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
-			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-
-			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
-			1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
-			1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+			 // positions       // texture coordinates
+			 0.4f, 1.3f, 0.0f,  1.0f, 1.0f,
+			 0.4f, 0.3f, 0.0f,  1.0f, 0.0f,
+			-0.4f, 0.3f, 0.0f,  0.0f, 0.0f,
+			-0.4f, 1.3f, 0.0f,  0.0f, 1.0f
 		};
 
 		std::vector<Vertex> vertices = {};
@@ -317,16 +316,17 @@ public:
 		// create quad material
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
-		Framebuffer* framebuffer = Framebuffer::create(width, height, (uint32_t)Framebuffer::AttachmentType::ColorBuffer_1 | (uint32_t)Framebuffer::AttachmentType::RenderBuffer);
+		framebuffer = Framebuffer::create(width, height, (uint32_t)Framebuffer::AttachmentType::ColorBuffer_1 | (uint32_t)Framebuffer::AttachmentType::RenderBuffer);
 		
-		Model* model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", shaderPaths);
+		model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", shaderPaths);
 
 		//addObject(static_cast<Object*>(model));
 	}
 
 	virtual void update(float deltaTime) override
 	{
-		
+		framebuffer->apply();
+		model->render();
 	}
 };
 

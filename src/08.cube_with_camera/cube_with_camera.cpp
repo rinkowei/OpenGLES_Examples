@@ -21,6 +21,8 @@ public:
 public:
 	virtual void prepare() override
 	{
+		ExampleBase::prepare();
+
 		// setup camera
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 0.0f, 3.0f));

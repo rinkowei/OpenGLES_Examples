@@ -20,6 +20,8 @@ public:
 public:
 	virtual void prepare() override
 	{
+		ExampleBase::prepare();
+
 		std::vector<GLfloat> vertexPositions = {
 			-0.6f, -0.3f, 0.0f,
 			-0.3f, 0.4f, 0.0f,

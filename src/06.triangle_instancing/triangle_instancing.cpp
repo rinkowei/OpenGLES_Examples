@@ -26,6 +26,8 @@ public:
 public:
 	virtual void prepare() override
 	{
+		ExampleBase::prepare();
+
 		// create a array of 100 triangle locations
 		std::array<glm::vec2, 100> locations;
 		unsigned int index = 0;

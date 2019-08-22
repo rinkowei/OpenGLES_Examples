@@ -14,6 +14,11 @@ public:
 
 	}
 public:
+	virtual void prepare() override
+	{
+		ExampleBase::prepare();
+	}
+
 	virtual void update(float deltaTime) override
 	{
 		

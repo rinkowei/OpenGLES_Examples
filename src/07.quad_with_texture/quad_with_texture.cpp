@@ -21,6 +21,8 @@ public:
 public:
 	virtual void prepare() override
 	{
+		ExampleBase::prepare();
+
 		std::vector<GLfloat> vertexAttrs = {
 			// positions          // texture coordinates
 			0.5f,  0.5f, 0.0f,    1.0f, 1.0f,
