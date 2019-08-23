@@ -5,18 +5,20 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	Mesh* quad;
+
 	Example()
 	{
 		title = "quad with texture";
 		settings.vsync = true;
-		defaultClearColor = glm::vec4(0.1f, 0.1f, 0.2f, 1.0f);
+		defaultClearColor = glm::vec4(0.1f, 0.1f, 0.7f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/07.quad_with_texture/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/07.quad_with_texture/";
 	}
 	~Example()
 	{
-		
+		delete(quad);
 	}
 public:
 	virtual void prepare() override
@@ -60,13 +62,17 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create quad mesh
-		Mesh* quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
-
-		addObject(static_cast<Object*>(quad));
+		quad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 	}
-	virtual void update(float deltaTime) override
-	{
 
+	virtual void render(float deltaTime) override
+	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		quad->render(deltaTime);
 	}
 };
 
