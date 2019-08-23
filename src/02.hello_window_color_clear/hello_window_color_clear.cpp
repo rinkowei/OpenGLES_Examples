@@ -20,9 +20,12 @@ public:
 		ExampleBase::prepare();
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
-
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 };
 

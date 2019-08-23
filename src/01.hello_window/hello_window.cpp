@@ -21,7 +21,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
 	}
 };
 
