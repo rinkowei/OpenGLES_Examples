@@ -5,6 +5,8 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	Mesh* quadrangle;
+
 	Example()
 	{
 		title = "quadrangle indices";
@@ -15,7 +17,7 @@ public:
 	}
 	~Example()
 	{
-		
+		delete(quadrangle);
 	}
 public:
 	virtual void prepare() override
@@ -54,14 +56,17 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create quadrangle mesh
-		Mesh* quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
-
-		addObject(static_cast<Object*>(quadrangle));
+		quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT);
 
+		quadrangle->render(deltaTime);
 	}
 };
 
