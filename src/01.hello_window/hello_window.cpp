@@ -19,7 +19,7 @@ public:
 		ExampleBase::prepare();
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
 		
 	}
