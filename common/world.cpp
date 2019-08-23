@@ -4,6 +4,7 @@
 namespace es
 {
 	World* World::world = nullptr;
+	World::GarbageDeleter World::gd;
 
 	World::World()
 	{

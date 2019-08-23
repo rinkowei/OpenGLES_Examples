@@ -17,15 +17,19 @@ namespace es
 			scaling = glm::vec3(1.0f);
 			model = glm::mat4(1.0f);
 
+			autoUpdated = true;
 			transformUpdated = true;
 			isDirty = false;
 		};
 
 		virtual ~Object() = default;
 
-		virtual void render()
+		virtual void render(float deltaTime)
 		{
-
+			if (autoUpdated)
+			{
+				update(deltaTime);
+			}
 		}
 
 		virtual void update(float deltaTime)
@@ -103,13 +107,22 @@ namespace es
 		{
 			this->model = model;
 		}
+
+		void setAutoUpdated(GLboolean autoUpdated)
+		{
+			this->autoUpdated = autoUpdated;
+		}
 	protected:
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scaling;
 		glm::mat4 model;
 
+		// is auto call update function in render()
+		GLboolean autoUpdated;
+		// is transformation updated
 		GLboolean transformUpdated;
+		// is transform updated not yet
 		GLboolean isDirty;
 	};
 }

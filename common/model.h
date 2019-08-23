@@ -46,11 +46,17 @@ namespace es
 			return nullptr;
 		}
 
-		virtual void render() override
+		virtual void render(float deltaTime) override
 		{
+			if (autoUpdated)
+			{
+				Object::update(deltaTime);
+			}
+
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->render();
+				meshes[i]->setModelMatrix(model);
+				meshes[i]->render(deltaTime);
 			}
 		}
 
@@ -170,7 +176,10 @@ namespace es
 
 			std::shared_ptr<Material> material = std::make_shared<Material>(shaders, textures);
 
-			return Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+			Mesh* partMesh = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+			partMesh->setAutoUpdated(false);
+
+			return partMesh;
 		}
 
 		std::vector<std::pair<Texture::Type, std::string>> loadMaterialTextures(aiMaterial* mat, aiTextureType type)

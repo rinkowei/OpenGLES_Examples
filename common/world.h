@@ -19,5 +19,20 @@ namespace es
 	private:
 		Camera* defaultCamera;
 		static World* world;
+
+		class GarbageDeleter
+		{
+		public:
+			GarbageDeleter() = default;
+			~GarbageDeleter()
+			{
+				if (World::world)
+				{
+					delete World::world;
+					World::world = nullptr;
+				}
+			}
+		};
+		static GarbageDeleter gd;
 	};
 }

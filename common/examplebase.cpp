@@ -42,11 +42,7 @@ ExampleBase::ExampleBase()
 
 ExampleBase::~ExampleBase()
 {
-	for (size_t i = 0; i < objectPool.size(); i++)
-	{
-		delete(objectPool[i]);
-	}
-	objectPool.swap(std::vector<Object*>());
+	
 }
 
 bool ExampleBase::setupGLFW()
@@ -121,8 +117,6 @@ void ExampleBase::prepare()
 {
 	// default camera
 	camera = World::getWorld()->getDefaultCamera();
-
-	objectPool.clear();
 }
 
 void ExampleBase::renderFrame()
@@ -147,17 +141,9 @@ void ExampleBase::renderFrame()
 	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	update(frameTimer);
+	render(frameTimer);
 
-	for (size_t i = 0; i < objectPool.size(); i++)
-	{
-		objectPool[i]->update(frameTimer);
-	}
-
-	for (size_t i = 0; i < objectPool.size(); i++)
-	{
-		objectPool[i]->render();
-	}
+	camera->update(frameTimer);
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	
@@ -165,7 +151,6 @@ void ExampleBase::renderFrame()
 	auto timeEnd = std::chrono::high_resolution_clock::now();
 	auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 	frameTimer = (float)timeDiff / 1000.0f;
-	camera->update(frameTimer);
 
 	viewUpdated = true;
 
@@ -193,16 +178,11 @@ void ExampleBase::renderFrame()
 	updateOverlay();
 }
 
-void ExampleBase::addObject(Object* obj)
-{
-	objectPool.push_back(obj);
-}
-
 void ExampleBase::renderLoop()
 {
 	if (benchmark.active)
 	{
-		benchmark.run([=] { update(frameTimer); });
+		benchmark.run([=] { render(frameTimer); });
 		if (benchmark.filename != "")
 		{
 			benchmark.saveResults();

@@ -65,12 +65,14 @@ namespace es
 			return nullptr;
 		}
 
-		virtual void render() override
+		virtual void render(float deltaTime) override
 		{
-			if (vertices.empty())
-				return;
+			if (autoUpdated)
+			{
+				Object::update(deltaTime);
+			}
 
-			if (!transformUpdated)
+			if (vertices.empty())
 				return;
 
 			if (material != nullptr)

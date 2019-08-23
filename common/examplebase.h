@@ -67,8 +67,6 @@ namespace es
 		std::string shadersDirectory;
 		std::string texturesDirectory;
 
-		std::vector<Object*> objectPool;
-
 		Camera* camera;
 	public:
 		bool prepared = false;
@@ -141,8 +139,6 @@ namespace es
 		void setupDPIAwareness();
 #endif
 
-		void addObject(Object* obj);
-
 		virtual void viewChanged();
 
 		virtual void keyPressed(GLuint);
@@ -155,7 +151,7 @@ namespace es
 
 		virtual void prepare();
 
-		virtual void update(float deltaTime) = 0;
+		virtual void render(float deltaTime) = 0;
 
 		void renderLoop();
 
