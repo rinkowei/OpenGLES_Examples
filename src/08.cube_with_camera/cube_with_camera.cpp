@@ -5,6 +5,8 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	Mesh* cube;
+
 	Example()
 	{
 		title = "cube with camera";
@@ -16,7 +18,7 @@ public:
 	}
 	~Example()
 	{
-		
+		delete(cube);
 	}
 public:
 	virtual void prepare() override
@@ -24,7 +26,8 @@ public:
 		ExampleBase::prepare();
 
 		// setup camera
-		camera->rotationSpeed = 0.5f;
+		camera->movementSpeed = 5.0f;
+		camera->rotationSpeed = 1.0f;
 		camera->setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
 		// enable depth test
@@ -99,13 +102,17 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create cube mesh
-		Mesh* cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
-
-		addObject(static_cast<Object*>(cube));
+		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 	}
-	virtual void update(float deltaTime) override
-	{
 
+	virtual void render(float deltaTime) override
+	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		cube->render(deltaTime);
 	}
 };
 
