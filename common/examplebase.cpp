@@ -135,11 +135,6 @@ void ExampleBase::renderFrame()
 
 	// Rendering
 	ImGui::Render();
-	int display_w, display_h;
-	glfwGetFramebufferSize(window, &display_w, &display_h);
-	glViewport(0, 0, display_w, display_h);
-	glClearColor(defaultClearColor.x, defaultClearColor.y, defaultClearColor.z, defaultClearColor.w);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	render(frameTimer);
 

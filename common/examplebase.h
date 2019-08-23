@@ -70,8 +70,8 @@ namespace es
 		Camera* camera;
 	public:
 		bool prepared = false;
-		GLuint width = 1280;
-		GLuint height = 720;
+		GLint width = 1280;
+		GLint height = 720;
 
 		es::UIOverlay uiOverlay;
 
