@@ -94,7 +94,7 @@ public:
 		material = Material::createWithFile(shaderPaths, texturePaths);
 
 	}
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
 		material->apply();
 		glBindVertexArray(VAO);
