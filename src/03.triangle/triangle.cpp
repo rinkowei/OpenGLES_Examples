@@ -5,6 +5,8 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	Mesh* triangle;
+
 	Example()
 	{
 		title = "triangle";
@@ -15,7 +17,7 @@ public:
 	}
 	~Example()
 	{
-		
+		delete(triangle);
 	}
 public:
 	virtual void prepare() override
@@ -48,14 +50,17 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 		
 		// create triangle mesh
-		Mesh* triangle = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
-		
-		addObject(static_cast<Object*>(triangle));
+		triangle = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT);
 
+		triangle->render(deltaTime);
 	}
 };
 
