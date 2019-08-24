@@ -6,6 +6,7 @@ class Example : public ExampleBase
 public:
 	Example()
 	{
+		title = "dear imgui";
 		settings.overlay = true;
 		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -15,14 +16,24 @@ public:
 
 	}
 public:
-	bool show_demo_window = true;
-	bool show_another_window = false;
+	bool showDemoWindow = true;
+	bool showAnotherWindow = false;
 
-	virtual void render()
+	virtual void prepare() override
 	{
+		ExampleBase::prepare();
+	}
+
+	virtual void render(float deltaTime) override
+	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
+		if (showDemoWindow)
+			ImGui::ShowDemoWindow(&showDemoWindow);
 
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 		{
@@ -32,8 +43,8 @@ public:
 			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
 			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-			ImGui::Checkbox("Another Window", &show_another_window);
+			ImGui::Checkbox("Demo Window", &showDemoWindow);      // Edit bools storing our window open/close state
+			ImGui::Checkbox("Another Window", &showAnotherWindow);
 
 			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
 			ImGui::ColorEdit3("clear color", (float*)& defaultClearColor); // Edit 3 floats representing a color
@@ -47,12 +58,12 @@ public:
 			ImGui::End();
 		}
 		// 3. Show another simple window.
-		if (show_another_window)
+		if (showAnotherWindow)
 		{
-			ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+			ImGui::Begin("Another Window", &showAnotherWindow);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
 			ImGui::Text("Hello from another window!");
 			if (ImGui::Button("Close Me"))
-				show_another_window = false;
+				showAnotherWindow = false;
 			ImGui::End();
 		}
 	}

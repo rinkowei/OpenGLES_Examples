@@ -133,12 +133,11 @@ void ExampleBase::renderFrame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	// Rendering
-	ImGui::Render();
-
+	// rendering objects
 	render(frameTimer);
 
-	camera->update(frameTimer);
+	// rendering imgui
+	ImGui::Render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	
@@ -146,7 +145,8 @@ void ExampleBase::renderFrame()
 	auto timeEnd = std::chrono::high_resolution_clock::now();
 	auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 	frameTimer = (float)timeDiff / 1000.0f;
-
+	// update camera
+	camera->update(frameTimer);
 	viewUpdated = true;
 
 	if (!paused)
@@ -191,10 +191,10 @@ void ExampleBase::renderLoop()
 
 	while (!glfwWindowShouldClose(window))
 	{
+		glfwPollEvents();
 		handleInput();
 		renderFrame();
 		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
 
 	// clean up
