@@ -5,6 +5,8 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	std::vector<Mesh*> quads;
+
 	Example()
 	{
 		title = "blending";
@@ -15,7 +17,11 @@ public:
 	}
 	~Example()
 	{
-
+		for (unsigned int i = 0; i < quads.size(); i++)
+		{
+			delete(quads[i]);
+		}
+		quads.swap(std::vector<Mesh*>());
 	}
 public:
 	virtual void prepare() override
@@ -90,13 +96,21 @@ public:
 		{
 			Mesh* quad = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 			quad->setPosition(iter->second);
-			addObject(static_cast<Object*>(quad));
+			quads.push_back(quad);
 		}
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		for (unsigned int i = 0; i < quads.size(); i++)
+		{
+			quads[i]->render(deltaTime);
+		}
 	}
 };
 
