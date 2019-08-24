@@ -10,7 +10,7 @@ public:
 	Example()
 	{
 		title = "transformations";
-		settings.vsync = true;
+		settings.vsync = false;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/09.transformations/";
@@ -18,7 +18,7 @@ public:
 	}
 	~Example()
 	{
-		
+		delete(cube);
 	}
 public:
 	virtual void prepare() override
@@ -103,15 +103,19 @@ public:
 		// create cube mesh
 		cube = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
 
-		addObject(static_cast<Object*>(cube));
-
 		cube->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
-		cube->rotate(glm::vec3(1.0f, 1.0f, 1.0f));
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		cube->rotate(glm::vec3(120.0f, 100.0f, 80.0f) * deltaTime);
 		cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 4.0), 0.3)));
+		cube->render(deltaTime);
 	}
 };
 
