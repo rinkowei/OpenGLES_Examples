@@ -5,7 +5,9 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	std::vector<Mesh*> cubes;
 	std::shared_ptr<Material> material;
+
 	Example()
 	{
 		title = "blinn phong lighting";
@@ -17,7 +19,11 @@ public:
 	}
 	~Example()
 	{
-
+		for (unsigned int i = 0; i < cubes.size(); i++)
+		{
+			delete(cubes[i]);
+		}
+		cubes.swap(std::vector<Mesh*>());
 	}
 public:
 	virtual void prepare() override
@@ -121,13 +127,17 @@ public:
 			cube->setPosition(cubePositions[i]);
 			cube->setRotation(glm::vec3(20.0f * i, 12.0f * i, 7.0f * i));
 			cube->setScale(glm::vec3(0.7f));
-
-			addObject(static_cast<Object*>(cube));
+			cubes.push_back(cube);
 		}
 	}
 
-	virtual void update(float deltaTime) override
+	virtual void render(float deltaTime) override
 	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		material->setVec3("viewPos", camera->getPosition());
 		material->setFloat("shininess", 32.0f);
 		// directional light
@@ -154,6 +164,11 @@ public:
 		material->setFloat("spotLight.quadratic", 0.032f);
 		material->setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
 		material->setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+		for (unsigned int i = 0; i < cubes.size(); i++)
+		{
+			cubes[i]->render(deltaTime);
+		}
 	}
 };
 
