@@ -1,4 +1,4 @@
-﻿
+﻿/*
 #define GLFW_INCLUDE_ES32
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -174,3 +174,4 @@ void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
 	camera.handleMouseScroll(yOffset);
 }
+*/
