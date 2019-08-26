@@ -131,7 +131,39 @@ public:
 
 		// create cubeYellow material
 		std::shared_ptr<Material> yellowMaterial = std::make_shared<Material>(yellowShaderPaths, texturePaths);
+		
+		// because all the uniform block index in shaders are same, so we just need to get it once
+		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMaterial->getProgramID(), "mixColor");
 
+		// create the MixColor ubo
+		GLuint uboMixColor;
+		glGenBuffers(1, &uboMixColor);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
+		GLint blockSize;
+		// get the needed size of uniform block
+		glGetActiveUniformBlockiv(blueMaterial->getProgramID(), uniformBlockIndexBlue, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+		// pre-allocate memory
+		glBufferData(GL_UNIFORM_BUFFER, blockSize, nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		// set binding point to 0
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMixColor);
+
+		const GLchar* const names[] = {
+			"additionalColor",
+			"mixValue"
+		};
+		GLuint indices[2];
+		glGetUniformIndices(blueMaterial->getProgramID(), 2, names, indices);
+		GLint offsets[2];
+		glGetActiveUniformsiv(blueMaterial->getProgramID(), 2, indices, GL_UNIFORM_OFFSET, offsets);
+		glm::vec4 additionalColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		GLfloat mixValue = 0.5f;
+		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
+		// fill the data
+		glBufferSubData(GL_UNIFORM_BUFFER, offsets[0], sizeof(glm::vec4), &additionalColor[0]);
+		glBufferSubData(GL_UNIFORM_BUFFER, offsets[1], sizeof(GLfloat), &mixValue);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		
 		// create cubeBlue mesh
 		cubeBlue = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, blueMaterial);
 		cubeBlue->setPosition(glm::vec3(-0.75f, 0.75f, 0.0f));
@@ -155,7 +187,6 @@ public:
 		glViewport(0, 0, width, height);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		
 		cubeBlue->render(deltaTime);
 		cubeGreen->render(deltaTime);
