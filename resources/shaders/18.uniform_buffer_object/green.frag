@@ -4,9 +4,9 @@ layout(location = 0) out vec4 fragColor;
 
 in vec2 fTexCoord;
 
-uniform sampler2D screenTexture;
+uniform sampler2D diffuseMap_0;
 
 void main()
 {
-    fragColor = vec4(texture(screenTexture, fTexCoord).rgb, 1.0f);
+    fragColor = texture(diffuseMap_0, fTexCoord);
 }

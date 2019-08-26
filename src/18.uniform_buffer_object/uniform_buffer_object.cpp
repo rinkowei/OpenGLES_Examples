@@ -11,12 +11,12 @@ public:
 
 	Example()
 	{
-		title = "offscreen rendering";
+		title = "uniform buffer object";
 		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/15.offscreen_rendering/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/18.uniform_buffer_object/";
 	}
 	~Example()
 	{
