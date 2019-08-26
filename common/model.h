@@ -69,6 +69,11 @@ namespace es
 			}
 		}
 
+		std::vector<Mesh*> getMeshes() const
+		{
+			return meshes;
+		}
+
 	private:
 		std::vector<Mesh*> meshes;
 		std::unordered_map<Material::ShaderType, std::string> shaders;

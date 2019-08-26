@@ -1,177 +1,96 @@
-﻿/*
-#define GLFW_INCLUDE_ES32
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
+﻿
 #include <common.h>
+using namespace es;
 
-#include <iostream>
-#include <vector>
-#include <array>
-
-using namespace std;
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void mouseCallback(GLFWwindow* window, double xPos, double yPos);
-void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
-void handleInput(GLFWwindow* window);
-
-const GLuint SCREEN_WIDTH = 800;
-const GLuint SCREEN_HEIGHT = 600;
-
-const string resources_dir(ES_EXAMPLE_RESOURCES_DIR);
-
-Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-float lastX = SCREEN_WIDTH / 2.0f;
-float lastY = SCREEN_HEIGHT / 2.0f;
-bool firstMouse = true;
-
-float deltaTime = 0.0f;
-float lastTime = 0.0f;
-
-int main()
+class Example final : public ExampleBase
 {
-	// initialize and configure glfw
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_ES_API, GLFW_OPENGL_CORE_PROFILE);
-	
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGLES_Examples", nullptr, nullptr);
-	if (window == nullptr)
+public:
+	Model* planeModel;
+	std::vector<Mesh*> meshes;
+
+	Example()
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
+		title = "normal mapping";
+		settings.vsync = false;
+		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+		modelsDirectory = getResourcesPath(ResourceType::Model);
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/16.normal_mapping/";
+		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/16.normal_mapping/";
 	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-	glfwSetCursorPosCallback(window, mouseCallback);
-	glfwSetScrollCallback(window, scrollCallback);
-	
-	// capture mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	
-	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
+	~Example()
 	{
-		cout << "Failed to initialize GLAD\n";
-		return -1;
+		delete(planeModel);
 	}
-	else
+public:
+	virtual void prepare() override
 	{
-		cout << "Success to initialize GLAD\n";
-	}
+		ExampleBase::prepare();
 
-	// enable depth test
-	glEnable(GL_DEPTH_TEST);
+		// setup camera
+		camera->rotationSpeed = 0.5f;
+		camera->setPosition(glm::vec3(0.0f, 3.0f, 4.0f));
 
-	// diffuse map
-	GLuint diffuseMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_COL.jpg", true);
-	// specular map
-	GLuint specularMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_DSP.jpg", true);
-	// normal map
-	GLuint normalMap = textureLoader::loadTexture2D(resources_dir + "/models/Aussie-Telco/telstra_NRM.jpg", true);
-	
-	Shader* shader = Shader::createWithFile(resources_dir + "shaders/16.normal_mapping/plane.vs", resources_dir + "shaders/16.normal_mapping/plane.fs");
+		// enable depth test
+		glEnable(GL_DEPTH_TEST);
 
-	Model planeModel(resources_dir + "/models/Aussie-Telco/grid.obj");
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "plane.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "plane.frag" }
+		};
 
-	// render loop
-	while (!glfwWindowShouldClose(window))
-	{
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastTime;
-		lastTime = currentFrame;
+		planeModel = Model::createWithFile(modelsDirectory + "/Aussie-Telco/grid.obj", shaderPaths);
 
-		handleInput(window);
+		Texture* diffuseMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_COL.jpg", Texture::Type::Diffuse);
+		Texture* specularMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_DSP.jpg", Texture::Type::Specular);
+		Texture* normalMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_NRM.jpg", Texture::Type::Normal);
 
-		// clear color and depth buffer
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		shader->use();
-		shader->setMat4("view", camera.getViewMatrix());
-		shader->setMat4("projection", camera.getPerspectiveMatrix());
-		
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-		shader->setMat4("model", model);
+		meshes = planeModel->getMeshes();
+		for (size_t i = 0; i < meshes.size(); i++)
+		{
+			meshes[i]->getMaterial()->setVec3("lightPos", glm::vec3(0.0f, 2.0f, 0.0f));
+			meshes[i]->getMaterial()->setInt("diffuseMap_0", 0);
+			meshes[i]->getMaterial()->setInt("specularMap_0", 1);
+			meshes[i]->getMaterial()->setInt("normalMap_0", 2);
+		}
 
-		shader->setVec3("lightPos", camera.getPosition());
-		shader->setVec3("viewPos", camera.getPosition());
-
-		// bind textures to shader
-		shader->setInt("diffuseMap", 0);
-		shader->setInt("specularMap", 1);
-		shader->setInt("normalMap", 2);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap->getID());
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
+		glBindTexture(GL_TEXTURE_2D, specularMap->getID());
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
-		
-		planeModel.Draw(*shader);
-		
-		// swap buffers and poll IO events(keys pressed / released. mouse moved etc.)
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		glBindTexture(GL_TEXTURE_2D, normalMap->getID());
 	}
 
-	glDeleteTextures(1, &diffuseMap);
-	glDeleteTextures(1, &specularMap);
-	glDeleteTextures(1, &normalMap);
+	virtual void render(float deltaTime) override
+	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glfwTerminate();
+		for (size_t i = 0; i < meshes.size(); i++)
+		{
+			meshes[i]->getMaterial()->setVec3("viewPos", camera->getPosition());
+		}
+		planeModel->render(deltaTime);
+	}
+};
+
+Example* example;
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+	example = new Example();
+	example->setupValidation();
+	if (!example->setupGLFW() ||
+		!example->loadGLESFunctions() ||
+		!example->setupImGui())
+	{
+		return 0;
+	}
+	example->prepare();
+	example->renderLoop();
+	delete(example);
 	return 0;
 }
-
-void handleInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-	else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.handleKeyboard(Camera::CameraMovement::FORWARD, deltaTime);
-	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.handleKeyboard(Camera::CameraMovement::BACKWARD, deltaTime);
-	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.handleKeyboard(Camera::CameraMovement::LEFT, deltaTime);
-	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.handleKeyboard(Camera::CameraMovement::RIGHT, deltaTime);
-}
-
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-}
-
-void mouseCallback(GLFWwindow* window, double xPos, double yPos)
-{
-	if (firstMouse)
-	{
-		lastX = xPos;
-		lastY = yPos;
-		firstMouse = false;
-	}
-	
-	float xOffset = xPos - lastX;
-	float yOffset = yPos - lastY;
-
-	lastX = xPos;
-	lastY = yPos;
-
-	camera.handleMouseMovement(xOffset, -yOffset);
-}
-
-void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
-{
-	camera.handleMouseScroll(yOffset);
-}
-*/
