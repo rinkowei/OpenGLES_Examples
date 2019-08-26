@@ -51,6 +51,7 @@ set(EXAMPLES
     15.offscreen_rendering
     16.normal_mapping
     17.dear_imgui
+    18.uniform_buffer_object
 )
 
 buildExamples()
