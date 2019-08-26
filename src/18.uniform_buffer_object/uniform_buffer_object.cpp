@@ -135,7 +135,7 @@ public:
 		// because all the uniform block index in shaders are same, so we just need to get it once
 		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMaterial->getProgramID(), "mixColor");
 
-		// create the MixColor ubo
+		// create the MixColor ubo, use default shared memory layout
 		GLuint uboMixColor;
 		glGenBuffers(1, &uboMixColor);
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
