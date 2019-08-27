@@ -6,7 +6,6 @@ class Example final : public ExampleBase
 {
 public:
 	Model* planeModel;
-	std::vector<Mesh*> meshes;
 
 	Example()
 	{
@@ -46,14 +45,10 @@ public:
 		Texture* specularMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_DSP.jpg", Texture::Type::Specular);
 		Texture* normalMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_NRM.jpg", Texture::Type::Normal);
 
-		meshes = planeModel->getMeshes();
-		for (size_t i = 0; i < meshes.size(); i++)
-		{
-			meshes[i]->getMaterial()->setVec3("lightPos", glm::vec3(0.0f, 2.0f, 0.0f));
-			meshes[i]->getMaterial()->setInt("diffuseMap_0", 0);
-			meshes[i]->getMaterial()->setInt("specularMap_0", 1);
-			meshes[i]->getMaterial()->setInt("normalMap_0", 2);
-		}
+		planeModel->setVec3("lightPos", glm::vec3(0.0f, 2.0f, 0.0f));
+		planeModel->setInteger("diffuseMap_0", 0);
+		planeModel->setInteger("specularMap_0", 1);
+		planeModel->setInteger("normalMap_0", 2);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap->getID());
@@ -70,10 +65,7 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		for (size_t i = 0; i < meshes.size(); i++)
-		{
-			meshes[i]->getMaterial()->setVec3("viewPos", camera->getPosition());
-		}
+		planeModel->setVec3("viewPos", camera->getPosition());
 		planeModel->render(deltaTime);
 	}
 };

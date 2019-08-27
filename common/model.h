@@ -74,6 +74,98 @@ namespace es
 			return meshes;
 		}
 
+		void setBoolean(const std::string& name, bool value) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setBool(name, value);
+			}
+		}
+
+		void setInteger(const std::string& name, int value) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setInt(name, value);
+			}
+		}
+
+		void setFloat(const std::string& name, float value) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setFloat(name, value);
+			}
+		}
+
+		void setVec2(const std::string& name, const glm::vec2& value) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setVec2(name, value);
+			}
+		}
+		void setVec2(const std::string& name, float x, float y) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setVec2(name, x, y);
+			}
+		}
+
+		void setVec3(const std::string& name, const glm::vec3& value) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setVec3(name, value);
+			}
+		}
+		void setVec3(const std::string& name, float x, float y, float z) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setVec3(name, x, y, z);
+			}
+		}
+
+		void setVec4(const std::string& name, const glm::vec4& value) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setVec4(name, value);
+			}
+		}
+		void setVec4(const std::string& name, float x, float y, float z, float w)
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setVec4(name, x, y, z, w);
+			}
+		}
+
+		void setMat2(const std::string& name, const glm::mat2& mat) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setMat2(name, mat);
+			}
+		}
+
+		void setMat3(const std::string& name, const glm::mat3& mat) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setMat3(name, mat);
+			}
+		}
+
+		void setMat4(const std::string& name, const glm::mat4& mat) const
+		{
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				meshes[i]->getMaterial()->setMat4(name, mat);
+			}
+		}
 	private:
 		std::vector<Mesh*> meshes;
 		std::unordered_map<Material::ShaderType, std::string> shaders;
