@@ -99,4 +99,4 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [19 - texture_cubemap](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/19.texture_cubemap>)
+#### [19 - skybox](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/19.skybox>)

@@ -12,11 +12,11 @@ public:
 
 	Example()
 	{
-		title = "uniform buffer object";
+		title = "skybox";
 		settings.vsync = false;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/18.uniform_buffer_object/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/19.skybox/";
 	}
 	~Example()
 	{
