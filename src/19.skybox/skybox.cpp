@@ -5,19 +5,22 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	Model* skybox;
 
 	Example()
 	{
 		title = "skybox";
 		settings.vsync = false;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
+		modelsDirectory = getResourcesPath(ResourceType::Model);
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/19.skybox/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()
 	{
-
+		delete(skybox);
 	}
 public:
 	virtual void prepare() override
@@ -85,10 +88,10 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		std::unordered_map<Material::ShaderType, std::string> blueShaderPaths =
+		std::unordered_map<Material::ShaderType, std::string> skyboxShaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "ubo.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "blue.frag" }
+			{ Material::ShaderType::Vertex, shadersDirectory + "skybox.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "skybox.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
@@ -96,6 +99,15 @@ public:
 			
 		};
 
+		// create a cube model as skybox
+		skybox = Model::createWithFile(modelsDirectory + "/cube/cube.obj", skyboxShaderPaths);
+		skybox->setPosition(glm::vec3(-1.0f, -1.0f, -1.0f));
+		TextureCube* cubemap = TextureCube::createWithFiles({texturesDirectory + "/skyboxes/sincity/sincity_right.tga", texturesDirectory + "/skyboxes/sincity/sincity_left.tga",
+															 texturesDirectory + "/skyboxes/sincity/sincity_top.tga", texturesDirectory + "/skyboxes/sincity/sincity_bottom.tga",
+															 texturesDirectory + "/skyboxes/sincity/sincity_front.tga", texturesDirectory + "/skyboxes/sincity/sincity_back.tga"});
+		skybox->setInteger("cubemap", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getID());
 	}
 
 	virtual void render(float deltaTime) override
@@ -105,6 +117,9 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
+		glDepthFunc(GL_LEQUAL);
+		skybox->render(deltaTime);
+		glDepthFunc(GL_LESS);
 	}
 };
 

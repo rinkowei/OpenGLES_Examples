@@ -5,7 +5,10 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+out vec3 fUVW;
+
 void main()
 {
-	gl_Position = projection * view * model * vec4(vPos, 1.0f);
+	fUVW = vPos;
+	gl_Position = projection * view * vec4(vPos, 1.0f);
 }

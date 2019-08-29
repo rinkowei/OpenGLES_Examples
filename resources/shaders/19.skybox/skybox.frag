@@ -2,13 +2,11 @@
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-layout(shared, binding = 0) uniform mixColor
-{
-	vec4 additionalColor;
-	float mixValue;
-};
+in vec3 fUVW;
+
+uniform samplerCube cubemap;
 
 void main()
 {
-    fragColor = mix(vec4(1.0f, 1.0f, 0.0f, 1.0f), additionalColor, mixValue);
+    fragColor = texture(cubemap, fUVW);
 }
