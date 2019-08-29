@@ -52,6 +52,7 @@ set(EXAMPLES
     16.normal_mapping
     17.dear_imgui
     18.uniform_buffer_object
+    19.texture_cubemap
 )
 
 buildExamples()
