@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 #include <stb/stb_image.h>
 
@@ -81,7 +82,7 @@ namespace es
 		std::string filePath;
 		Type type = Type::Diffuse;
 
-		bool initWithFile(const std::string& path, Type type)
+		GLboolean initWithFile(const std::string& path, Type type)
 		{
 			this->filePath = path;
 			this->type = type;
@@ -127,6 +128,72 @@ namespace es
 				stbi_image_free(data);
 				return false;
 			}
+
+			return true;
+		}
+	};
+
+	class TextureCube
+	{
+	public:
+		TextureCube() = default;
+		~TextureCube()
+		{
+			glDeleteTextures(1, &ID);
+		}
+
+		static TextureCube* createWithFiles(const std::vector<std::string>& filePaths)
+		{
+			TextureCube* textureCube = new (std::nothrow) TextureCube();
+			if (textureCube && textureCube->initWithFiles(filePaths))
+			{
+				return textureCube;
+			}
+			delete(textureCube);
+			return nullptr;
+		}
+
+		GLuint getID() const
+		{
+			return ID;
+		}
+	private:
+		GLuint ID = 0;
+
+		std::vector<std::string> filePaths;
+
+		GLboolean initWithFiles(const std::vector<std::string>& filePaths)
+		{
+			this->filePaths = filePaths;
+
+			glGenTextures(1, &ID);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+			int width, height, nrChannels;
+			for (size_t i = 0; i < filePaths.size(); i++)
+			{
+				unsigned char* data = stbi_load(filePaths[i].c_str(), &width, &height, &nrChannels, 0);
+				if (data)
+				{
+					if (nrChannels == 1)
+						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+					else if (nrChannels == 3)
+						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+					else if (nrChannels == 4)
+						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+					stbi_image_free(data);
+				}
+				else
+				{
+					std::cout << "failed to create cubemap texture at path : " << filePaths[i] << std::endl;
+					stbi_image_free(data);
+				}
+			}
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 			return true;
 		}
