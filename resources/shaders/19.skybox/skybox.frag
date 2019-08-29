@@ -10,5 +10,5 @@ layout(shared, binding = 0) uniform mixColor
 
 void main()
 {
-    fragColor = mix(vec4(1.0f, 0.0f, 0.0f, 1.0f), additionalColor, mixValue);
+    fragColor = mix(vec4(1.0f, 1.0f, 0.0f, 1.0f), additionalColor, mixValue);
 }
