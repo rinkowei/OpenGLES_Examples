@@ -2,7 +2,6 @@
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-uniform vec3 viewPos;
 uniform samplerCube skybox;
 
 in VS_OUT
