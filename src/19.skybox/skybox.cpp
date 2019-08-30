@@ -6,6 +6,7 @@ class Example final : public ExampleBase
 {
 public:
 	Model* skybox;
+	Model* sphere;
 
 	Example()
 	{
@@ -21,6 +22,7 @@ public:
 	~Example()
 	{
 		delete(skybox);
+		delete(sphere);
 	}
 public:
 	virtual void prepare() override
@@ -30,7 +32,7 @@ public:
 		// setup camera
 		camera->movementSpeed = 2.0f;
 		camera->rotationSpeed = 1.0f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		camera->setPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -94,6 +96,12 @@ public:
 			{ Material::ShaderType::Fragment, shadersDirectory + "skybox.frag" }
 		};
 
+		std::unordered_map<Material::ShaderType, std::string> sphereShaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "reflect.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "reflect.frag" }
+		};
+
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
 		{
 			
@@ -101,12 +109,16 @@ public:
 
 		std::shared_ptr<Material> material = std::make_shared<Material>(skyboxShaderPaths, texturePaths);
 
+		// create a sphere model
+		sphere = Model::createWithFile(modelsDirectory + "/sphere/sphere.obj", sphereShaderPaths);
+		sphere->setPosition(glm::vec3(0.0f, 0.0f, -2.0f));
+		sphere->setScale(glm::vec3(0.02f, 0.02f, 0.02f));
 		// create a cube model as skybox
 		skybox = Model::createWithFile(modelsDirectory + "/cube/cube.obj", skyboxShaderPaths);
 
-		TextureCube* cubemap = TextureCube::createWithFiles({texturesDirectory + "/skyboxes/sincity/right.tga", texturesDirectory + "/skyboxes/sincity/left.tga",
-															 texturesDirectory + "/skyboxes/sincity/top.tga", texturesDirectory + "/skyboxes/sincity/bottom.tga",
-															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga"});
+		TextureCube* cubemap = TextureCube::createWithFiles({texturesDirectory + "/skyboxes/sea/right.jpg", texturesDirectory + "/skyboxes/sea/left.jpg",
+															 texturesDirectory + "/skyboxes/sea/top.jpg", texturesDirectory + "/skyboxes/sea/bottom.jpg",
+															 texturesDirectory + "/skyboxes/sea/front.jpg", texturesDirectory + "/skyboxes/sea/back.jpg"});
 		skybox->setInteger("cubemap", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getID());
@@ -119,6 +131,9 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
+
+		sphere->render(deltaTime);
+
 		glDepthFunc(GL_LEQUAL);
 		skybox->render(deltaTime);
 		glDepthFunc(GL_LESS);
