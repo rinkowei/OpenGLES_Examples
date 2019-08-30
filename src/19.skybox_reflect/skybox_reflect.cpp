@@ -10,9 +10,8 @@ public:
 
 	Example()
 	{
-		title = "skybox";
+		title = "skybox reflect";
 		settings.vsync = false;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
