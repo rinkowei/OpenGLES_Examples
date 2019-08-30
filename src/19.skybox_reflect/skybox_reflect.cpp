@@ -111,14 +111,16 @@ public:
 
 		// create a sphere model
 		sphere = Model::createWithFile(modelsDirectory + "/sphere/sphere.obj", sphereShaderPaths);
-		sphere->setPosition(glm::vec3(0.0f, 0.0f, -2.0f));
+		sphere->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 		sphere->setScale(glm::vec3(0.02f, 0.02f, 0.02f));
 		// create a cube model as skybox
 		skybox = Model::createWithFile(modelsDirectory + "/cube/cube.obj", skyboxShaderPaths);
 
-		TextureCube* cubemap = TextureCube::createWithFiles({texturesDirectory + "/skyboxes/sea/right.jpg", texturesDirectory + "/skyboxes/sea/left.jpg",
-															 texturesDirectory + "/skyboxes/sea/top.jpg", texturesDirectory + "/skyboxes/sea/bottom.jpg",
-															 texturesDirectory + "/skyboxes/sea/front.jpg", texturesDirectory + "/skyboxes/sea/back.jpg"});
+		TextureCube* cubemap = TextureCube::createWithFiles({texturesDirectory + "/skyboxes/sincity/right.tga", texturesDirectory + "/skyboxes/sincity/left.tga",
+															 texturesDirectory + "/skyboxes/sincity/top.tga", texturesDirectory + "/skyboxes/sincity/bottom.tga",
+															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga"});
+		
+		sphere->setInteger("skybox", 0);
 		skybox->setInteger("cubemap", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getID());
@@ -131,7 +133,7 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
-
+		sphere->setVec3("viewPos", camera->getPosition());
 		sphere->render(deltaTime);
 
 		glDepthFunc(GL_LEQUAL);
