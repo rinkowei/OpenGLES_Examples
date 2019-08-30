@@ -73,8 +73,11 @@ public:
 		
 		sphere->render(deltaTime);
 
+		// change depth function so depth test passes when depth values are equal to content of depth buffer
 		glDepthFunc(GL_LEQUAL);
+		// render skybox at last
 		skybox->render(deltaTime);
+		// set depth function back to default
 		glDepthFunc(GL_LESS);
 	}
 };

@@ -10,7 +10,7 @@ in VS_OUT
 	vec3 fNormal;
 	vec3 fViewVec;
 	vec3 fLightVec;
-	mat4 fInvModelView;
+	mat4 fInvModel;
 }fs_in;
 
 void main()
@@ -18,7 +18,7 @@ void main()
 	vec3 cI = normalize(fs_in.fFragPos);
 	vec3 cR = reflect(cI, normalize(fs_in.fNormal));
 
-	cR = vec3(fs_in.fInvModelView * vec4(cR, 0.0f));
+	cR = vec3(fs_in.fInvModel * vec4(cR, 0.0f));
 	cR.yz *= -1.0f;
 
 	vec4 color = texture(skybox, cR);

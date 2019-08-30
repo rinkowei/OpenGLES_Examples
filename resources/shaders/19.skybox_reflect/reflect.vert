@@ -13,7 +13,7 @@ out VS_OUT
 	vec3 fNormal;
 	vec3 fViewVec;
 	vec3 fLightVec;
-	mat4 fInvModelView;
+	mat4 fInvModel;
 }vs_out;
 
 
@@ -23,7 +23,7 @@ void main()
 	vs_out.fNormal = mat3(model) * vNormal;
 	vs_out.fViewVec = -vs_out.fFragPos.xyz;
 	vs_out.fLightVec = vec3(0.0f, -5.0f, -5.0f) - vs_out.fFragPos.xyz;
-	vs_out.fInvModelView = inverse(model);
+	vs_out.fInvModel = inverse(model);
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }
