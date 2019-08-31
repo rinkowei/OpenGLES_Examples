@@ -53,6 +53,7 @@ set(EXAMPLES
     17.dear_imgui
     18.uniform_buffer_object
     20.parallex_mapping
+    21.shadow_mapping_directional_light
 )
 
 buildExamples()
