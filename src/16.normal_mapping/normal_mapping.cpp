@@ -27,8 +27,10 @@ public:
 		ExampleBase::prepare();
 
 		// setup camera
+		camera->movementSpeed = 2.0f;
 		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, 3.0f, 4.0f));
+		camera->setPosition(glm::vec3(0.0f, 2.0f, 2.0f));
+		camera->setRotation(glm::vec3(-60.0f, -90.0f, 0.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -39,22 +41,19 @@ public:
 			{ Material::ShaderType::Fragment, shadersDirectory + "plane.frag" }
 		};
 
-		planeModel = Model::createWithFile(modelsDirectory + "/Aussie-Telco/grid.obj", shaderPaths);
+		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", shaderPaths);
+		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 
-		Texture* diffuseMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_COL.jpg", Texture::Type::Diffuse);
-		Texture* specularMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_DSP.jpg", Texture::Type::Specular);
-		Texture* normalMap = Texture::createWithFile(modelsDirectory + "/Aussie-Telco/telstra_NRM.jpg", Texture::Type::Normal);
+		Texture* diffuseMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png", Texture::Type::Diffuse);
+		Texture* normalMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png", Texture::Type::Normal);
 
-		planeModel->setVec3("lightPos", glm::vec3(0.0f, 2.0f, 0.0f));
 		planeModel->setInteger("diffuseMap_0", 0);
-		planeModel->setInteger("specularMap_0", 1);
-		planeModel->setInteger("normalMap_0", 2);
+		planeModel->setInteger("normalMap_0", 1);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap->getID());
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap->getID());
-		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, normalMap->getID());
 	}
 
@@ -65,8 +64,9 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		planeModel->setVec3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 10.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
 		planeModel->setVec3("viewPos", camera->getPosition());
-		planeModel->render(deltaTime);
+		planeModel->draw(deltaTime, true);
 	}
 };
 
