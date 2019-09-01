@@ -5,23 +5,22 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Model* skybox;
-	Model* sphere;
+	Model* scene;
 
 	Example()
 	{
-		title = "parallex mapping";
+		title = "shadow mapping directional light";
 		settings.vsync = false;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/20.parallex_mapping/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/21.shadow_mapping_directional_light/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()
 	{
-		delete(skybox);
-		delete(sphere);
+		delete(scene);
 	}
 public:
 	virtual void prepare() override
@@ -36,32 +35,20 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		std::unordered_map<Material::ShaderType, std::string> skyboxShaderPaths =
+		std::unordered_map<Material::ShaderType, std::string> depthShaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "skybox.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "skybox.frag" }
+			{ Material::ShaderType::Vertex, shadersDirectory + "depth_map.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "depth_map.frag" }
 		};
 
-		std::unordered_map<Material::ShaderType, std::string> sphereShaderPaths =
+		std::unordered_map<Material::ShaderType, std::string> sceneShaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "reflect.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "reflect.frag" }
+			{ Material::ShaderType::Vertex, shadersDirectory + "scene.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "scene.frag" }
 		};
 
-		// create a sphere model
-		sphere = Model::createWithFile(modelsDirectory + "/sphere/sphere.obj", sphereShaderPaths);
-		sphere->setScale(glm::vec3(0.03f, 0.03f, 0.03f));
-		// create a cube model as skybox
-		skybox = Model::createWithFile(modelsDirectory + "/cube/cube.obj", skyboxShaderPaths);
-
-		TextureCube* cubemap = TextureCube::createWithFiles({texturesDirectory + "/skyboxes/sincity/right.tga", texturesDirectory + "/skyboxes/sincity/left.tga",
-															 texturesDirectory + "/skyboxes/sincity/top.tga", texturesDirectory + "/skyboxes/sincity/bottom.tga",
-															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga"});
-		
-		sphere->setInteger("skybox", 0);
-		skybox->setInteger("cubemap", 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->getID());
+		scene = Model::createWithFile(modelsDirectory + "/susanoo/Susanoo.obj", sceneShaderPaths);
+		scene->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -70,15 +57,8 @@ public:
 		glViewport(0, 0, width, height);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		
-		sphere->render(deltaTime);
 
-		// change depth function so depth test passes when depth values are equal to content of depth buffer
-		glDepthFunc(GL_LEQUAL);
-		// render skybox at last
-		skybox->render(deltaTime);
-		// set depth function back to default
-		glDepthFunc(GL_LESS);
+		scene->render(deltaTime);
 	}
 };
 

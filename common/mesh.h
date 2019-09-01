@@ -18,12 +18,12 @@ namespace es
 {
 	struct Vertex
 	{
-		std::optional<glm::vec3> Position;
-		std::optional<glm::vec2> TexCoords;
-		std::optional<glm::vec3> Normal;
-		std::optional<glm::vec3> Tangent;
-		std::optional<glm::vec3> Bitangent;
-		std::optional<glm::vec4> Color;
+		glm::vec3 Position;
+		glm::vec2 TexCoords;
+		glm::vec3 Normal;
+		glm::vec3 Tangent;
+		glm::vec3 Bitangent;
+		glm::vec3 Color;
 	};
 
 	class Mesh : public Object
@@ -168,41 +168,24 @@ namespace es
 			}
 
 			GLushort attrLocation = 0;
-			if (vertices[0].Position.has_value())
-			{
-				glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
-				glEnableVertexAttribArray(attrLocation++);
-			}
 
-			if (vertices[0].TexCoords.has_value())
-			{
-				glVertexAttribPointer(attrLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-				glEnableVertexAttribArray(attrLocation++);
-			}
+			glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+			glEnableVertexAttribArray(attrLocation++);
 
-			if (vertices[0].Normal.has_value())
-			{
-				glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-				glEnableVertexAttribArray(attrLocation++);
-			}
+			glVertexAttribPointer(attrLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+			glEnableVertexAttribArray(attrLocation++);
 
-			if (vertices[0].Tangent.has_value())
-			{
-				glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
-				glEnableVertexAttribArray(attrLocation++);
-			}
+			glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+			glEnableVertexAttribArray(attrLocation++);
 
-			if (vertices[0].Bitangent.has_value())
-			{
-				glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
-				glEnableVertexAttribArray(attrLocation++);
-			}
+			glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+			glEnableVertexAttribArray(attrLocation++);
+	
+			glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+			glEnableVertexAttribArray(attrLocation++);
 
-			if (vertices[0].Color.has_value())
-			{
-				glVertexAttribPointer(attrLocation, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
-				glEnableVertexAttribArray(attrLocation);
-			}
+			glVertexAttribPointer(attrLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+			glEnableVertexAttribArray(attrLocation);
 			
 			glBindVertexArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);

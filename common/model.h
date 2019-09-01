@@ -238,11 +238,12 @@ namespace es
 					vertex.Tangent = glm::vec3(0.0f);
 					vertex.Bitangent = glm::vec3(0.0f);
 				}
-
+			
 				if (mesh->HasVertexColors(0))
-					vertex.Color = glm::vec4(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b, mesh->mColors[0][i].a);
+					vertex.Color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
 				else
-					vertex.Color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+					vertex.Color = glm::vec3(0.0f, 0.0f, 0.0f);
+				
 
 				vertices.push_back(vertex);
 			}
