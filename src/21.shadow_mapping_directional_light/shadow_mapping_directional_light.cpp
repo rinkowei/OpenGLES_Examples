@@ -5,14 +5,15 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	Model* scene;
+	Model* plane;
+	Model* susanoo;
 
 	Example()
 	{
 		title = "shadow mapping directional light";
 		settings.vsync = false;
 		settings.validation = true;
-		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/21.shadow_mapping_directional_light/";
@@ -20,7 +21,8 @@ public:
 	}
 	~Example()
 	{
-		delete(scene);
+		delete(plane);
+		delete(susanoo);
 	}
 public:
 	virtual void prepare() override
@@ -30,7 +32,7 @@ public:
 		// setup camera
 		camera->movementSpeed = 2.0f;
 		camera->rotationSpeed = 1.0f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+		camera->setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -47,8 +49,18 @@ public:
 			{ Material::ShaderType::Fragment, shadersDirectory + "scene.frag" }
 		};
 
-		scene = Model::createWithFile(modelsDirectory + "/susanoo/Susanoo.obj", sceneShaderPaths);
-		scene->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		std::unordered_map<Material::ShaderType, std::string> planeShaderPaths =
+		{
+			{ Material::ShaderType::Vertex, shadersDirectory + "plane.vert" },
+			{ Material::ShaderType::Fragment, shadersDirectory + "plane.frag" }
+		};
+
+		plane = Model::createWithFile(modelsDirectory + "/cube/cube.obj", planeShaderPaths);
+		plane->setScale(glm::vec3(2.0f, 0.05f, 2.0f));
+
+		susanoo = Model::createWithFile(modelsDirectory + "/susanoo/Susanoo.obj", sceneShaderPaths);
+		susanoo->setPosition(glm::vec3(0.0f, 0.07f, 0.0f));
+		susanoo->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -58,7 +70,8 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		scene->render(deltaTime);
+		plane->render(deltaTime);
+		susanoo->render(deltaTime);
 	}
 };
 
