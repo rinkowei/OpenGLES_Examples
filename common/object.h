@@ -108,6 +108,11 @@ namespace es
 			this->model = model;
 		}
 
+		const glm::mat4& getModelMatrix() const
+		{
+			return model;
+		}
+
 		void setAutoUpdated(GLboolean autoUpdated)
 		{
 			this->autoUpdated = autoUpdated;

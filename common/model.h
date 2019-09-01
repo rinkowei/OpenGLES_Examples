@@ -52,11 +52,16 @@ namespace es
 			{
 				Object::update(deltaTime);
 			}
+		}
+
+		void draw(float deltaTime, bool isUseOwnMat = true)
+		{
+			render(deltaTime);
 
 			for (unsigned int i = 0; i < meshes.size(); i++)
 			{
 				meshes[i]->setModelMatrix(model);
-				meshes[i]->render(deltaTime);
+				meshes[i]->draw(deltaTime, isUseOwnMat);
 			}
 		}
 

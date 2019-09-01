@@ -5,8 +5,15 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	std::shared_ptr<Material> depthMapMat;
+	
 	Model* plane;
-	Model* susanoo;
+	Model* xenoRaven;
+
+	const uint16_t depthMapWidth = 1024;
+	const uint16_t depthMapHeight = 1024;
+	uint32_t depthMapFBO;
+	uint32_t depthTexture;
 
 	Example()
 	{
@@ -22,7 +29,7 @@ public:
 	~Example()
 	{
 		delete(plane);
-		delete(susanoo);
+		delete(xenoRaven);
 	}
 public:
 	virtual void prepare() override
@@ -33,6 +40,7 @@ public:
 		camera->movementSpeed = 2.0f;
 		camera->rotationSpeed = 1.0f;
 		camera->setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
+		camera->rotate(glm::vec3(90.0f, 0.0f, 0.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -41,6 +49,11 @@ public:
 		{
 			{ Material::ShaderType::Vertex, shadersDirectory + "depth_map.vert" },
 			{ Material::ShaderType::Fragment, shadersDirectory + "depth_map.frag" }
+		};
+
+		std::vector<std::pair<Texture::Type, std::string>> depthTexturePaths =
+		{
+		
 		};
 
 		std::unordered_map<Material::ShaderType, std::string> sceneShaderPaths =
@@ -55,12 +68,33 @@ public:
 			{ Material::ShaderType::Fragment, shadersDirectory + "plane.frag" }
 		};
 
+		depthMapMat = std::make_shared<Material>(depthShaderPaths, depthTexturePaths);
+
 		plane = Model::createWithFile(modelsDirectory + "/cube/cube.obj", planeShaderPaths);
 		plane->setScale(glm::vec3(2.0f, 0.05f, 2.0f));
 
-		susanoo = Model::createWithFile(modelsDirectory + "/susanoo/Susanoo.obj", sceneShaderPaths);
-		susanoo->setPosition(glm::vec3(0.0f, 0.07f, 0.0f));
-		susanoo->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		xenoRaven = Model::createWithFile(modelsDirectory + "/xeno-raven/XenoRaven.fbx", sceneShaderPaths);
+		xenoRaven->setPosition(glm::vec3(0.0f, 0.05f, 1.0f));
+		xenoRaven->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
+
+		// configure depth map FBO;
+		glGenFramebuffers(1, &depthMapFBO);
+		glGenTextures(1, &depthTexture);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, depthMapWidth, depthMapHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depthMapWidth, depthMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		std::array<float, 4> borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor.data());
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapFBO, 0);
+		glDrawBuffers(0, GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	}
 
 	virtual void render(float deltaTime) override
@@ -70,8 +104,57 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		plane->render(deltaTime);
-		susanoo->render(deltaTime);
+		glm::mat4 lightSpaceMatrix = glm::ortho(-3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 100.0f) * camera->getViewMatrix();
+		depthMapMat->apply();
+		depthMapMat->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glViewport(0, 0, depthMapWidth, depthMapHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		depthMapMat->setMat4("model", plane->getModelMatrix());
+		plane->draw(deltaTime, false);
+		depthMapMat->setMat4("model", xenoRaven->getModelMatrix());
+		xenoRaven->draw(deltaTime, false);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		
+		glViewport(0, 0, width, height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		plane->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		plane->setInteger("depthMap", 0);
+		plane->draw(deltaTime, true);
+		xenoRaven->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		xenoRaven->setInteger("depthMap", 0);
+		xenoRaven->draw(deltaTime, true);
+		
+	}
+
+	void renderQuad()
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		unsigned int quadVAO, quadVBO;
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 	}
 };
 
