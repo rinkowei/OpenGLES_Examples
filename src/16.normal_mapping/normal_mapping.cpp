@@ -6,7 +6,8 @@ class Example final : public ExampleBase
 {
 public:
 	Model* planeModel;
-
+	Texture* diffuseMap;
+	Texture* normalMap;
 	Example()
 	{
 		title = "normal mapping";
@@ -45,16 +46,11 @@ public:
 		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 
-		Texture* diffuseMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png", Texture::Type::Diffuse);
-		Texture* normalMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png", Texture::Type::Normal);
+		diffuseMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png", Texture::Type::Diffuse);
+		normalMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png", Texture::Type::Normal);
 
 		planeModel->setInteger("diffuseMap_0", 0);
 		planeModel->setInteger("normalMap_0", 1);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap->getID());
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normalMap->getID());
 	}
 
 	virtual void render(float deltaTime) override
@@ -64,7 +60,12 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		planeModel->setVec3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 10.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap->getID());
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalMap->getID());
+
+		planeModel->setVec3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
 		planeModel->setVec3("viewPos", camera->getPosition());
 		planeModel->draw(deltaTime, true);
 	}

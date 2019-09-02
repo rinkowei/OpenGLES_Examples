@@ -91,6 +91,7 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
+				meshes[i]->getMaterial()->apply();
 				meshes[i]->getMaterial()->setInt(name, value);
 			}
 		}
