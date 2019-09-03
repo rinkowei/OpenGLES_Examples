@@ -83,7 +83,7 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setBool(name, value);
+				meshes[i]->getMaterial()->setBoolean(name, value);
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace es
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
 				meshes[i]->getMaterial()->apply();
-				meshes[i]->getMaterial()->setInt(name, value);
+				meshes[i]->getMaterial()->setInteger(name, value);
 			}
 		}
 
@@ -108,14 +108,14 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setVec2(name, value);
+				meshes[i]->getMaterial()->setVector2(name, value);
 			}
 		}
 		void setVec2(const std::string& name, float x, float y) const
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setVec2(name, x, y);
+				meshes[i]->getMaterial()->setVector2(name, x, y);
 			}
 		}
 
@@ -123,14 +123,14 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setVec3(name, value);
+				meshes[i]->getMaterial()->setVector3(name, value);
 			}
 		}
 		void setVec3(const std::string& name, float x, float y, float z) const
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setVec3(name, x, y, z);
+				meshes[i]->getMaterial()->setVector3(name, x, y, z);
 			}
 		}
 
@@ -138,14 +138,14 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setVec4(name, value);
+				meshes[i]->getMaterial()->setVector4(name, value);
 			}
 		}
 		void setVec4(const std::string& name, float x, float y, float z, float w)
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setVec4(name, x, y, z, w);
+				meshes[i]->getMaterial()->setVector4(name, x, y, z, w);
 			}
 		}
 
@@ -153,7 +153,7 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setMat2(name, mat);
+				meshes[i]->getMaterial()->setMatrix2x2(name, mat);
 			}
 		}
 
@@ -161,7 +161,7 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setMat3(name, mat);
+				meshes[i]->getMaterial()->setMatrix3x3(name, mat);
 			}
 		}
 
@@ -169,7 +169,7 @@ namespace es
 		{
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
-				meshes[i]->getMaterial()->setMat4(name, mat);
+				meshes[i]->getMaterial()->setMatrix4x4(name, mat);
 			}
 		}
 	private:
@@ -266,23 +266,59 @@ namespace es
 				}
 			}
 			
+			// load diffuse maps
 			std::vector<std::pair<Texture::Type, std::string>> diffuseMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_DIFFUSE);
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
+			// load specular maps
 			std::vector<std::pair<Texture::Type, std::string>> specularMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_SPECULAR);
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
+			// load ambient maps
+			std::vector<std::pair<Texture::Type, std::string>> ambientMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_AMBIENT);
+			textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
+
+			// load emissive maps
+			std::vector<std::pair<Texture::Type, std::string>> emissiveMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_EMISSIVE);
+			textures.insert(textures.end(), emissiveMaps.begin(), emissiveMaps.end());
+
+			// load normal maps
 			std::vector<std::pair<Texture::Type, std::string>> normalMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_NORMALS);
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
+			// load height maps
 			std::vector<std::pair<Texture::Type, std::string>> heightMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_HEIGHT);
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
+			// load shininess maps
+			std::vector<std::pair<Texture::Type, std::string>> shininessMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_SHININESS);
+			textures.insert(textures.end(), shininessMaps.begin(), shininessMaps.end());
+
+			// load opacity maps
+			std::vector<std::pair<Texture::Type, std::string>> opacityMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_OPACITY);
+			textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
+
+			// load displacement maps
+			std::vector<std::pair<Texture::Type, std::string>> displacementMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_DISPLACEMENT);
+			textures.insert(textures.end(), displacementMaps.begin(), displacementMaps.end());
+
+			// load light maps
+			std::vector<std::pair<Texture::Type, std::string>> lightMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_LIGHTMAP);
+			textures.insert(textures.end(), lightMaps.begin(), lightMaps.end());
+
+			// load reflection maps
+			std::vector<std::pair<Texture::Type, std::string>> reflectionMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_REFLECTION);
+			textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
+
+			// load unknown maps
+			std::vector<std::pair<Texture::Type, std::string>> unknownMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_UNKNOWN);
+			textures.insert(textures.end(), unknownMaps.begin(), unknownMaps.end());
 
 			std::shared_ptr<Material> material = std::make_shared<Material>(shaders, textures);
 
 			Mesh* partMesh = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
 			partMesh->setAutoUpdated(false);
-
+	
 			return partMesh;
 		}
 
@@ -311,22 +347,62 @@ namespace es
 				{
 					case aiTextureType_DIFFUSE:
 					{
-						texType = Texture::Type::Diffuse;
+						texType = Texture::Type::DIFFUSE;
 						break;
 					}
 					case aiTextureType_SPECULAR:
 					{
-						texType = Texture::Type::Specular;
+						texType = Texture::Type::SPECULAR;
+						break;
+					}
+					case aiTextureType_AMBIENT:
+					{
+						texType = Texture::Type::AMBIENT;
+						break;
+					}
+					case aiTextureType_EMISSIVE:
+					{
+						texType = Texture::Type::EMISSIVE;
 						break;
 					}
 					case aiTextureType_NORMALS:
 					{
-						texType = Texture::Type::Normal;
+						texType = Texture::Type::NORMAL;
 						break;
 					}
 					case aiTextureType_HEIGHT:
 					{
-						texType = Texture::Type::Height;
+						texType = Texture::Type::HEIGHT;
+						break;
+					}
+					case aiTextureType_SHININESS:
+					{
+						texType = Texture::Type::SHININESS;
+						break;
+					}
+					case aiTextureType_OPACITY:
+					{
+						texType = Texture::Type::OPACITY;
+						break;
+					}
+					case aiTextureType_DISPLACEMENT:
+					{
+						texType = Texture::Type::DISPLACEMENT;
+						break;
+					}
+					case aiTextureType_LIGHTMAP:
+					{
+						texType = Texture::Type::LIGHTMAP;
+						break;
+					}
+					case aiTextureType_REFLECTION:
+					{
+						texType = Texture::Type::REFLECTION;
+						break;
+					}
+					case aiTextureType_UNKNOWN:
+					{
+						texType = Texture::Type::UNKNOWN;
 						break;
 					}
 				}

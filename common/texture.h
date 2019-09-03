@@ -26,10 +26,18 @@ namespace es
 
 		enum class Type
 		{
-			Diffuse,
-			Specular,
-			Normal,
-			Height
+			DIFFUSE,
+			SPECULAR,
+			AMBIENT,
+			EMISSIVE,
+			NORMAL,
+			HEIGHT,
+			SHININESS,
+			OPACITY,
+			DISPLACEMENT,
+			LIGHTMAP,
+			REFLECTION,
+			UNKNOWN
 		};
 
 		static Texture* createWithFile(const std::string& path, Type type)
@@ -80,7 +88,7 @@ namespace es
 		GLenum format = GL_RGBA;
 
 		std::string filePath;
-		Type type = Type::Diffuse;
+		Type type = Type::UNKNOWN;
 
 		GLboolean initWithFile(const std::string& path, Type type)
 		{

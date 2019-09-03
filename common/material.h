@@ -257,10 +257,18 @@ namespace es
 				textures.swap(std::vector<Texture*>());
 			}
 
-			GLuint diffuseMap = 0;
-			GLuint specularMap = 0;
-			GLuint normalMap = 0;
-			GLuint heightMap = 0;
+			GLuint diffuseMap       = 0;
+			GLuint specularMap      = 0;
+			GLuint ambientMap       = 0;
+			GLuint emissiveMap      = 0;
+			GLuint normalMap        = 0;
+			GLuint heightMap        = 0;
+			GLuint shininessMap     = 0;
+			GLuint opacityMap       = 0;
+			GLuint displacementMap  = 0;
+			GLuint lightMap         = 0;
+			GLuint reflectionMap    = 0;
+			GLuint unknownMap       = 0;
 
 			GLuint count = 0;
 
@@ -293,25 +301,65 @@ namespace es
 
 				std::string number;
 				std::string name;
-				if (texturePath.first == Texture::Type::Diffuse)
+				if (texturePath.first == Texture::Type::DIFFUSE)
 				{
 					name = "diffuseMap_";
 					number = std::to_string(diffuseMap++);
 				}
-				else if (texturePath.first == Texture::Type::Specular)
+				else if (texturePath.first == Texture::Type::SPECULAR)
 				{
 					name = "specularMap_";
 					number = std::to_string(specularMap++);
 				}
-				else if (texturePath.first == Texture::Type::Normal)
+				else if (texturePath.first == Texture::Type::AMBIENT)
+				{
+					name = "ambientMap_";
+					number = std::to_string(ambientMap++);
+				}
+				else if (texturePath.first == Texture::Type::EMISSIVE)
+				{
+					name = "emissiveMap_";
+					number = std::to_string(emissiveMap++);
+				}
+				else if (texturePath.first == Texture::Type::NORMAL)
 				{
 					name = "normalMap_";
 					number = std::to_string(normalMap++);
 				}
-				else if (texturePath.first == Texture::Type::Height)
+				else if (texturePath.first == Texture::Type::HEIGHT)
 				{
 					name = "heightMap_";
 					number = std::to_string(heightMap++);
+				}
+				else if (texturePath.first == Texture::Type::SHININESS)
+				{
+					name = "shininessMap_";
+					number = std::to_string(shininessMap++);
+				}
+				else if (texturePath.first == Texture::Type::OPACITY)
+				{
+					name = "opacityMap_";
+					number = std::to_string(opacityMap++);
+				}
+				else if (texturePath.first == Texture::Type::DISPLACEMENT)
+				{
+					name = "displacementMap_";
+					number = std::to_string(displacementMap++);
+				}
+				else if (texturePath.first == Texture::Type::LIGHTMAP)
+				{
+					name = "lightMap_";
+					number = std::to_string(lightMap++);
+				}
+				else if (texturePath.first == Texture::Type::REFLECTION)
+				{
+					name = "reflectionMap_";
+					number = std::to_string(reflectionMap++);
+				}
+				else if (texturePath.first == Texture::Type::UNKNOWN)
+				{
+					name = "unknownMap_";
+					number = std::to_string(unknownMap++);
 				}
 
 				setInteger((name + number).c_str(), count++);
