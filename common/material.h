@@ -87,59 +87,62 @@ namespace es
 
 		void setBoolean(const std::string& name, bool value) const
 		{
-			glUniform1i(glGetUniformLocation(programID, name.c_str()), (int)value);
+			glProgramUniform1i(programID, glGetUniformLocation(programID, name.c_str()), (int)value);
 		}
 
 		void setInteger(const std::string& name, int value) const
 		{
-			glUniform1i(glGetUniformLocation(programID, name.c_str()), value);
+			glProgramUniform1i(programID, glGetUniformLocation(programID, name.c_str()), value);
 		}
 
 		void setFloat(const std::string& name, float value) const
 		{
-			glUniform1f(glGetUniformLocation(programID, name.c_str()), value);
+			glProgramUniform1f(programID, glGetUniformLocation(programID, name.c_str()), value);
 		}
 
 		void setVector2(const std::string& name, const glm::vec2& value) const
 		{
-			glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
+			glProgramUniform2fv(programID, glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
 		}
+
 		void setVector2(const std::string& name, float x, float y) const
 		{
-			glUniform2f(glGetUniformLocation(programID, name.c_str()), x, y);
+			glProgramUniform2f(programID, glGetUniformLocation(programID, name.c_str()), x, y);
 		}
 
 		void setVector3(const std::string& name, const glm::vec3& value) const
 		{
-			glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
+			glProgramUniform3fv(programID, glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
 		}
+
 		void setVector3(const std::string& name, float x, float y, float z) const
 		{
-			glUniform3f(glGetUniformLocation(programID, name.c_str()), x, y, z);
+			glProgramUniform3f(programID, glGetUniformLocation(programID, name.c_str()), x, y, z);
 		}
 
 		void setVector4(const std::string& name, const glm::vec4& value) const
 		{
-			glUniform4fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
+			glProgramUniform4fv(programID, glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
 		}
+
 		void setVector4(const std::string& name, float x, float y, float z, float w)
 		{
-			glUniform4f(glGetUniformLocation(programID, name.c_str()), x, y, z, w);
+			glProgramUniform4f(programID, glGetUniformLocation(programID, name.c_str()), x, y, z, w);
 		}
 
 		void setMatrix2x2(const std::string& name, const glm::mat2& mat) const
 		{
-			glUniformMatrix2fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+			glProgramUniformMatrix2fv(programID, glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
 
 		void setMatrix3x3(const std::string& name, const glm::mat3& mat) const
 		{
-			glUniformMatrix3fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+			glProgramUniformMatrix3fv(programID, glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
 
 		void setMatrix4x4(const std::string& name, const glm::mat4& mat) const
 		{
-			glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+			glProgramUniformMatrix4fv(programID, glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
 
 		GLuint getProgramID()

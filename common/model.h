@@ -28,11 +28,11 @@ namespace es
 		Model() = default;
 		~Model()
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				delete(meshes[i]);
+				delete(iter->second);
 			}
-			meshes.swap(std::vector<Mesh*>());
+			meshes.swap(std::unordered_map<std::string, Mesh*>());
 		}
 
 		static Model* createWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shaders)
@@ -46,141 +46,141 @@ namespace es
 			return nullptr;
 		}
 
+		static Model* createWithFile(const std::string& path, std::shared_ptr<Material> material)
+		{
+			return nullptr;
+		}
+
 		virtual void render(float deltaTime) override
 		{
 			if (autoUpdated)
 			{
 				Object::update(deltaTime);
 			}
-		}
 
-		void draw(float deltaTime, bool isUseOwnMat = true)
-		{
-			render(deltaTime);
-
-			for (unsigned int i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->setModelMatrix(model);
-				meshes[i]->draw(deltaTime, isUseOwnMat);
+				iter->second->setModelMatrix(model);
+				iter->second->render(deltaTime);
 			}
 		}
 
 		virtual void update(float deltaTime) override
 		{
 			Object::update(deltaTime);
-			for (size_t i = 0; i < meshes.size(); i++)
+
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->setModelMatrix(model);
+				iter->second->setModelMatrix(model);
 			}
 		}
 
-		std::vector<Mesh*> getMeshes() const
+		std::unordered_map<std::string, Mesh*> getMeshes() const
 		{
 			return meshes;
 		}
 
 		void setBoolean(const std::string& name, bool value) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setBoolean(name, value);
+				iter->second->getMaterial()->setBoolean(name, value);
 			}
 		}
 
 		void setInteger(const std::string& name, int value) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->apply();
-				meshes[i]->getMaterial()->setInteger(name, value);
+				iter->second->getMaterial()->setInteger(name, value);
 			}
 		}
 
 		void setFloat(const std::string& name, float value) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setFloat(name, value);
+				iter->second->getMaterial()->setFloat(name, value);
 			}
 		}
 
-		void setVec2(const std::string& name, const glm::vec2& value) const
+		void setVector2(const std::string& name, const glm::vec2& value) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setVector2(name, value);
+				iter->second->getMaterial()->setVector2(name, value);
 			}
 		}
-		void setVec2(const std::string& name, float x, float y) const
+		void setVector2(const std::string& name, float x, float y) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setVector2(name, x, y);
-			}
-		}
-
-		void setVec3(const std::string& name, const glm::vec3& value) const
-		{
-			for (size_t i = 0; i < meshes.size(); i++)
-			{
-				meshes[i]->getMaterial()->setVector3(name, value);
-			}
-		}
-		void setVec3(const std::string& name, float x, float y, float z) const
-		{
-			for (size_t i = 0; i < meshes.size(); i++)
-			{
-				meshes[i]->getMaterial()->setVector3(name, x, y, z);
+				iter->second->getMaterial()->setVector2(name, x, y);
 			}
 		}
 
-		void setVec4(const std::string& name, const glm::vec4& value) const
+		void setVector3(const std::string& name, const glm::vec3& value) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setVector4(name, value);
+				iter->second->getMaterial()->setVector3(name, value);
 			}
 		}
-		void setVec4(const std::string& name, float x, float y, float z, float w)
+		void setVector3(const std::string& name, float x, float y, float z) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setVector4(name, x, y, z, w);
-			}
-		}
-
-		void setMat2(const std::string& name, const glm::mat2& mat) const
-		{
-			for (size_t i = 0; i < meshes.size(); i++)
-			{
-				meshes[i]->getMaterial()->setMatrix2x2(name, mat);
+				iter->second->getMaterial()->setVector3(name, x, y, z);
 			}
 		}
 
-		void setMat3(const std::string& name, const glm::mat3& mat) const
+		void setVector4(const std::string& name, const glm::vec4& value) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setMatrix3x3(name, mat);
+				iter->second->getMaterial()->setVector4(name, value);
+			}
+		}
+		void setVector4(const std::string& name, float x, float y, float z, float w)
+		{
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+			{
+				iter->second->getMaterial()->setVector4(name, x, y, z, w);
 			}
 		}
 
-		void setMat4(const std::string& name, const glm::mat4& mat) const
+		void setMatrix2x2(const std::string& name, const glm::mat2& mat) const
 		{
-			for (size_t i = 0; i < meshes.size(); i++)
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				meshes[i]->getMaterial()->setMatrix4x4(name, mat);
+				iter->second->getMaterial()->setMatrix2x2(name, mat);
+			}
+		}
+
+		void setMatrix3x3(const std::string& name, const glm::mat3& mat) const
+		{
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+			{
+				iter->second->getMaterial()->setMatrix3x3(name, mat);
+			}
+		}
+
+		void setMatrix4x4(const std::string& name, const glm::mat4& mat) const
+		{
+			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+			{
+				iter->second->getMaterial()->setMatrix4x4(name, mat);
 			}
 		}
 	private:
-		std::vector<Mesh*> meshes;
-		std::unordered_map<Material::ShaderType, std::string> shaders;
+		std::unordered_map<std::string, Mesh*> meshes;
+		std::unordered_map<Material::ShaderType, std::string> shader;
 		std::string directory;
 
-		bool loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shaders)
+		bool loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader)
 		{
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices);
+			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices | aiProcess_GenSmoothNormals);
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
 				std::cout << importer.GetErrorString() << std::endl;
@@ -188,7 +188,7 @@ namespace es
 			}
 			this->directory = path.substr(0, path.find_last_of('/'));
 
-			this->shaders = shaders;
+			this->shader = shader;
 
 			handleNode(scene->mRootNode, scene);
 
@@ -200,7 +200,7 @@ namespace es
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
 			{
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				meshes.push_back(handleMesh(mesh, scene));
+				meshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), handleMesh(mesh, scene)));
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -314,12 +314,13 @@ namespace es
 			std::vector<std::pair<Texture::Type, std::string>> unknownMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_UNKNOWN);
 			textures.insert(textures.end(), unknownMaps.begin(), unknownMaps.end());
 
-			std::shared_ptr<Material> material = std::make_shared<Material>(shaders, textures);
+			std::shared_ptr<Material> material = std::make_shared<Material>(shader, textures);
 
-			Mesh* partMesh = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
-			partMesh->setAutoUpdated(false);
+			Mesh* childMesh = Mesh::createWithData(vertices, indices, material, Mesh::DrawType::ELEMENTS);
+			childMesh->setName(std::string(mesh->mName.C_Str()));
+			childMesh->setAutoUpdated(false);
 	
-			return partMesh;
+			return childMesh;
 		}
 
 		std::vector<std::pair<Texture::Type, std::string>> loadMaterialTextures(aiMaterial* mat, aiTextureType type)

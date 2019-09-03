@@ -12,6 +12,8 @@ namespace es
 	public:
 		Object()
 		{
+			name = "None";
+
 			position = glm::vec3(0.0f);
 			rotation = glm::vec3(0.0f);
 			scaling = glm::vec3(1.0f);
@@ -51,6 +53,11 @@ namespace es
 			}
 			transformUpdated = true;
 		}
+
+		virtual void setName(const std::string& name)
+		{
+			this->name = name;
+		}
 		
 		virtual void translate(const glm::vec3& deltaPosition)
 		{
@@ -88,6 +95,11 @@ namespace es
 			isDirty = true;
 		}
 
+		const std::string& getName() const
+		{
+			return name;
+		}
+
 		const glm::vec3& getPosition() const
 		{
 			return position;
@@ -118,6 +130,8 @@ namespace es
 			this->autoUpdated = autoUpdated;
 		}
 	protected:
+		std::string name;
+
 		glm::vec3 position;
 		glm::vec3 rotation;
 		glm::vec3 scaling;

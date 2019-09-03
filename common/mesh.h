@@ -34,14 +34,15 @@ namespace es
 
 		enum class DrawType
 		{
-			Arrays,
-			Arrays_Indirect,
-			Arrays_Instanced,
-			Elements,
-			Elements_Restart_Index
+			ARRAYS,
+			ARRAYS_INDIRECT,
+			ARRAYS_INSTANCED,
+			ELEMENTS,
+			ELEMENTS_RESTART_INDEX
 		};
 		
 		Mesh() = default;
+
 		~Mesh()
 		{
 			if (material != nullptr)
@@ -54,10 +55,10 @@ namespace es
 			glDeleteVertexArrays(1, &VAO);
 		}
 
-		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, std::shared_ptr<Material> material)
+		static Mesh* createWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, std::shared_ptr<Material> material, DrawType type = DrawType::ELEMENTS)
 		{
 			Mesh* mesh = new (std::nothrow) Mesh();
-			if (mesh && mesh->initWithData(vertices, indices, type, material))
+			if (mesh && mesh->initWithData(vertices, indices, material, type))
 			{
 				return mesh;
 			}
@@ -71,41 +72,36 @@ namespace es
 			{
 				Object::update(deltaTime);
 			}
-		}
-
-		void draw(float deltaTime, bool isUseOwnMat = true)
-		{
-			render(deltaTime);
 
 			if (vertices.empty())
 				return;
 
-			if (isUseOwnMat && material != nullptr)
+			if (material != nullptr)
 			{
 				material->apply();
-				material->setMat4("model", model);
-				material->setMat4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
-				material->setMat4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+				material->setMatrix4x4("model", model);
+				material->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
+				material->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
 			}
 
 			glBindVertexArray(VAO);
 			switch (drawType)
 			{
-				case DrawType::Arrays:
+				case DrawType::ARRAYS:
 				{
 					glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 					break;
 				}
-				case DrawType::Arrays_Indirect:
+				case DrawType::ARRAYS_INDIRECT:
 					break;
-				case DrawType::Arrays_Instanced:
+				case DrawType::ARRAYS_INSTANCED:
 					break;
-				case DrawType::Elements:
+				case DrawType::ELEMENTS:
 				{
 					glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 					break;
 				}
-				case DrawType::Elements_Restart_Index:
+				case DrawType::ELEMENTS_RESTART_INDEX:
 				{
 					// enable primitive restart
 					glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
@@ -146,16 +142,16 @@ namespace es
 		GLuint VAO = 0;
 		GLuint VBO = 0;;
 		GLuint EBO = 0;
-		DrawType drawType = DrawType::Elements;
+		DrawType drawType = DrawType::ELEMENTS;
 
 		std::shared_ptr<Material> material;
 
-		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, DrawType type, std::shared_ptr<Material> material)
+		bool initWithData(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, std::shared_ptr<Material> material, DrawType type)
 		{
 			this->vertices = vertices;
 			this->indices = indices;
-			this->drawType = type;
 			this->material = material;
+			this->drawType = type;
 			
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
