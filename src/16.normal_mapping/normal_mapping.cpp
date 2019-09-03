@@ -6,8 +6,7 @@ class Example final : public ExampleBase
 {
 public:
 	Model* planeModel;
-	Texture* diffuseMap;
-	Texture* normalMap;
+
 	Example()
 	{
 		title = "normal mapping";
@@ -16,7 +15,6 @@ public:
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/16.normal_mapping/";
-		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/16.normal_mapping/";
 	}
 	~Example()
 	{
@@ -36,21 +34,24 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPath =
+		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
 			{ Material::ShaderType::VERTEX, shadersDirectory + "plane.vert" },
 			{ Material::ShaderType::FRAGMENT, shadersDirectory + "plane.frag" }
 		};
 
-		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", shaderPath);
+		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
+		{
+			std::make_pair(Texture::Type::DIFFUSE, modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png"),
+			std::make_pair(Texture::Type::NORMAL, modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png")
+		};
+
+		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
+
+		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", {});
+		planeModel->setSingleMaterial(material);
 		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-
-		diffuseMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png", Texture::Type::DIFFUSE);
-		normalMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png", Texture::Type::NORMAL);
-
-		planeModel->setInteger("diffuseMap_0", 0);
-		planeModel->setInteger("normalMap_0", 1);
 	}
 
 	virtual void render(float deltaTime) override
@@ -59,11 +60,6 @@ public:
 		glViewport(0, 0, width, height);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap->getID());
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normalMap->getID());
 
 		planeModel->setVector3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
 		planeModel->setVector3("viewPos", camera->getPosition());

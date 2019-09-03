@@ -46,11 +46,6 @@ namespace es
 			return nullptr;
 		}
 
-		static Model* createWithFile(const std::string& path, std::shared_ptr<Material> material)
-		{
-			return nullptr;
-		}
-
 		virtual void render(float deltaTime) override
 		{
 			if (autoUpdated)
@@ -60,7 +55,17 @@ namespace es
 
 			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 			{
-				iter->second->setModelMatrix(model);
+				if (singleMaterial.has_value())
+				{
+					singleMaterial.value()->apply();
+					singleMaterial.value()->setMatrix4x4("model", model);
+					singleMaterial.value()->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
+					singleMaterial.value()->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+				}
+				else
+				{
+					iter->second->setModelMatrix(model);
+				}
 				iter->second->render(deltaTime);
 			}
 		}
@@ -121,9 +126,16 @@ namespace es
 
 		void setVector3(const std::string& name, const glm::vec3& value) const
 		{
-			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+			if (singleMaterial.has_value())
 			{
-				iter->second->getMaterial()->setVector3(name, value);
+				singleMaterial.value()->setVector3(name, value);
+			}
+			else
+			{
+				for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+				{
+					iter->second->getMaterial()->setVector3(name, value);
+				}
 			}
 		}
 		void setVector3(const std::string& name, float x, float y, float z) const
@@ -172,12 +184,26 @@ namespace es
 				iter->second->getMaterial()->setMatrix4x4(name, mat);
 			}
 		}
+
+		void setSingleMaterial(std::shared_ptr<Material> singleMaterial)
+		{
+			this->singleMaterial = singleMaterial;
+		}
+
+		std::shared_ptr<Material> getSingleMaterial() const
+		{
+			if (singleMaterial.has_value())
+			{
+				return singleMaterial.value();
+			}
+			return nullptr;
+		}
 	private:
 		std::unordered_map<std::string, Mesh*> meshes;
-		std::unordered_map<Material::ShaderType, std::string> shader;
+		std::optional<std::shared_ptr<Material>> singleMaterial;
 		std::string directory;
 
-		bool loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader)
+		GLboolean loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader)
 		{
 			Assimp::Importer importer;
 			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices | aiProcess_GenSmoothNormals);
@@ -188,28 +214,26 @@ namespace es
 			}
 			this->directory = path.substr(0, path.find_last_of('/'));
 
-			this->shader = shader;
-
-			handleNode(scene->mRootNode, scene);
+			handleNode(scene->mRootNode, scene, shader);
 
 			return true;
 		}
 
-		void handleNode(aiNode* node, const aiScene* scene)
+		void handleNode(aiNode* node, const aiScene* scene, const std::unordered_map<Material::ShaderType, std::string>& shader)
 		{
 			for (unsigned int i = 0; i < node->mNumMeshes; i++)
 			{
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-				meshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), handleMesh(mesh, scene)));
+				meshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), handleMesh(mesh, scene, shader)));
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren; i++)
 			{
-				handleNode(node->mChildren[i], scene);
+				handleNode(node->mChildren[i], scene, shader);
 			}
 		}
 
-		Mesh* handleMesh(aiMesh* mesh, const aiScene* scene)
+		Mesh* handleMesh(aiMesh* mesh, const aiScene* scene, const std::unordered_map<Material::ShaderType, std::string>& shader)
 		{
 			std::vector<Vertex> vertices;
 			std::vector<GLuint> indices;
@@ -314,7 +338,11 @@ namespace es
 			std::vector<std::pair<Texture::Type, std::string>> unknownMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_UNKNOWN);
 			textures.insert(textures.end(), unknownMaps.begin(), unknownMaps.end());
 
-			std::shared_ptr<Material> material = std::make_shared<Material>(shader, textures);
+			std::shared_ptr<Material> material = nullptr;
+			if (!shader.empty())
+			{
+				material = std::make_shared<Material>(shader, textures);
+			}
 
 			Mesh* childMesh = Mesh::createWithData(vertices, indices, material, Mesh::DrawType::ELEMENTS);
 			childMesh->setName(std::string(mesh->mName.C_Str()));
