@@ -25,5 +25,4 @@ void main()
     vec3 specular = vec3(0.15f) * pow(max(dot(N, H), 0.0), 32.0f);
 
     fragColor = vec4(ambient + diffuse + specular, 1.0f);
-	//fragColor = texture(normalMap_0, fs_in.fTexCoord);
 }

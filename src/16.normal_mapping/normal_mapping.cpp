@@ -36,18 +36,18 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
+		std::unordered_map<Material::ShaderType, std::string> shaderPath =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "plane.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "plane.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "plane.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "plane.frag" }
 		};
 
-		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", shaderPaths);
+		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", shaderPath);
 		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 
-		diffuseMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png", Texture::Type::Diffuse);
-		normalMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png", Texture::Type::Normal);
+		diffuseMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_color_bc3_unorm.png", Texture::Type::DIFFUSE);
+		normalMap = Texture::createWithFile(modelsDirectory + "/rocks_plane/rocks_normal_height_rgba.png", Texture::Type::NORMAL);
 
 		planeModel->setInteger("diffuseMap_0", 0);
 		planeModel->setInteger("normalMap_0", 1);
@@ -65,9 +65,9 @@ public:
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, normalMap->getID());
 
-		planeModel->setVec3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
-		planeModel->setVec3("viewPos", camera->getPosition());
-		planeModel->draw(deltaTime, true);
+		planeModel->setVector3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
+		planeModel->setVector3("viewPos", camera->getPosition());
+		planeModel->render(deltaTime);
 	}
 };
 
