@@ -22,10 +22,12 @@ namespace es
 	public:
 		enum class ShaderType
 		{
-			Vertex,
-			Geometry,
-			Fragment,
-			Program
+			VERTEX,                         // vertex shader
+			TESSELLATION_CONTROL,           // tessellation control
+			TESSELLATION_EVALUATION,        // tessellation evaluation
+			GEOMETRY,                       // geometry shader
+			FRAGMENT,                       // fragment shader
+			PROGRAM                         // GLSL shader program
 		};
 
 		Material() = default;
@@ -83,12 +85,12 @@ namespace es
 			}
 		}
 
-		void setBool(const std::string& name, bool value) const
+		void setBoolean(const std::string& name, bool value) const
 		{
 			glUniform1i(glGetUniformLocation(programID, name.c_str()), (int)value);
 		}
 
-		void setInt(const std::string& name, int value) const
+		void setInteger(const std::string& name, int value) const
 		{
 			glUniform1i(glGetUniformLocation(programID, name.c_str()), value);
 		}
@@ -98,44 +100,44 @@ namespace es
 			glUniform1f(glGetUniformLocation(programID, name.c_str()), value);
 		}
 
-		void setVec2(const std::string& name, const glm::vec2& value) const
+		void setVector2(const std::string& name, const glm::vec2& value) const
 		{
 			glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
 		}
-		void setVec2(const std::string& name, float x, float y) const
+		void setVector2(const std::string& name, float x, float y) const
 		{
 			glUniform2f(glGetUniformLocation(programID, name.c_str()), x, y);
 		}
 
-		void setVec3(const std::string& name, const glm::vec3& value) const
+		void setVector3(const std::string& name, const glm::vec3& value) const
 		{
 			glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
 		}
-		void setVec3(const std::string& name, float x, float y, float z) const
+		void setVector3(const std::string& name, float x, float y, float z) const
 		{
 			glUniform3f(glGetUniformLocation(programID, name.c_str()), x, y, z);
 		}
 
-		void setVec4(const std::string& name, const glm::vec4& value) const
+		void setVector4(const std::string& name, const glm::vec4& value) const
 		{
 			glUniform4fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
 		}
-		void setVec4(const std::string& name, float x, float y, float z, float w)
+		void setVector4(const std::string& name, float x, float y, float z, float w)
 		{
 			glUniform4f(glGetUniformLocation(programID, name.c_str()), x, y, z, w);
 		}
 
-		void setMat2(const std::string& name, const glm::mat2& mat) const
+		void setMatrix2x2(const std::string& name, const glm::mat2& mat) const
 		{
 			glUniformMatrix2fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
 
-		void setMat3(const std::string& name, const glm::mat3& mat) const
+		void setMatrix3x3(const std::string& name, const glm::mat3& mat) const
 		{
 			glUniformMatrix3fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
 
-		void setMat4(const std::string& name, const glm::mat4& mat) const
+		void setMatrix4x4(const std::string& name, const glm::mat4& mat) const
 		{
 			glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 		}
@@ -168,21 +170,43 @@ namespace es
 			programID = glCreateProgram();
 
 			GLuint vertShaderID = 0;
-			auto& shader = shaderPaths.find(Material::ShaderType::Vertex);
+			auto& shader = shaderPaths.find(Material::ShaderType::VERTEX);
 			if (shader != shaderPaths.end())
 			{
-				if (!compileWithFile(Material::ShaderType::Vertex, shader->second, &vertShaderID))
+				if (!compileWithFile(Material::ShaderType::VERTEX, shader->second, &vertShaderID))
 				{
 					return false;
 				}
 				glAttachShader(programID, vertShaderID);
 			}
 
-			GLuint geomShaderID = 0;
-			shader = shaderPaths.find(Material::ShaderType::Geometry);
+			GLuint tessCtrlShaderID = 0;
+			shader = shaderPaths.find(Material::ShaderType::TESSELLATION_CONTROL);
 			if (shader != shaderPaths.end())
 			{
-				if (!compileWithFile(Material::ShaderType::Geometry, shader->second, &geomShaderID))
+				if (!compileWithFile(Material::ShaderType::TESSELLATION_CONTROL, shader->second, &tessCtrlShaderID))
+				{
+					return false;
+				}
+				glAttachShader(programID, tessCtrlShaderID);
+			}
+
+			GLuint tessEvalShaderID = 0;
+			shader = shaderPaths.find(Material::ShaderType::TESSELLATION_EVALUATION);
+			if (shader != shaderPaths.end())
+			{
+				if (!compileWithFile(Material::ShaderType::TESSELLATION_EVALUATION, shader->second, &tessEvalShaderID))
+				{
+					return false;
+				}
+				glAttachShader(programID, tessEvalShaderID);
+			}
+
+			GLuint geomShaderID = 0;
+			shader = shaderPaths.find(Material::ShaderType::GEOMETRY);
+			if (shader != shaderPaths.end())
+			{
+				if (!compileWithFile(Material::ShaderType::GEOMETRY, shader->second, &geomShaderID))
 				{
 					return false;
 				}
@@ -190,10 +214,10 @@ namespace es
 			}
 
 			GLuint fragShaderID = 0;
-			shader = shaderPaths.find(Material::ShaderType::Fragment);
+			shader = shaderPaths.find(Material::ShaderType::FRAGMENT);
 			if (shader != shaderPaths.end())
 			{
-				if (!compileWithFile(Material::ShaderType::Fragment, shader->second, &fragShaderID))
+				if (!compileWithFile(Material::ShaderType::FRAGMENT, shader->second, &fragShaderID))
 				{
 					return false;
 				}
@@ -201,12 +225,14 @@ namespace es
 			}
 
 			glLinkProgram(programID);
-			if (!checkCompiled(programID, Material::ShaderType::Program))
+			if (!checkCompiled(programID, Material::ShaderType::PROGRAM))
 			{
 				return false;
 			}
 
 			glDeleteShader(vertShaderID);
+			glDeleteShader(tessCtrlShaderID);
+			glDeleteShader(tessEvalShaderID);
 			glDeleteShader(geomShaderID);
 			glDeleteShader(fragShaderID);
 
@@ -288,7 +314,7 @@ namespace es
 					number = std::to_string(heightMap++);
 				}
 
-				setInt((name + number).c_str(), count++);
+				setInteger((name + number).c_str(), count++);
 			}
 			return true;
 		}
@@ -323,15 +349,23 @@ namespace es
 
 		bool compileWithSource(Material::ShaderType type, const GLchar* source, GLuint* shaderID)
 		{
-			if (type == Material::ShaderType::Vertex)
+			if (type == Material::ShaderType::VERTEX)
 			{
 				*shaderID = glCreateShader(GL_VERTEX_SHADER);
 			}
-			else if (type == Material::ShaderType::Geometry)
+			else if (type == Material::ShaderType::TESSELLATION_CONTROL)
+			{
+				*shaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
+			}
+			else if (type == Material::ShaderType::TESSELLATION_EVALUATION)
+			{
+				*shaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
+			}
+			else if (type == Material::ShaderType::GEOMETRY)
 			{
 				*shaderID = glCreateShader(GL_GEOMETRY_SHADER);
 			}
-			else if (type == Material::ShaderType::Fragment)
+			else if (type == Material::ShaderType::FRAGMENT)
 			{
 				*shaderID = glCreateShader(GL_FRAGMENT_SHADER);
 			}
@@ -348,7 +382,7 @@ namespace es
 		{
 			GLint success;
 			GLchar infoLog[1024];
-			if (type == ShaderType::Vertex || type == ShaderType::Geometry || type == ShaderType::Fragment)
+			if (type == ShaderType::VERTEX || type == ShaderType::TESSELLATION_CONTROL || type == ShaderType::TESSELLATION_EVALUATION || type == ShaderType::GEOMETRY || type == ShaderType::FRAGMENT)
 			{
 				glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 				if (!success)
@@ -359,7 +393,7 @@ namespace es
 				}
 				return true;
 			}
-			else if (type == ShaderType::Program)
+			else if (type == ShaderType::PROGRAM)
 			{
 				glGetProgramiv(shader, GL_LINK_STATUS, &success);
 				if (!success)
