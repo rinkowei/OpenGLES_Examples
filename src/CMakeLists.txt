@@ -52,7 +52,7 @@ set(EXAMPLES
     16.normal_mapping
     17.dear_imgui
     18.uniform_buffer_object
-    20.parallex_mapping
+    20.parallax_mapping
     21.shadow_mapping_directional_light
 )
 

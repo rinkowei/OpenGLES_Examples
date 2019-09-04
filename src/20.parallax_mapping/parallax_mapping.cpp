@@ -9,12 +9,12 @@ public:
 
 	Example()
 	{
-		title = "parallex mapping";
+		title = "parallax mapping";
 		settings.vsync = false;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/20.parallex_mapping/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/20.parallax_mapping/";
 	}
 	~Example()
 	{
@@ -26,7 +26,7 @@ public:
 		ExampleBase::prepare();
 
 		// setup camera
-		camera->movementSpeed = 2.0f;
+		camera->movementSpeed = 3.0f;
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 2.0f, 2.0f));
 		camera->setRotation(glm::vec3(-60.0f, -90.0f, 0.0f));
@@ -36,8 +36,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "parallex.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "parallex.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "parallax.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "parallax.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths =

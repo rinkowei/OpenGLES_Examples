@@ -103,7 +103,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [20 - parallex_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/20.parallex_mapping>)
+#### [20 - parallax_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/20.parallax_mapping>)
 
 
 
