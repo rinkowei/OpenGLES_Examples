@@ -36,8 +36,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "rocks_plane.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "rocks_plane.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "normal.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "normal.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
