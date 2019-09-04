@@ -95,17 +95,31 @@ namespace es
 
 		void setInteger(const std::string& name, int value) const
 		{
-			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+			if (singleMaterial.has_value())
 			{
-				iter->second->getMaterial()->setInteger(name, value);
+				singleMaterial.value()->setInteger(name, value);
+			}
+			else
+			{
+				for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+				{
+					iter->second->getMaterial()->setInteger(name, value);
+				}
 			}
 		}
 
 		void setFloat(const std::string& name, float value) const
 		{
-			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+			if (singleMaterial.has_value())
 			{
-				iter->second->getMaterial()->setFloat(name, value);
+				singleMaterial.value()->setFloat(name, value);
+			}
+			else
+			{
+				for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
+				{
+					iter->second->getMaterial()->setFloat(name, value);
+				}
 			}
 		}
 
@@ -206,7 +220,7 @@ namespace es
 		GLboolean loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader)
 		{
 			Assimp::Importer importer;
-			const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_PreTransformVertices | aiProcess_GenSmoothNormals);
+			const aiScene* scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals);
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
 				std::cout << importer.GetErrorString() << std::endl;
