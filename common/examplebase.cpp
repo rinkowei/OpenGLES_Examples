@@ -290,22 +290,22 @@ void ExampleBase::handleKeyboardInput()
 		paused = !paused;
 
 	if (ImGui::IsKeyPressed(GLFW_KEY_W))
-		camera->keys.up = true;
+		camera->keys.forward = true;
 	if (ImGui::IsKeyPressed(GLFW_KEY_S))
-		camera->keys.down = true;
+		camera->keys.backward = true;
 	if (ImGui::IsKeyPressed(GLFW_KEY_A))
-		camera->keys.left = true;
+		camera->keys.leftward = true;
 	if (ImGui::IsKeyPressed(GLFW_KEY_D))
-		camera->keys.right = true;
+		camera->keys.rightward = true;
 	
 	if (ImGui::IsKeyReleased(GLFW_KEY_W))
-		camera->keys.up = false;
+		camera->keys.forward = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_S))
-		camera->keys.down = false;
+		camera->keys.backward = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_A))
-		camera->keys.left = false;
+		camera->keys.leftward = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_D))
-		camera->keys.right = false;
+		camera->keys.rightward = false;
 }
 
 void ExampleBase::handleMouseMove()
@@ -316,7 +316,7 @@ void ExampleBase::handleMouseMove()
 	// mouse left button down
 	if (ImGui::IsMouseDown(0))
 	{
-		camera->rotate(glm::vec3(-deltaY * camera->rotationSpeed, deltaX * camera->rotationSpeed, 0.0f));
+		camera->rotate(glm::vec3(deltaY * camera->rotationSpeed, deltaX * camera->rotationSpeed, 0.0f));
 		viewUpdated = true;
 	}
 	// mouse right button down

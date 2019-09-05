@@ -44,7 +44,7 @@ namespace es
 
 	Camera::Camera()
 	{
-		rotation = glm::vec3(0.0f, -90.0f, 0.0f);
+		rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		front = glm::vec3(0.0f, 0.0f, -1.0f);
 		right = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -124,25 +124,25 @@ namespace es
 		if (viewDirty)
 		{
 			glm::vec3 camFront;
-			camFront.x = cos(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
+			camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
 			camFront.y = sin(glm::radians(rotation.x));
-			camFront.z = sin(glm::radians(rotation.y)) * cos(glm::radians(rotation.x));
+			camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
 			
-			front = glm::normalize(camFront);
+			front = -glm::normalize(camFront);
 			right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
 			up = glm::normalize(glm::cross(right, front));
 
 			float moveSpeed = deltaTime * movementSpeed;
 
-			if (keys.up)
-				position += front * moveSpeed;
-			if (keys.down)
-				position -= front * moveSpeed;
-			if (keys.left)
-				position -= right * moveSpeed;
-			if (keys.right)
-				position += right * moveSpeed;
-
+			if (keys.forward)
+				translate(front * moveSpeed);
+			if (keys.backward)
+				translate(-front * moveSpeed);
+			if (keys.leftward)
+				translate(-right * moveSpeed);
+			if (keys.rightward)
+				translate(right * moveSpeed);
+			
 			updateViewMatrix();
 
 			viewDirty = false;
@@ -158,6 +158,7 @@ namespace es
 	void Camera::rotate(const glm::vec3& deltaEuler)
 	{
 		this->rotation += deltaEuler;
+		this->rotation.x = glm::clamp(this->rotation.x, -90.0f, 90.0f);
 		viewDirty = true;
 	}
 
@@ -170,6 +171,7 @@ namespace es
 	void Camera::setRotation(const glm::vec3& euler)
 	{
 		this->rotation = euler;
+		this->rotation.x = glm::clamp(this->rotation.x, -90.0f, 90.0f);
 		viewDirty = true;
 	}
 
@@ -190,11 +192,16 @@ namespace es
 
 	bool Camera::moving() const
 	{
-		return keys.left || keys.right || keys.up || keys.down;
+		return keys.leftward || keys.rightward || keys.forward || keys.backward;
 	}
 
 	void Camera::updateViewMatrix()
 	{
-		view = glm::lookAt(position, position + front, up);
+		view = glm::mat4(1.0f);
+		view = glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		view = glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		view = glm::translate(view, -position);
 	}
 }

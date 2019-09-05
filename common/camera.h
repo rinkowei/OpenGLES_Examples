@@ -86,10 +86,10 @@ namespace es
 
 		struct
 		{
-			bool left = false;
-			bool right = false;
-			bool up = false;
-			bool down = false;
+			bool leftward = false;
+			bool rightward = false;
+			bool forward = false;
+			bool backward = false;
 		} keys;
 	protected:
 		Camera::Type type;

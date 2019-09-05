@@ -62,8 +62,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "screen.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "screen.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "screen.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "screen.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
@@ -75,12 +75,12 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create offscreenQuad mesh
-		offscreenQuad = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+		offscreenQuad = Mesh::createWithData(vertices, indices, material, Mesh::DrawType::ELEMENTS);
 		
 		model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", 
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "construction.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "construction.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "construction.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "construction.frag" }
 		});
 
 		// configure framebuffer
@@ -125,7 +125,7 @@ public:
 		glDisable(GL_DEPTH_TEST);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, colorAttachment);
-		offscreenQuad->getMaterial()->setInt("screenTexture", 0);
+		offscreenQuad->getMaterial()->setInteger("screenTexture", 0);
 		offscreenQuad->render(deltaTime);
 	}
 };
