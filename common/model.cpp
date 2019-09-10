@@ -36,12 +36,12 @@ namespace es
 
 		for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 		{
-			if (singleMaterial.has_value())
+			if (World::getWorld()->getGlobalMaterialEnabled())
 			{
-				singleMaterial.value()->apply();
-				singleMaterial.value()->setMatrix4x4("model", model);
-				singleMaterial.value()->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
-				singleMaterial.value()->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+				std::shared_ptr<Material> globalMat = World::getWorld()->getGlobalMaterial();
+				globalMat->setMatrix4x4("model", model);
+				globalMat->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
+				globalMat->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
 			}
 			else
 			{
@@ -76,31 +76,17 @@ namespace es
 
 	GLvoid Model::setInteger(const std::string& name, int value) const
 	{
-		if (singleMaterial.has_value())
+		for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 		{
-			singleMaterial.value()->setInteger(name, value);
-		}
-		else
-		{
-			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
-			{
-				iter->second->getMaterial()->setInteger(name, value);
-			}
+			iter->second->getMaterial()->setInteger(name, value);
 		}
 	}
 
 	GLvoid Model::setFloat(const std::string& name, float value) const
 	{
-		if (singleMaterial.has_value())
+		for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 		{
-			singleMaterial.value()->setFloat(name, value);
-		}
-		else
-		{
-			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
-			{
-				iter->second->getMaterial()->setFloat(name, value);
-			}
+			iter->second->getMaterial()->setFloat(name, value);
 		}
 	}
 
@@ -122,16 +108,9 @@ namespace es
 
 	GLvoid Model::setVector3(const std::string& name, const glm::vec3& value) const
 	{
-		if (singleMaterial.has_value())
+		for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
 		{
-			singleMaterial.value()->setVector3(name, value);
-		}
-		else
-		{
-			for (auto iter = meshes.begin(); iter != meshes.end(); iter++)
-			{
-				iter->second->getMaterial()->setVector3(name, value);
-			}
+			iter->second->getMaterial()->setVector3(name, value);
 		}
 	}
 
@@ -180,20 +159,6 @@ namespace es
 		{
 			iter->second->getMaterial()->setMatrix4x4(name, mat);
 		}
-	}
-
-	GLvoid Model::setSingleMaterial(std::shared_ptr<Material> singleMaterial)
-	{
-		this->singleMaterial = singleMaterial;
-	}
-
-	std::shared_ptr<Material> Model::getSingleMaterial() const
-	{
-		if (singleMaterial.has_value())
-		{
-			return singleMaterial.value();
-		}
-		return nullptr;
 	}
 
 	GLboolean Model::loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader)
@@ -266,7 +231,6 @@ namespace es
 				vertex.Color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
 			else
 				vertex.Color = glm::vec3(0.0f, 0.0f, 0.0f);
-
 
 			vertices.push_back(vertex);
 		}

@@ -47,9 +47,8 @@ public:
 		};
 
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
-
+		World::getWorld()->enableGlobalMaterial(material);
 		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", {});
-		planeModel->setSingleMaterial(material);
 		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 	}
@@ -61,8 +60,8 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		planeModel->setVector3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
-		planeModel->setVector3("viewPos", camera->getPosition());
+		World::getWorld()->getGlobalMaterial()->setVector3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
+		World::getWorld()->getGlobalMaterial()->setVector3("viewPos", camera->getPosition());
 		planeModel->render(deltaTime);
 	}
 };

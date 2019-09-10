@@ -59,13 +59,8 @@ namespace es
 
 		GLvoid setMatrix4x4(const std::string& name, const glm::mat4& mat) const;
 
-		GLvoid setSingleMaterial(std::shared_ptr<Material> singleMaterial);
-
-		std::shared_ptr<Material> getSingleMaterial() const;
-
 	private:
 		std::unordered_map<std::string, Mesh*> meshes;
-		std::optional<std::shared_ptr<Material>> singleMaterial;
 		std::string directory;
 
 		GLboolean loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader);

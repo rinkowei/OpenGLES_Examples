@@ -9,6 +9,8 @@ namespace es
 	World::World()
 	{
 		defaultCamera = Camera::create();
+		globalMaterial = nullptr;
+		isGlobalMaterialEnabled = false;
 	}
 
 	World::~World()
@@ -29,5 +31,36 @@ namespace es
 	Camera* World::getDefaultCamera() const
 	{
 		return defaultCamera;
+	}
+
+	GLvoid World::enableGlobalMaterial(std::shared_ptr<Material> globalMaterial)
+	{
+		if (this->globalMaterial != nullptr)
+		{
+			this->globalMaterial.reset();
+		}
+		this->globalMaterial = globalMaterial;
+		this->globalMaterial->apply();
+		isGlobalMaterialEnabled = true;
+	}
+
+	GLvoid World::disableGlobalMaterial()
+	{
+		if (this->globalMaterial != nullptr)
+		{
+			this->globalMaterial.reset();
+			this->globalMaterial = nullptr;
+		}
+		isGlobalMaterialEnabled = false;
+	}
+
+	std::shared_ptr<Material> World::getGlobalMaterial() const
+	{
+		return globalMaterial;
+	}
+
+	GLboolean World::getGlobalMaterialEnabled() const
+	{
+		return isGlobalMaterialEnabled;
 	}
 }
