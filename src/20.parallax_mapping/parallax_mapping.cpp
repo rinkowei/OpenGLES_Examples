@@ -29,7 +29,7 @@ public:
 		camera->movementSpeed = 3.0f;
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 2.0f, 2.0f));
-		camera->setRotation(glm::vec3(-60.0f, -90.0f, 0.0f));
+		camera->setRotation(glm::vec3(45.0f, 0.0f, 0.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -48,8 +48,7 @@ public:
 
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
-		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", {});
-		planeModel->setSingleMaterial(material);
+		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", material);
 		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 
