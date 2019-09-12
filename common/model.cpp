@@ -27,6 +27,17 @@ namespace es
 		return nullptr;
 	}
 
+	Model* Model::createWithFile(const std::string& path, std::shared_ptr<Material> material)
+	{
+		Model* model = new (std::nothrow) Model();
+		if (model && model->loadWithFile(path, material))
+		{
+			return model;
+		}
+		delete(model);
+		return nullptr;
+	}
+
 	GLvoid Model::render(float deltaTime)
 	{
 		if (autoUpdated)
@@ -177,12 +188,32 @@ namespace es
 		return true;
 	}
 
+	GLboolean Model::loadWithFile(const std::string& path, std::shared_ptr<Material> material)
+	{
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals);
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			std::cout << importer.GetErrorString() << std::endl;
+			return false;
+		}
+		this->directory = path.substr(0, path.find_last_of('/'));
+
+		handleNode(scene->mRootNode, scene, material);
+
+		return true;
+	}
+
 	GLvoid Model::handleNode(aiNode* node, const aiScene* scene, const std::unordered_map<Material::ShaderType, std::string>& shader)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), handleMesh(mesh, scene, shader)));
+
+			Mesh* childMesh = handleMesh(mesh, scene);
+			childMesh->setMaterial(std::make_shared<Material>(shader, handleMaterialTextures(scene->mMaterials[mesh->mMaterialIndex])));
+
+			meshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), childMesh));
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -191,11 +222,28 @@ namespace es
 		}
 	}
 
-	Mesh* Model::handleMesh(aiMesh* mesh, const aiScene* scene, const std::unordered_map<Material::ShaderType, std::string>& shader)
+	GLvoid Model::handleNode(aiNode* node, const aiScene* scene, std::shared_ptr<Material> material)
+	{
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+			Mesh* childMesh = handleMesh(mesh, scene);
+			childMesh->setMaterial(material);
+
+			meshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), childMesh));
+		}
+
+		for (unsigned int i = 0; i < node->mNumChildren; i++)
+		{
+			handleNode(node->mChildren[i], scene, material);
+		}
+	}
+
+	Mesh* Model::handleMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
-		std::vector<std::pair<Texture::Type, std::string>> textures;
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
@@ -247,65 +295,66 @@ namespace es
 			}
 		}
 
-		// load diffuse maps
-		std::vector<std::pair<Texture::Type, std::string>> diffuseMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_DIFFUSE);
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-
-		// load specular maps
-		std::vector<std::pair<Texture::Type, std::string>> specularMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_SPECULAR);
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-		// load ambient maps
-		std::vector<std::pair<Texture::Type, std::string>> ambientMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_AMBIENT);
-		textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
-
-		// load emissive maps
-		std::vector<std::pair<Texture::Type, std::string>> emissiveMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_EMISSIVE);
-		textures.insert(textures.end(), emissiveMaps.begin(), emissiveMaps.end());
-
-		// load normal maps
-		std::vector<std::pair<Texture::Type, std::string>> normalMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_NORMALS);
-		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-		// load height maps
-		std::vector<std::pair<Texture::Type, std::string>> heightMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_HEIGHT);
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-
-		// load shininess maps
-		std::vector<std::pair<Texture::Type, std::string>> shininessMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_SHININESS);
-		textures.insert(textures.end(), shininessMaps.begin(), shininessMaps.end());
-
-		// load opacity maps
-		std::vector<std::pair<Texture::Type, std::string>> opacityMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_OPACITY);
-		textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
-
-		// load displacement maps
-		std::vector<std::pair<Texture::Type, std::string>> displacementMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_DISPLACEMENT);
-		textures.insert(textures.end(), displacementMaps.begin(), displacementMaps.end());
-
-		// load light maps
-		std::vector<std::pair<Texture::Type, std::string>> lightMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_LIGHTMAP);
-		textures.insert(textures.end(), lightMaps.begin(), lightMaps.end());
-
-		// load reflection maps
-		std::vector<std::pair<Texture::Type, std::string>> reflectionMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_REFLECTION);
-		textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
-
-		// load unknown maps
-		std::vector<std::pair<Texture::Type, std::string>> unknownMaps = loadMaterialTextures(scene->mMaterials[mesh->mMaterialIndex], aiTextureType_UNKNOWN);
-		textures.insert(textures.end(), unknownMaps.begin(), unknownMaps.end());
-
-		std::shared_ptr<Material> material = nullptr;
-		if (!shader.empty())
-		{
-			material = std::make_shared<Material>(shader, textures);
-		}
-
-		Mesh* childMesh = Mesh::createWithData(vertices, indices, material, Mesh::DrawType::ELEMENTS);
+		Mesh* childMesh = Mesh::createWithData(vertices, indices, nullptr, Mesh::DrawType::ELEMENTS);
 		childMesh->setName(std::string(mesh->mName.C_Str()));
 		childMesh->setAutoUpdated(false);
 
 		return childMesh;
+	}
+
+	std::vector<std::pair<Texture::Type, std::string>> Model::handleMaterialTextures(aiMaterial* mat)
+	{
+		std::vector<std::pair<Texture::Type, std::string>> textures;
+
+		// load diffuse maps
+		std::vector<std::pair<Texture::Type, std::string>> diffuseMaps = loadMaterialTextures(mat, aiTextureType_DIFFUSE);
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
+		// load specular maps
+		std::vector<std::pair<Texture::Type, std::string>> specularMaps = loadMaterialTextures(mat, aiTextureType_SPECULAR);
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		// load ambient maps
+		std::vector<std::pair<Texture::Type, std::string>> ambientMaps = loadMaterialTextures(mat, aiTextureType_AMBIENT);
+		textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
+
+		// load emissive maps
+		std::vector<std::pair<Texture::Type, std::string>> emissiveMaps = loadMaterialTextures(mat, aiTextureType_EMISSIVE);
+		textures.insert(textures.end(), emissiveMaps.begin(), emissiveMaps.end());
+
+		// load normal maps
+		std::vector<std::pair<Texture::Type, std::string>> normalMaps = loadMaterialTextures(mat, aiTextureType_NORMALS);
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
+		// load height maps
+		std::vector<std::pair<Texture::Type, std::string>> heightMaps = loadMaterialTextures(mat, aiTextureType_HEIGHT);
+		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
+		// load shininess maps
+		std::vector<std::pair<Texture::Type, std::string>> shininessMaps = loadMaterialTextures(mat, aiTextureType_SHININESS);
+		textures.insert(textures.end(), shininessMaps.begin(), shininessMaps.end());
+
+		// load opacity maps
+		std::vector<std::pair<Texture::Type, std::string>> opacityMaps = loadMaterialTextures(mat, aiTextureType_OPACITY);
+		textures.insert(textures.end(), opacityMaps.begin(), opacityMaps.end());
+
+		// load displacement maps
+		std::vector<std::pair<Texture::Type, std::string>> displacementMaps = loadMaterialTextures(mat, aiTextureType_DISPLACEMENT);
+		textures.insert(textures.end(), displacementMaps.begin(), displacementMaps.end());
+
+		// load light maps
+		std::vector<std::pair<Texture::Type, std::string>> lightMaps = loadMaterialTextures(mat, aiTextureType_LIGHTMAP);
+		textures.insert(textures.end(), lightMaps.begin(), lightMaps.end());
+
+		// load reflection maps
+		std::vector<std::pair<Texture::Type, std::string>> reflectionMaps = loadMaterialTextures(mat, aiTextureType_REFLECTION);
+		textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
+
+		// load unknown maps
+		std::vector<std::pair<Texture::Type, std::string>> unknownMaps = loadMaterialTextures(mat, aiTextureType_UNKNOWN);
+		textures.insert(textures.end(), unknownMaps.begin(), unknownMaps.end());
+
+		return textures;
 	}
 
 	std::vector<std::pair<Texture::Type, std::string>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type)

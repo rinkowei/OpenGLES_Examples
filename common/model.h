@@ -29,6 +29,8 @@ namespace es
 
 		static Model* createWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shaders);
 
+		static Model* createWithFile(const std::string& path, std::shared_ptr<Material> material);
+
 		virtual GLvoid render(float deltaTime) override;
 
 		virtual GLvoid update(float deltaTime) override;
@@ -65,9 +67,15 @@ namespace es
 
 		GLboolean loadWithFile(const std::string& path, const std::unordered_map<Material::ShaderType, std::string>& shader);
 
+		GLboolean loadWithFile(const std::string& path, std::shared_ptr<Material> material);
+
 		GLvoid handleNode(aiNode* node, const aiScene* scene, const std::unordered_map<Material::ShaderType, std::string>& shader);
 
-		Mesh* handleMesh(aiMesh* mesh, const aiScene* scene, const std::unordered_map<Material::ShaderType, std::string>& shader);
+		GLvoid handleNode(aiNode* node, const aiScene* scene, std::shared_ptr<Material> material);
+
+		Mesh* handleMesh(aiMesh* mesh, const aiScene* scene);
+
+		std::vector<std::pair<Texture::Type, std::string>> handleMaterialTextures(aiMaterial* mat);
 
 		std::vector<std::pair<Texture::Type, std::string>> loadMaterialTextures(aiMaterial* mat, aiTextureType type);
 	};
