@@ -29,7 +29,7 @@ public:
 		camera->movementSpeed = 2.0f;
 		camera->rotationSpeed = 0.5f;
 		camera->setPosition(glm::vec3(0.0f, 2.0f, 2.0f));
-		camera->setRotation(glm::vec3(-60.0f, -90.0f, 0.0f));
+		camera->setRotation(glm::vec3(45.0f, 0.0f, 0.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -47,8 +47,8 @@ public:
 		};
 
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
-		World::getWorld()->enableGlobalMaterial(material);
-		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", {});
+
+		planeModel = Model::createWithFile(modelsDirectory + "/rocks_plane/rocks_plane.obj", material);
 		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		planeModel->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 	}
@@ -60,8 +60,8 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		World::getWorld()->getGlobalMaterial()->setVector3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
-		World::getWorld()->getGlobalMaterial()->setVector3("viewPos", camera->getPosition());
+		planeModel->setVector3("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
+		planeModel->setVector3("viewPos", camera->getPosition());
 		planeModel->render(deltaTime);
 	}
 };
