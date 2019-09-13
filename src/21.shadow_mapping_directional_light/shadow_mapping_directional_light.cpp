@@ -8,7 +8,7 @@ public:
 	std::shared_ptr<Material> depthMapMat;
 	
 	Model* plane;
-	Model* xenoRaven;
+	Model* cube;
 
 	const uint16_t depthMapWidth = 1024;
 	const uint16_t depthMapHeight = 1024;
@@ -29,7 +29,7 @@ public:
 	~Example()
 	{
 		delete(plane);
-		delete(xenoRaven);
+		delete(cube);
 	}
 public:
 	virtual void prepare() override
@@ -39,16 +39,16 @@ public:
 		// setup camera
 		camera->movementSpeed = 2.0f;
 		camera->rotationSpeed = 1.0f;
-		camera->setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
-		camera->rotate(glm::vec3(90.0f, 0.0f, 0.0f));
+		camera->setPosition(glm::vec3(0.0f, 2.0f, 3.0f));
+		camera->rotate(glm::vec3(45.0f, 0.0f, 0.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
 		std::unordered_map<Material::ShaderType, std::string> depthShaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "depth_map.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "depth_map.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "depth_map.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "depth_map.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> depthTexturePaths =
@@ -56,16 +56,16 @@ public:
 		
 		};
 
-		std::unordered_map<Material::ShaderType, std::string> sceneShaderPaths =
+		std::unordered_map<Material::ShaderType, std::string> xenoShaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "scene.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "scene.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "xeno.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "xeno.frag" }
 		};
 
 		std::unordered_map<Material::ShaderType, std::string> planeShaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "plane.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "plane.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "plane.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "plane.frag" }
 		};
 
 		depthMapMat = std::make_shared<Material>(depthShaderPaths, depthTexturePaths);
@@ -73,9 +73,9 @@ public:
 		plane = Model::createWithFile(modelsDirectory + "/cube/cube.obj", planeShaderPaths);
 		plane->setScale(glm::vec3(2.0f, 0.05f, 2.0f));
 
-		xenoRaven = Model::createWithFile(modelsDirectory + "/xeno-raven/XenoRaven.fbx", sceneShaderPaths);
-		xenoRaven->setPosition(glm::vec3(0.0f, 0.05f, 1.0f));
-		xenoRaven->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
+		cube = Model::createWithFile(modelsDirectory + "/cube/cube.obj", xenoShaderPaths);
+		cube->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+		cube->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 
 		// configure depth map FBO;
 		glGenFramebuffers(1, &depthMapFBO);
@@ -91,10 +91,10 @@ public:
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor.data());
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapFBO, 0);
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthMapFBO, 0);
 		glDrawBuffers(0, GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	}
 
 	virtual void render(float deltaTime) override
@@ -103,31 +103,33 @@ public:
 		glViewport(0, 0, width, height);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		glm::mat4 lightSpaceMatrix = glm::ortho(-3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 100.0f) * camera->getViewMatrix();
-		depthMapMat->apply();
-		depthMapMat->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		
+		World::getWorld()->enableGlobalMaterial(depthMapMat);
+		glm::mat4 lightSpaceMatrix = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 100.0f) * glm::lookAt(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0, 0.0, -1.0));
+		depthMapMat->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
 
 		glViewport(0, 0, depthMapWidth, depthMapHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		depthMapMat->setMat4("model", plane->getModelMatrix());
-		plane->draw(deltaTime, false);
-		depthMapMat->setMat4("model", xenoRaven->getModelMatrix());
-		xenoRaven->draw(deltaTime, false);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		depthMapMat->setMatrix4x4("model", cube->getModelMatrix());
+		cube->render(deltaTime);
+		depthMapMat->setMatrix4x4("model", plane->getModelMatrix());
+		plane->render(deltaTime);
+		World::getWorld()->disableGlobalMaterial();
 		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		plane->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		cube->setInteger("depthMap", 0);
 		plane->setInteger("depthMap", 0);
-		plane->draw(deltaTime, true);
-		xenoRaven->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-		xenoRaven->setInteger("depthMap", 0);
-		xenoRaven->draw(deltaTime, true);
+
+		cube->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
+		plane->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
+
+		cube->render(deltaTime);
+		plane->render(deltaTime);
 		
 	}
 

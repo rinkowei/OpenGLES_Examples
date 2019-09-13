@@ -10,7 +10,6 @@ in VS_OUT
 	vec4 fFragPosLightSpace;
 }fs_in;
 
-//uniform sampler2D diffuseMap_0;
 uniform sampler2D depthMap;
 
 float calculateShadow(vec4 fragPosLightSpace)
@@ -29,10 +28,10 @@ float calculateShadow(vec4 fragPosLightSpace)
         {
             float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * 1.0f / vec2(texelSize.x, texelSize.y)).r; 
             shadow += currentDepth > pcfDepth ? 1.0f : 0.0f;        
-        }    
+        }
     }
 
-    shadow /= 9.0;
+    shadow /= 9.0f;
 
 	if (projCoords.z > 1.0f)
 	{
@@ -44,7 +43,8 @@ float calculateShadow(vec4 fragPosLightSpace)
 
 void main()
 {
-	vec4 diffuseColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);
+	vec4 diffuseColor = vec4(0.7f, 0.4f, 1.0f, 1.0f);
 	float shadow = calculateShadow(fs_in.fFragPosLightSpace);
     fragColor = (1.0f - shadow) * diffuseColor;
+	//fragColor = diffuseColor;
 }

@@ -40,12 +40,19 @@ namespace es
 		if (vertices.empty())
 			return;
 
-		if (material != nullptr)
+		if (World::getWorld()->getGlobalMaterialEnabled())
 		{
-			material->apply();
-			material->setMatrix4x4("model", model);
-			material->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
-			material->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+
+		}
+		else
+		{
+			if (material != nullptr)
+			{
+				material->apply();
+				material->setMatrix4x4("model", model);
+				material->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
+				material->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+			}
 		}
 
 		glBindVertexArray(VAO);

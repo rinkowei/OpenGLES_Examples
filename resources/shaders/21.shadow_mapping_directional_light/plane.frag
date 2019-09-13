@@ -44,4 +44,5 @@ void main()
 	vec3 diffuseColor = vec3(0.6f, 0.6f, 0.6f);
 	float shadow = calculateShadow(fs_in.fFragPosLightSpace);
     fragColor = vec4((1.0f - shadow) * diffuseColor, 1.0f);
+	//fragColor = vec4(diffuseColor, 1.0f);
 }

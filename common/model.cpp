@@ -50,9 +50,9 @@ namespace es
 			if (World::getWorld()->getGlobalMaterialEnabled())
 			{
 				std::shared_ptr<Material> globalMat = World::getWorld()->getGlobalMaterial();
-				globalMat->setMatrix4x4("model", model);
-				globalMat->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
-				globalMat->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+				//globalMat->setMatrix4x4("model", model);
+				//globalMat->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
+				//globalMat->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
 			}
 			else
 			{
