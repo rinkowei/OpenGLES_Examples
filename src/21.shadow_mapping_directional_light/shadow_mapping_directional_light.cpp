@@ -45,6 +45,11 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
+		// enable cull face
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CW);
+		glCullFace(GL_BACK);
+
 		std::unordered_map<Material::ShaderType, std::string> depthShaderPaths =
 		{
 			{ Material::ShaderType::VERTEX, shadersDirectory + "depth_map.vert" },
