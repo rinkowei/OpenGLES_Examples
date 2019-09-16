@@ -7,13 +7,14 @@ class Example final : public ExampleBase
 public:
 	std::shared_ptr<Material> depthMapMat;
 	
-	Model* plane;
-	Model* cube;
+	Model* playground;
 
-	const uint16_t depthMapWidth = 1024;
-	const uint16_t depthMapHeight = 1024;
+	const uint16_t depthMapWidth = 2048;
+	const uint16_t depthMapHeight = 2048;
 	uint32_t depthMapFBO;
 	uint32_t depthTexture;
+
+	glm::vec3 lightPos = glm::vec3(-2.0f, 5.0f, 0.0f);
 
 	Example()
 	{
@@ -28,8 +29,7 @@ public:
 	}
 	~Example()
 	{
-		delete(plane);
-		delete(cube);
+		delete(playground);
 	}
 public:
 	virtual void prepare() override
@@ -56,26 +56,22 @@ public:
 		
 		};
 
-		std::unordered_map<Material::ShaderType, std::string> xenoShaderPaths =
-		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "xeno.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "xeno.frag" }
-		};
-
-		std::unordered_map<Material::ShaderType, std::string> planeShaderPaths =
-		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "plane.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "plane.frag" }
-		};
-
 		depthMapMat = std::make_shared<Material>(depthShaderPaths, depthTexturePaths);
 
-		plane = Model::createWithFile(modelsDirectory + "/cube/cube.obj", planeShaderPaths);
-		plane->setScale(glm::vec3(2.0f, 0.05f, 2.0f));
+		std::unordered_map<Material::ShaderType, std::string> groundShaderPaths =
+		{
+			{ Material::ShaderType::VERTEX, shadersDirectory + "playground.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "playground.frag" }
+		};
 
-		cube = Model::createWithFile(modelsDirectory + "/cube/cube.obj", xenoShaderPaths);
-		cube->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
-		cube->setScale(glm::vec3(0.3f, 0.3f, 0.3f));
+		std::vector<std::pair<Texture::Type, std::string>> groundTexturePaths =
+		{
+			
+		};
+
+		std::shared_ptr<Material> groundMat = std::make_shared<Material>(groundShaderPaths, groundTexturePaths);
+
+		playground = Model::createWithFile(modelsDirectory + "/playground/Playground.obj", groundMat);
 
 		// configure depth map FBO;
 		glGenFramebuffers(1, &depthMapFBO);
@@ -103,60 +99,35 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
 		World::getWorld()->enableGlobalMaterial(depthMapMat);
-		glm::mat4 lightSpaceMatrix = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 100.0f) * glm::lookAt(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0, 0.0, -1.0));
+
+		// change light position over time
+		lightPos = glm::vec3(sin(glfwGetTime()) * 3.0f, 5.0f + cos(glfwGetTime()) * 1.0f, cos(glfwGetTime()) * 2.0f);
+		glm::mat4 lightProj = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 10.0f);
+		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 1.0));
+		glm::mat4 lightSpaceMatrix = lightProj * lightView;
 		depthMapMat->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
 
 		glViewport(0, 0, depthMapWidth, depthMapHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// fixed peter panning, use cull front face when render scene to depth map
 		glCullFace(GL_FRONT);
-		depthMapMat->setMatrix4x4("model", cube->getModelMatrix());
-		cube->render(deltaTime);
-		depthMapMat->setMatrix4x4("model", plane->getModelMatrix());
-		plane->render(deltaTime);
-		World::getWorld()->disableGlobalMaterial();
+		depthMapMat->setMatrix4x4("model", playground->getModelMatrix());
+		playground->render(deltaTime);
 		glCullFace(GL_BACK);
+		World::getWorld()->disableGlobalMaterial();
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		cube->setInteger("depthMap", 0);
-		plane->setInteger("depthMap", 0);
+		playground->setInteger("depthMap", 0);
 
-		cube->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
-		plane->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
-
-		cube->render(deltaTime);
-		plane->render(deltaTime);
-		
-	}
-
-	void renderQuad()
-	{
-		float quadVertices[] = {
-			// positions        // texture Coords
-			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-				1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		};
-		unsigned int quadVAO, quadVBO;
-		// setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		playground->setVector3("lightPos", lightPos);
+		playground->setVector3("viewPos", camera->getPosition());
+		playground->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
+		playground->render(deltaTime);
 	}
 };
 
