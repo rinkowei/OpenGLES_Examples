@@ -4,12 +4,15 @@ layout(location = 0) out vec4 fragColor;
 
 in VS_OUT
 {
+	vec3 fNormal;
 	vec3 fFragPos;
-	vec4 fFragPosLightSpace;
+	//vec4 fFragPosLightSpace;
 }fs_in;
 
-uniform sampler2D depthMap;
-
+uniform vec3 lightPos;
+uniform vec3 viewPos;
+//uniform sampler2D depthMap;
+/*
 float calculateShadow(vec4 fragPosLightSpace)
 {
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -29,7 +32,7 @@ float calculateShadow(vec4 fragPosLightSpace)
         }    
     }
 
-    shadow /= 9.0;
+    shadow /= 9.0f;
 
 	if (projCoords.z > 1.0f)
 	{
@@ -38,11 +41,28 @@ float calculateShadow(vec4 fragPosLightSpace)
 
 	return shadow;
 }
-
+*/
 void main()
 {
-	vec3 diffuseColor = vec3(0.6f, 0.6f, 0.6f);
-	float shadow = calculateShadow(fs_in.fFragPosLightSpace);
-    fragColor = vec4((1.0f - shadow) * diffuseColor, 1.0f);
-	//fragColor = vec4(diffuseColor, 1.0f);
+	vec3 color = vec3(0.8f, 0.8f, 0.8f);
+	vec3 normal = normalize(fs_in.fNormal);
+	vec3 lightColor = vec3(0.5f);
+
+	// ambient
+	vec3 ambient = 0.3f * color;
+
+	// diffuse
+	vec3 lightDir = normalize(lightPos - fs_in.fFragPos);
+	float diff = max(dot(lightDir, normal), 0.0f);
+	vec3 diffuse = diff * lightColor;
+
+	// specular
+    vec3 viewDir = normalize(viewPos - fs_in.fFragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
+    vec3 specular = spec * lightColor;    
+
+	//float shadow = calculateShadow(fs_in.fFragPosLightSpace);
+	float shadow = 0.0f;
+    fragColor = vec4((1.0f - shadow) * (ambient + diffuse + specular), 1.0f);
 }
