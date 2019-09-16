@@ -81,7 +81,6 @@ public:
 		glGenFramebuffers(1, &depthMapFBO);
 		glGenTextures(1, &depthTexture);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, depthMapWidth, depthMapHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depthMapWidth, depthMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -91,7 +90,6 @@ public:
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor.data());
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapFBO, 0);
-		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthMapFBO, 0);
 		glDrawBuffers(0, GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -111,11 +109,13 @@ public:
 		glViewport(0, 0, depthMapWidth, depthMapHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_FRONT);
 		depthMapMat->setMatrix4x4("model", cube->getModelMatrix());
 		cube->render(deltaTime);
 		depthMapMat->setMatrix4x4("model", plane->getModelMatrix());
 		plane->render(deltaTime);
 		World::getWorld()->disableGlobalMaterial();
+		glCullFace(GL_BACK);
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);

@@ -14,20 +14,25 @@ uniform sampler2D depthMap;
 
 float calculateShadow(vec4 fragPosLightSpace)
 {
+	// perform perspective divide
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	// transform to [0,1] range
 	projCoords = projCoords * 0.5f + 0.5f;
 
 	float closestDepth = texture(depthMap, projCoords.xy).r;
 	float currentDepth = projCoords.z;
 
-	float shadow = 1.0f;
+	float shadow = 0.0f;
 	ivec2 texelSize = textureSize(depthMap, 0);
+
+	// PCF filering
 	for(int x = -1; x <= 1; ++x)
     {
         for(int y = -1; y <= 1; ++y)
         {
-            float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * 1.0f / vec2(texelSize.x, texelSize.y)).r; 
-            shadow += currentDepth > pcfDepth ? 1.0f : 0.0f;        
+            float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) / vec2(texelSize.x, texelSize.y)).r;
+			// check whether current frag is in shadow
+            shadow += currentDepth - 0.005f > pcfDepth ? 1.0f : 0.0f;        
         }
     }
 
@@ -46,5 +51,4 @@ void main()
 	vec4 diffuseColor = vec4(0.7f, 0.4f, 1.0f, 1.0f);
 	float shadow = calculateShadow(fs_in.fFragPosLightSpace);
     fragColor = (1.0f - shadow) * diffuseColor;
-	//fragColor = diffuseColor;
 }

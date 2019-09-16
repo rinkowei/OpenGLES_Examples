@@ -49,10 +49,7 @@ namespace es
 		{
 			if (World::getWorld()->getGlobalMaterialEnabled())
 			{
-				std::shared_ptr<Material> globalMat = World::getWorld()->getGlobalMaterial();
-				//globalMat->setMatrix4x4("model", model);
-				//globalMat->setMatrix4x4("view", World::getWorld()->getDefaultCamera()->getViewMatrix());
-				//globalMat->setMatrix4x4("projection", World::getWorld()->getDefaultCamera()->getProjectionMatrix());
+
 			}
 			else
 			{
@@ -380,66 +377,66 @@ namespace es
 			Texture::Type texType;
 			switch (type)
 			{
-			case aiTextureType_DIFFUSE:
-			{
-				texType = Texture::Type::DIFFUSE;
-				break;
-			}
-			case aiTextureType_SPECULAR:
-			{
-				texType = Texture::Type::SPECULAR;
-				break;
-			}
-			case aiTextureType_AMBIENT:
-			{
-				texType = Texture::Type::AMBIENT;
-				break;
-			}
-			case aiTextureType_EMISSIVE:
-			{
-				texType = Texture::Type::EMISSIVE;
-				break;
-			}
-			case aiTextureType_NORMALS:
-			{
-				texType = Texture::Type::NORMAL;
-				break;
-			}
-			case aiTextureType_HEIGHT:
-			{
-				texType = Texture::Type::HEIGHT;
-				break;
-			}
-			case aiTextureType_SHININESS:
-			{
-				texType = Texture::Type::SHININESS;
-				break;
-			}
-			case aiTextureType_OPACITY:
-			{
-				texType = Texture::Type::OPACITY;
-				break;
-			}
-			case aiTextureType_DISPLACEMENT:
-			{
-				texType = Texture::Type::DISPLACEMENT;
-				break;
-			}
-			case aiTextureType_LIGHTMAP:
-			{
-				texType = Texture::Type::LIGHTMAP;
-				break;
-			}
-			case aiTextureType_REFLECTION:
-			{
-				texType = Texture::Type::REFLECTION;
-				break;
-			}
-			case aiTextureType_UNKNOWN:
-			{
-				texType = Texture::Type::UNKNOWN;
-				break;
-			}
+				case aiTextureType_DIFFUSE:
+				{
+					texType = Texture::Type::DIFFUSE;
+					break;
+				}
+				case aiTextureType_SPECULAR:
+				{
+					texType = Texture::Type::SPECULAR;
+					break;
+				}
+				case aiTextureType_AMBIENT:
+				{
+					texType = Texture::Type::AMBIENT;
+					break;
+				}
+				case aiTextureType_EMISSIVE:
+				{
+					texType = Texture::Type::EMISSIVE;
+					break;
+				}
+				case aiTextureType_NORMALS:
+				{
+					texType = Texture::Type::NORMAL;
+					break;
+				}
+				case aiTextureType_HEIGHT:
+				{
+					texType = Texture::Type::HEIGHT;
+					break;
+				}
+				case aiTextureType_SHININESS:
+				{
+					texType = Texture::Type::SHININESS;
+					break;
+				}
+				case aiTextureType_OPACITY:
+				{
+					texType = Texture::Type::OPACITY;
+					break;
+				}
+				case aiTextureType_DISPLACEMENT:
+				{
+					texType = Texture::Type::DISPLACEMENT;
+					break;
+				}
+				case aiTextureType_LIGHTMAP:
+				{
+					texType = Texture::Type::LIGHTMAP;
+					break;
+				}
+				case aiTextureType_REFLECTION:
+				{
+					texType = Texture::Type::REFLECTION;
+					break;
+				}
+				case aiTextureType_UNKNOWN:
+				{
+					texType = Texture::Type::UNKNOWN;
+					break;
+				}
 			}
 
 			textures.push_back(std::make_pair(texType, texPath));
