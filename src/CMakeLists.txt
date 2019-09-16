@@ -54,6 +54,7 @@ set(EXAMPLES
     18.uniform_buffer_object
     20.parallax_mapping
     21.shadow_mapping_directional_light
+    22.shadow_mapping_point_light
 )
 
 buildExamples()
