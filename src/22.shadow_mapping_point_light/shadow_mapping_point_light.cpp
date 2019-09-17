@@ -15,7 +15,7 @@ public:
 	uint32_t depthCubeMap;
 
 	// point light position
-	glm::vec3 lightPos = glm::vec3(0.0f, 2.5f, 0.0f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 2.5f, 1.5f);
 	// point light matrices
 	std::vector<glm::mat4> lightMatrices;
 
@@ -26,7 +26,6 @@ public:
 	{
 		title = "shadow mapping point light";
 		settings.vsync = false;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
