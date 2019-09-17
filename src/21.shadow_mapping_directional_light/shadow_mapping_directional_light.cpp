@@ -113,7 +113,7 @@ public:
 		World::getWorld()->enableGlobalMaterial(depthMapMat);
 
 		// change light position over time
-		lightPos = glm::vec3(sin(glfwGetTime()) * 3.0f, 5.0f + cos(glfwGetTime()) * 1.0f, cos(glfwGetTime()) * 2.0f);
+		lightPos = glm::vec3(sin(glfwGetTime()) * 2.0f, 5.0f + cos(glfwGetTime()) * 1.0f, cos(glfwGetTime()) * 1.0f);
 		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
 		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceMatrix = lightProj * lightView;
@@ -127,6 +127,7 @@ public:
 		depthMapMat->setMatrix4x4("model", playground->getModelMatrix());
 		playground->render(deltaTime);
 		glCullFace(GL_BACK);
+
 		World::getWorld()->disableGlobalMaterial();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
