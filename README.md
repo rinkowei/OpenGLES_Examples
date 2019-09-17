@@ -112,3 +112,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 #### [22 - shadow_mapping_point_light](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/22.shadow_mapping_point_light>)
+
+
+
+#### [23 - shadow_mapping_spot_light](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/23.shadow_mapping_spot_light>)
