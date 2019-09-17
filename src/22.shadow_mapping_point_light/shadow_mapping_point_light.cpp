@@ -78,13 +78,14 @@ public:
 
 		std::vector<std::pair<Texture::Type, std::string>> roomTexturePaths =
 		{
-
+			
 		};
 
 		std::shared_ptr<Material> roomMat = std::make_shared<Material>(roomShaderPaths, roomTexturePaths);
 
 		room = Model::createWithFile(modelsDirectory + "/van-gogh-room/van-gogh-room.obj", roomMat);
 
+		// configure depth map FBO
 		glGenFramebuffers(1, &depthMapFBO);
 		glGenTextures(1, &depthCubeMap);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
@@ -112,7 +113,6 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		//lightPos = glm::vec3(0.0f, 3.0f + cos(glfwGetTime()) * 0.5f, 2.0f);
 		glm::mat4 lightProj = glm::perspective(glm::radians(90.0f), (float)depthMapWidth / (float)depthMapHeight, nearPlane, farPlane);
 		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
