@@ -84,6 +84,8 @@ public:
 		std::shared_ptr<Material> groundMat = std::make_shared<Material>(groundShaderPaths, groundTexturePaths);
 
 		playground = Model::createWithFile(modelsDirectory + "/playground/Playground.obj", groundMat);
+		playground->setMatrix4x4("biasMatrix", biasMatrix);
+		playground->setInteger("depthMap", 0);
 
 		// configure depth map FBO;
 		glGenFramebuffers(1, &depthMapFBO);
@@ -135,12 +137,10 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		playground->setInteger("depthMap", 0);
 
 		playground->setVector3("lightPos", lightPos);
 		playground->setVector3("viewPos", camera->getPosition());
 		playground->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
-		playground->setMatrix4x4("biasMatrix", biasMatrix);
 		playground->render(deltaTime);
 	}
 };
