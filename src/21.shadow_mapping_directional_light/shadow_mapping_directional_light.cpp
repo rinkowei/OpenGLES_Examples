@@ -16,6 +16,13 @@ public:
 
 	glm::vec3 lightPos = glm::vec3(-2.0f, 5.0f, 0.0f);
 
+	glm::mat4 biasMatrix = glm::mat4(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.5f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f
+	);
+
 	Example()
 	{
 		title = "shadow mapping directional light";
@@ -107,8 +114,8 @@ public:
 
 		// change light position over time
 		lightPos = glm::vec3(sin(glfwGetTime()) * 3.0f, 5.0f + cos(glfwGetTime()) * 1.0f, cos(glfwGetTime()) * 2.0f);
-		glm::mat4 lightProj = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 10.0f);
-		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 1.0));
+		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
+		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceMatrix = lightProj * lightView;
 		depthMapMat->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
 
@@ -121,7 +128,7 @@ public:
 		playground->render(deltaTime);
 		glCullFace(GL_BACK);
 		World::getWorld()->disableGlobalMaterial();
-		
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -132,6 +139,7 @@ public:
 		playground->setVector3("lightPos", lightPos);
 		playground->setVector3("viewPos", camera->getPosition());
 		playground->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
+		playground->setMatrix4x4("biasMatrix", biasMatrix);
 		playground->render(deltaTime);
 	}
 };
