@@ -7,20 +7,14 @@ class Example final : public ExampleBase
 public:
 	std::shared_ptr<Material> depthMapMat;
 
-	Model* room;
+	Model* sampleScene;
 
-	const uint16_t depthMapWidth = 1024;
-	const uint16_t depthMapHeight = 1024;
+	const uint16_t depthMapWidth = 2048;
+	const uint16_t depthMapHeight = 2048;
 	uint32_t depthMapFBO;
-	uint32_t depthCubeMap;
+	uint32_t depthTexture;
 
-	// point light position
-	glm::vec3 lightPos = glm::vec3(0.0f, 2.5f, 0.0f);
-	// point light matrices
-	std::vector<glm::mat4> lightMatrices;
-
-	float nearPlane = 1.0f;
-	float farPlane = 10.0f;
+	glm::vec3 lightPos = glm::vec3(0.0f, 6.0f, 1.0f);
 
 	Example()
 	{
@@ -35,7 +29,7 @@ public:
 
 	~Example()
 	{
-		delete(room);
+		delete(sampleScene);
 	}
 public:
 	virtual void prepare() override
@@ -59,7 +53,6 @@ public:
 		std::unordered_map<Material::ShaderType, std::string> depthShaderPaths =
 		{
 			{ Material::ShaderType::VERTEX, shadersDirectory + "depth_map.vert" },
-			{ Material::ShaderType::GEOMETRY, shadersDirectory + "depth_map.geom" },
 			{ Material::ShaderType::FRAGMENT, shadersDirectory + "depth_map.frag" }
 		};
 
@@ -70,37 +63,35 @@ public:
 
 		depthMapMat = std::make_shared<Material>(depthShaderPaths, depthTexturePaths);
 
-		std::unordered_map<Material::ShaderType, std::string> roomShaderPaths =
+		std::unordered_map<Material::ShaderType, std::string> sceneShaderPaths =
 		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "room.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "room.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "scene.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "scene.frag" }
 		};
 
-		std::vector<std::pair<Texture::Type, std::string>> roomTexturePaths =
+		std::vector<std::pair<Texture::Type, std::string>> sceneTexturePaths =
 		{
-			
+
 		};
 
-		std::shared_ptr<Material> roomMat = std::make_shared<Material>(roomShaderPaths, roomTexturePaths);
+		std::shared_ptr<Material> groundMat = std::make_shared<Material>(sceneShaderPaths, sceneTexturePaths);
 
-		room = Model::createWithFile(modelsDirectory + "/van-gogh-room/van-gogh-room.obj", roomMat);
+		sampleScene = Model::createWithFile(modelsDirectory + "/teapots-pillars/samplescene.dae", groundMat);
+		sampleScene->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
 
-		// configure depth map FBO
+		// configure depth map FBO;
 		glGenFramebuffers(1, &depthMapFBO);
-		glGenTextures(1, &depthCubeMap);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
-		for (unsigned int i = 0; i < 6; i++)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, depthMapWidth, depthMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
+		glGenTextures(1, &depthTexture);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depthMapWidth, depthMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		std::array<float, 4> borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor.data());
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapFBO, 0);
 		glDrawBuffers(0, GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -113,38 +104,39 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glm::mat4 lightProj = glm::perspective(glm::radians(90.0f), (float)depthMapWidth / (float)depthMapHeight, nearPlane, farPlane);
-		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
-		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		World::getWorld()->enableGlobalMaterial(depthMapMat);
+
+		// change light position over time
+		//lightPos.x = cos(glfwGetTime()) * 3.0f;
+		//lightPos.y = 5.0f + sin(glfwGetTime()) * 2.0f;
+		//lightPos.z = 1.0f + sin(glfwGetTime()) * 5.0f;
+		lightPos = glm::vec3(sin(glfwGetTime()) * 3.0f, 5.0f + cos(glfwGetTime()) * 1.0f, 1.0f + cos(glfwGetTime()) * 2.0f);
+		glm::mat4 lightProj = glm::perspective(glm::radians(60.0f), 1.0f, 1.0f, 20.0f);
+		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 lightSpaceMatrix = lightProj * lightView;
+		depthMapMat->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
 
 		glViewport(0, 0, depthMapWidth, depthMapHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		World::getWorld()->enableGlobalMaterial(depthMapMat);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// fixed peter panning, use cull front face when render scene to depth map
 		glCullFace(GL_FRONT);
-		for (unsigned int i = 0; i < 6; ++i)
-			depthMapMat->setMatrix4x4("lightMatrices[" + std::to_string(i) + "]", lightMatrices[i]);
-		depthMapMat->setFloat("farPlane", farPlane);
-		depthMapMat->setVector3("lightPos", lightPos);
-		depthMapMat->setMatrix4x4("model", room->getModelMatrix());
-		room->render(deltaTime);
+		depthMapMat->setMatrix4x4("model", sampleScene->getModelMatrix());
+		sampleScene->render(deltaTime);
 		glCullFace(GL_BACK);
 		World::getWorld()->disableGlobalMaterial();
-		
-		glViewport(0, 0, width, height);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		room->setFloat("farPlane", farPlane);
-		room->setVector3("lightPos", lightPos);
-		room->setVector3("viewPos", camera->getPosition());
-		room->setInteger("depthMap", 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
-		room->render(deltaTime);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		sampleScene->setInteger("depthMap", 0);
+
+		sampleScene->setVector3("lightPos", lightPos);
+		sampleScene->setVector3("viewPos", camera->getPosition());
+		sampleScene->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
+		sampleScene->render(deltaTime);
 	}
 };
 
