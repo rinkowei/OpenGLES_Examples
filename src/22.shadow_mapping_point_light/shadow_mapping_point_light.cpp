@@ -9,13 +9,18 @@ public:
 
 	Model* room;
 
-	const uint16_t depthMapWidth = 2048;
-	const uint16_t depthMapHeight = 2048;
+	const uint16_t depthMapWidth = 1024;
+	const uint16_t depthMapHeight = 1024;
 	uint32_t depthMapFBO;
-	uint32_t depthTexture;
+	uint32_t depthCubeMap;
 
 	// point light position
-	glm::vec3 lightPos = glm::vec3(0.0f, 3.0f, 0.0f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 2.5f, 0.0f);
+	// point light matrices
+	std::vector<glm::mat4> lightMatrices;
+
+	float nearPlane = 1.0f;
+	float farPlane = 10.0f;
 
 	Example()
 	{
@@ -54,7 +59,7 @@ public:
 		std::unordered_map<Material::ShaderType, std::string> depthShaderPaths =
 		{
 			{ Material::ShaderType::VERTEX, shadersDirectory + "depth_map.vert" },
-			//{ Material::ShaderType::GEOMETRY, shadersDirectory + "depth_map.geom" },
+			{ Material::ShaderType::GEOMETRY, shadersDirectory + "depth_map.geom" },
 			{ Material::ShaderType::FRAGMENT, shadersDirectory + "depth_map.frag" }
 		};
 
@@ -79,6 +84,25 @@ public:
 		std::shared_ptr<Material> roomMat = std::make_shared<Material>(roomShaderPaths, roomTexturePaths);
 
 		room = Model::createWithFile(modelsDirectory + "/van-gogh-room/van-gogh-room.obj", roomMat);
+
+		glGenFramebuffers(1, &depthMapFBO);
+		glGenTextures(1, &depthCubeMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
+		for (unsigned int i = 0; i < 6; i++)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, depthMapWidth, depthMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0);
+		glDrawBuffers(0, GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	virtual void render(float deltaTime) override
@@ -88,8 +112,38 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+		//lightPos = glm::vec3(0.0f, 3.0f + cos(glfwGetTime()) * 0.5f, 2.0f);
+		glm::mat4 lightProj = glm::perspective(glm::radians(90.0f), (float)depthMapWidth / (float)depthMapHeight, nearPlane, farPlane);
+		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+		lightMatrices.push_back(lightProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+		glViewport(0, 0, depthMapWidth, depthMapHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		World::getWorld()->enableGlobalMaterial(depthMapMat);
+		glCullFace(GL_FRONT);
+		for (unsigned int i = 0; i < 6; ++i)
+			depthMapMat->setMatrix4x4("lightMatrices[" + std::to_string(i) + "]", lightMatrices[i]);
+		depthMapMat->setFloat("farPlane", farPlane);
+		depthMapMat->setVector3("lightPos", lightPos);
+		depthMapMat->setMatrix4x4("model", room->getModelMatrix());
+		room->render(deltaTime);
+		glCullFace(GL_BACK);
+		World::getWorld()->disableGlobalMaterial();
+		
+		glViewport(0, 0, width, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		room->setFloat("farPlane", farPlane);
 		room->setVector3("lightPos", lightPos);
 		room->setVector3("viewPos", camera->getPosition());
+		room->setInteger("depthMap", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
 		room->render(deltaTime);
 	}
 };

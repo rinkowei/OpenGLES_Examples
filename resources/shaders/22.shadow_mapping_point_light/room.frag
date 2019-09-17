@@ -4,44 +4,50 @@ layout(location = 0) out vec4 fragColor;
 
 in VS_OUT
 {
+	vec2 fTexcoord;
 	vec3 fNormal;
 	vec3 fFragPos;
-	//vec4 fFragPosLightSpace;
 }fs_in;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
-//uniform sampler2D depthMap;
-/*
-float calculateShadow(vec4 fragPosLightSpace)
+uniform float farPlane;
+
+uniform samplerCube depthMap;
+
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
+float calculateShadow(vec3 fragPos)
 {
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-	projCoords = projCoords * 0.5f + 0.5f;
+	vec3 fragToLight = fragPos - lightPos;
 
-	float closestDepth = texture(depthMap, projCoords.xy).r;
-	float currentDepth = projCoords.z;
+	float currentDepth = length(fragToLight);
 
-	float shadow = 1.0f;
-	ivec2 texelSize = textureSize(depthMap, 0);
-	for(int x = -1; x <= 1; ++x)
+	float shadow = 0.0f;
+	float bias = 0.005f;
+	int samples = 20;
+	float viewDistance = length(viewPos - fragPos);
+	float diskRadius = (1.0f + (viewDistance / farPlane)) / 200.0f;
+	for(int i = 0; i < samples; ++i)
     {
-        for(int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * 1.0f / vec2(texelSize.x, texelSize.y)).r; 
-            shadow += currentDepth > pcfDepth ? 1.0f : 0.0f;        
-        }    
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= farPlane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0f;
     }
 
-    shadow /= 9.0f;
-
-	if (projCoords.z > 1.0f)
-	{
-		shadow = 0.0f;
-	}
+	shadow /= float(samples);
 
 	return shadow;
 }
-*/
+
 void main()
 {
 	vec3 color = vec3(0.8f, 0.8f, 0.8f);
@@ -62,7 +68,6 @@ void main()
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * lightColor;    
 
-	//float shadow = calculateShadow(fs_in.fFragPosLightSpace);
-	float shadow = 0.0f;
-    fragColor = vec4((1.0f - shadow) * (ambient + diffuse + specular), 1.0f);
+	float shadow = calculateShadow(fs_in.fFragPos);
+    fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
 }
