@@ -56,6 +56,7 @@ set(EXAMPLES
     21.shadow_mapping_directional_light
     22.shadow_mapping_point_light
     23.shadow_mapping_spot_light
+    24.cascade_shadow_mapping
 )
 
 buildExamples()
