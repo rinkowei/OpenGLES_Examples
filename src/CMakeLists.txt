@@ -57,6 +57,7 @@ set(EXAMPLES
     22.shadow_mapping_point_light
     23.shadow_mapping_spot_light
     24.cascade_shadow_mapping
+    25.variance_shadow_mapping
 )
 
 buildExamples()
