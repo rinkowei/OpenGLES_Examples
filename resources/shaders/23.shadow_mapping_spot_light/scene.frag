@@ -45,7 +45,6 @@ float calculateShadow(vec4 fragPosLightSpace)
 {
 	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
-	float closestDepth = texture(depthMap, projCoords.xy).r;
 	float currentDepth = projCoords.z;
 
 	vec3 normal = normalize(fs_in.fNormal);
