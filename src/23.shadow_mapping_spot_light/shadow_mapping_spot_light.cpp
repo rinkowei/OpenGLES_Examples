@@ -14,13 +14,19 @@ public:
 	uint32_t depthMapFBO;
 	uint32_t depthTexture;
 
-	glm::vec3 lightPos = glm::vec3(0.0f, 6.0f, 1.0f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
+
+	glm::mat4 biasMatrix = glm::mat4(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.5f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f
+	);
 
 	Example()
 	{
 		title = "shadow mapping spot light";
 		settings.vsync = false;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -74,10 +80,11 @@ public:
 
 		};
 
-		std::shared_ptr<Material> groundMat = std::make_shared<Material>(sceneShaderPaths, sceneTexturePaths);
+		std::shared_ptr<Material> sceneMat = std::make_shared<Material>(sceneShaderPaths, sceneTexturePaths);
 
-		sampleScene = Model::createWithFile(modelsDirectory + "/teapots-pillars/samplescene.dae", groundMat);
+		sampleScene = Model::createWithFile(modelsDirectory + "/teapots-pillars/samplescene.dae", sceneMat);
 		sampleScene->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		sampleScene->setMatrix4x4("biasMatrix", biasMatrix);
 
 		// configure depth map FBO;
 		glGenFramebuffers(1, &depthMapFBO);
@@ -107,11 +114,8 @@ public:
 		World::getWorld()->enableGlobalMaterial(depthMapMat);
 
 		// change light position over time
-		//lightPos.x = cos(glfwGetTime()) * 3.0f;
-		//lightPos.y = 5.0f + sin(glfwGetTime()) * 2.0f;
-		//lightPos.z = 1.0f + sin(glfwGetTime()) * 5.0f;
-		lightPos = glm::vec3(sin(glfwGetTime()) * 3.0f, 5.0f + cos(glfwGetTime()) * 1.0f, 1.0f + cos(glfwGetTime()) * 2.0f);
-		glm::mat4 lightProj = glm::perspective(glm::radians(60.0f), 1.0f, 1.0f, 20.0f);
+		lightPos = glm::vec3(-2.0f + sin(glfwGetTime()) * 2.0f, 5.0f + cos(glfwGetTime()) * 1.0f, 2.0f + cos(glfwGetTime()) * 1.0f);
+		glm::mat4 lightProj = glm::perspective<float>(glm::radians(45.0f), 1.0f, 1.0f, 10.0f);
 		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0));
 		glm::mat4 lightSpaceMatrix = lightProj * lightView;
 		depthMapMat->setMatrix4x4("lightSpaceMatrix", lightSpaceMatrix);
