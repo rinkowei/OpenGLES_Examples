@@ -124,3 +124,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 #### [25 - variance_shadow_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/25.variance_shadow_mapping>)
+
+
+
+#### [26 - HDR](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/26.HDR>)
