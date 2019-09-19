@@ -58,7 +58,7 @@ set(EXAMPLES
     23.shadow_mapping_spot_light
     24.cascade_shadow_mapping
     25.variance_shadow_mapping
-    26.HDR
+    26.bloom_with_hdr
 )
 
 buildExamples()

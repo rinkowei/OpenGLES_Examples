@@ -25,12 +25,12 @@ public:
 
 	Example()
 	{
-		title = "variance shadow mapping";
+		title = "bloom with hdr";
 		settings.vsync = false;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/25.variance_shadow_mapping/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/26.bloom_with_hdr/";
 	}
 
 	~Example()
