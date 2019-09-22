@@ -6,6 +6,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
+#include "ogles.h"
+#include "buffer.h"
 #include "plane.h"
 #include "frustum.h"
 #include "camera.h"
