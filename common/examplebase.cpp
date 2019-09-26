@@ -42,27 +42,51 @@ ExampleBase::ExampleBase()
 
 ExampleBase::~ExampleBase()
 {
-	
+	SDL_Quit();
 }
 
-bool ExampleBase::setupGLFW()
+bool ExampleBase::setupSDL()
 {
-	if (!glfwInit())
+	SDL_SetMainReady();
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+	{
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to init SDL! error : %s\n", SDL_GetError());
 		return false;
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_ES_API, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	
-	window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+	}
+	atexit(SDL_Quit);
+
+	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 16);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	window = SDL_CreateWindow(title.c_str(), 
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+		defaultWindowWidth, defaultWindowHeight, 
+		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	if (!window)
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error",
+			"failed to create the main window.", nullptr);
 		return false;
-	glfwMakeContextCurrent(window);
-	
-	if (this->settings.vsync)
-		glfwSwapInterval(1);
-	else
-		glfwSwapInterval(0);
+	}
+
+	context = SDL_GL_CreateContext(window);
+	if (!context)
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error",
+			"failed to create an OpenGL context.", nullptr);
+		return false;
+	}
 
 	return true;
 }
@@ -83,7 +107,7 @@ bool ExampleBase::setupImGui()
 	ImGui::StyleColorsDark();
 
 	// setup platform/renderer bindings
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplSDL2_InitForOpenGL(window, context);
 	ImGui_ImplOpenGL3_Init(apiVersion.c_str());
 
 	return true;
@@ -91,16 +115,7 @@ bool ExampleBase::setupImGui()
 
 bool ExampleBase::loadGLESFunctions()
 {
-	if (gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Success to initialize GLAD\n";
-		return true;
-	}
-	else
-	{
-		std::cout << "Failed to initialize GLAD\n";
-	}
-	return false;
+	return true;
 }
 
 void ExampleBase::setupValidation()
@@ -130,7 +145,7 @@ void ExampleBase::renderFrame()
 
 	// start the dear imgui frame
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
+	ImGui_ImplSDL2_NewFrame(window);
 	ImGui::NewFrame();
 
 	// rendering objects
@@ -164,7 +179,7 @@ void ExampleBase::renderFrame()
 		lastFPS = static_cast<uint32_t>((float)frameCounter * (1000.0f / fpsTimer));
 		if (!settings.overlay) {
 			std::string windowTitle = getWindowTitle();
-			glfwSetWindowTitle(window, windowTitle.c_str());
+			SDL_SetWindowTitle(window, windowTitle.c_str());
 		}
 		frameCounter = 0;
 		lastTimestamp = timeEnd;
@@ -175,35 +190,32 @@ void ExampleBase::renderFrame()
 
 void ExampleBase::renderLoop()
 {
-	if (benchmark.active)
-	{
-		benchmark.run([=] { render(frameTimer); });
-		if (benchmark.filename != "")
-		{
-			benchmark.saveResults();
-		}
-		return;
-	}
-
-	destWidth = width;
-	destHeight = height;
+	destWidth = defaultWindowWidth;
+	destHeight = defaultWindowHeight;
 	lastTimestamp = std::chrono::high_resolution_clock::now();
 
-	while (!glfwWindowShouldClose(window))
+	GLboolean quit = false;
+	while (!quit)
 	{
-		glfwPollEvents();
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT)
+			{
+				quit = true;
+			}
+		}
 		handleInput();
 		renderFrame();
-		glfwSwapBuffers(window);
+		SDL_GL_SwapWindow(window);
 	}
 
 	// clean up
 	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	SDL_DestroyWindow(window);
 }
 
 void ExampleBase::updateOverlay()
@@ -213,7 +225,7 @@ void ExampleBase::updateOverlay()
 
 	ImGuiIO& io = ImGui::GetIO();
 
-	io.DisplaySize = ImVec2((float)width, (float)height);
+	io.DisplaySize = ImVec2((float)defaultWindowWidth, (float)defaultWindowHeight);
 	io.DeltaTime = frameTimer;
 }
 
@@ -282,6 +294,7 @@ void ExampleBase::handleInput()
 
 void ExampleBase::handleKeyboardInput()
 {
+	/*
 	// handle keyboard input
 	if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE))
 		glfwSetWindowShouldClose(window, true);
@@ -306,6 +319,7 @@ void ExampleBase::handleKeyboardInput()
 		camera->keys.leftward = false;
 	if (ImGui::IsKeyReleased(GLFW_KEY_D))
 		camera->keys.rightward = false;
+		*/
 }
 
 void ExampleBase::handleMouseMove()

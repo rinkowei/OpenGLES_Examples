@@ -23,12 +23,11 @@
 #include "world.h"
 #include "object.h"
 #include "camera.h"
-#include "benchmark.h"
 #include "UIOverlay.h"
 
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengles32.h>
+#include <imgui/imgui_impl_sdl.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 using namespace es;
 
@@ -40,9 +39,6 @@ namespace es
 		// get window title with example name
 		std::string getWindowTitle();
 		bool viewUpdated = false;
-
-		GLuint destWidth;
-		GLuint destHeight;
 		GLboolean resizing = false;
 
 		void windowResize();
@@ -57,7 +53,9 @@ namespace es
 			Texture
 		};
 
-		GLFWwindow* window;
+		SDL_Window* window;
+		SDL_GLContext context;
+
 		// frame counter to display fps
 		GLuint64 frameCounter = 0;
 		GLuint lastFPS = 0;
@@ -70,15 +68,16 @@ namespace es
 		Camera* camera;
 	public:
 		bool prepared = false;
-		GLint width = 1280;
-		GLint height = 720;
+		GLint defaultWindowWidth = 1280;
+		GLint defaultWindowHeight = 720;
+
+		GLint destWidth;
+		GLint destHeight;
 
 		es::UIOverlay uiOverlay;
 
 		float frameTimer = 1.0f / 60.0f;
 		const std::string getResourcesPath(ResourceType type);
-
-		es::Benchmark benchmark;
 	    
 		struct Settings
 		{
@@ -100,13 +99,7 @@ namespace es
 
 		std::string title = "OpenGL_ES Example";
 		std::string name = "ExampleBase";
-		std::string apiVersion = "#version 320 es";
-
-		struct GamePadState
-		{
-			glm::vec2 axisLeft = glm::vec2(0.0f);
-			glm::vec2 axisRight = glm::vec2(0.0f);
-		} gamePadState;
+		std::string apiVersion = "#version 310 es";
 
 		struct MouseButtons
 		{
@@ -125,8 +118,8 @@ namespace es
 
 		// deconstructor
 		virtual ~ExampleBase();
-
-		bool setupGLFW();
+		 
+		bool setupSDL();
 
 		bool setupImGui();
 
