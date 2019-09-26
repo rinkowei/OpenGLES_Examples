@@ -1,8 +1,6 @@
 #pragma once
 
-#define GLFW_INCLUDE_ES32
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "ogles.h"
 
 #ifdef _WIN32
 #pragma comment(linker, "/subsystem:windows")
@@ -50,6 +48,7 @@ namespace es
 		void windowResize();
 		void handleKeyboardInput();
 		void handleMouseMove();
+
 	protected:
 		enum class ResourceType
 		{
@@ -57,6 +56,7 @@ namespace es
 			Shader,
 			Texture
 		};
+
 		GLFWwindow* window;
 		// frame counter to display fps
 		GLuint64 frameCounter = 0;

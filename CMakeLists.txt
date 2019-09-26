@@ -19,7 +19,7 @@ if(WIN32 AND NOT MINGW)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
   
     link_directories(${CMAKE_SOURCE_DIR}/lib/win${BITS})
-    set(LIBS glfw3 libGLESv2 assimp-vc140-mt)
+    set(LIBS SDL2 SDL2main libEGL libGLESv2 assimp-vc140-mt)
 
     # copy DLLs to runtime_output_directory in advance
     file(GLOB DLLs ${CMAKE_SOURCE_DIR}/dll/win${BITS}/*.dll)
@@ -47,9 +47,6 @@ if(MSVC_VERSION GREATER_EQUAL "1900")
 else()
     add_compile_options("/std:c++14")
 endif()
-
-add_library(glad "external/glad/glad.c")
-set(LIBS ${LIBS} glad)
 
 add_subdirectory(common)
 add_subdirectory(src)
