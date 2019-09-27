@@ -2,13 +2,42 @@
 
 #include "ogles.h"
 
+//  global compilation flag configuring windows sdk headers
+//  preventing inclusion of min and max macros clashing with <limits>
+#define NOMINMAX 1
+
+//  override byte to prevent clashes with <cstddef>
+#define byte win_byte_override
+
+#include <Windows.h> // gdi plus requires Windows.h
+// ...includes for other windows header that may use byte...
+
+//  Define min max macros required by GDI+ headers.
+#ifndef max
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#else
+#error max macro is already defined
+#endif
+#ifndef min
+#define min(a,b) (((a) < (b)) ? (a) : (b))
+#else
+#error min macro is already defined
+#endif
+
+#include <gdiplus.h>
+
+//  Undefine min max macros so they won't collide with <limits> header content.
+#undef min
+#undef max
+
+//  Undefine byte macros so it won't collide with <cstddef> header content.
+#undef byte
 
 #ifdef _WIN32
-//#pragma comment(linker, "/subsystem:windows")
-#include <Windows.h>
-//#include <fcntl.h>
-//#include <io.h>
-//#include <ShellScalingApi.h>
+#pragma comment(linker, "/subsystem:windows")
+#include <fcntl.h>
+#include <io.h>
+#include <ShellScalingApi.h>
 #endif
 
 #include <iostream>
