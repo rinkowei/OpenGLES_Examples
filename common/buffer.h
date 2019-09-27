@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ogles.h"
+
 namespace es
 {
 	class Buffer

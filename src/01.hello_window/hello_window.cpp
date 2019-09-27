@@ -27,7 +27,7 @@ public:
 };
 
 Example* example;
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+int APIENTRY SDL_main(int args, char **argc)
 {
 	example = new Example();
 	example->setupValidation();
@@ -40,5 +40,5 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	example->prepare();
 	example->renderLoop();
 	delete(example);
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -2,11 +2,12 @@
 
 #include "ogles.h"
 
+
 #ifdef _WIN32
-#pragma comment(linker, "/subsystem:windows")
+//#pragma comment(linker, "/subsystem:windows")
 #include <Windows.h>
-#include <fcntl.h>
-#include <io.h>
+//#include <fcntl.h>
+//#include <io.h>
 //#include <ShellScalingApi.h>
 #endif
 
@@ -109,8 +110,8 @@ namespace es
 		} mouseButtons;
 
 #if defined(_WIN32)
-		HWND windowHwnd;
-		HINSTANCE windowInstance;
+		//HWND windowHwnd;
+		//HINSTANCE windowInstance;
 #endif
 
 		// constrctor

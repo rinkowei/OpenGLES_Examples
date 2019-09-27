@@ -65,6 +65,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include "ogles.h"
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
@@ -101,7 +102,7 @@
 #if (defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_TV))
 #include <OpenGLES/ES3/gl.h>  // Use GL ES 3
 #else
-#include <GLES3/gl3.h>  // Use GL ES 3
+#include <GLES3/gl31.h>  // Use GL ES 3
 #endif
 #else
 // About Desktop OpenGL function loaders:
@@ -150,7 +151,7 @@ bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
         glsl_version = "#version 100";
 #elif defined(IMGUI_IMPL_OPENGL_ES3)
     if (glsl_version == NULL)
-        glsl_version = "#version 300 es";
+        glsl_version = "#version 310 es";
 #else
     if (glsl_version == NULL)
         glsl_version = "#version 130";
