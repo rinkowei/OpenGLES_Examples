@@ -10,10 +10,12 @@ public:
 		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.45f, 0.50f, 0.60f, 1.0f);
 	}
+
 	~Example()
 	{
 
 	}
+
 public:
 	virtual void prepare() override
 	{
@@ -22,8 +24,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
@@ -34,7 +36,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
