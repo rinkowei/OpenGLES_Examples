@@ -8,8 +8,8 @@ public:
 	{
 		title = "hello window";
 		settings.vsync = true;
-		settings.validation = true;
 	}
+
 	~Example()
 	{
 
