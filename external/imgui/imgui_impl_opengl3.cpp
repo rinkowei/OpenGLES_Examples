@@ -503,7 +503,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
         "}\n";
 
-    const GLchar* vertex_shader_glsl_300_es =
+    const GLchar* vertex_shader_glsl_310_es =
         "precision mediump float;\n"
         "layout (location = 0) in vec2 Position;\n"
         "layout (location = 1) in vec2 UV;\n"
@@ -554,7 +554,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
         "}\n";
 
-    const GLchar* fragment_shader_glsl_300_es =
+    const GLchar* fragment_shader_glsl_310_es =
         "precision mediump float;\n"
         "uniform sampler2D Texture;\n"
         "in vec2 Frag_UV;\n"
@@ -588,10 +588,10 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         vertex_shader = vertex_shader_glsl_410_core;
         fragment_shader = fragment_shader_glsl_410_core;
     }
-    else if (glsl_version == 300)
+    else if (glsl_version == 310)
     {
-        vertex_shader = vertex_shader_glsl_300_es;
-        fragment_shader = fragment_shader_glsl_300_es;
+        vertex_shader = vertex_shader_glsl_310_es;
+        fragment_shader = fragment_shader_glsl_310_es;
     }
     else
     {
