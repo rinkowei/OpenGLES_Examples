@@ -40,8 +40,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "triangle.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "triangle.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "triangle.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "triangle.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
@@ -50,7 +50,7 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 		
 		// create triangle mesh
-		triangle = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
+		triangle = Mesh::createWithData(vertices, {}, Mesh::DrawType::ARRAYS, material);
 	}
 
 	virtual void render(float deltaTime) override
