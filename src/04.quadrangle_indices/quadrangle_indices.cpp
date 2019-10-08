@@ -46,8 +46,8 @@ public:
 
 		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
 		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "quadrangle.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "quadrangle.frag" }
+			{ Material::ShaderType::VERTEX, shadersDirectory + "quadrangle.vert" },
+			{ Material::ShaderType::FRAGMENT, shadersDirectory + "quadrangle.frag" }
 		};
 
 		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
@@ -56,13 +56,13 @@ public:
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
 		// create quadrangle mesh
-		quadrangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements, material);
+		quadrangle = Mesh::createWithData(vertices, indices, material, Mesh::DrawType::ELEMENTS);
 	}
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -75,7 +75,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
