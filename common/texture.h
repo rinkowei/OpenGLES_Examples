@@ -48,6 +48,7 @@ namespace es
 		GLenum mInternalFormat;
 		GLenum mFormat;
 		GLenum mType;
+		GLuint mComponents;
 		uint32_t mArraySize;
 	};
 
@@ -56,7 +57,7 @@ namespace es
 	public:
 		Texture2D();
 		~Texture2D();
-		static Texture2D* createFromFile(std::string path, bool srgb = true);
+		static Texture2D* createFromFile(std::string path, int mipLevels = -1, bool srgb = true);
 
 		void setData(int arrayIndex, int mipLevel, void* data);
 
@@ -65,12 +66,33 @@ namespace es
 		uint32_t getMipLevels();
 		uint32_t getNumSamples();
 	private:
-		bool initFromFile(std::string path, bool srgb);
+		bool initFromFile(std::string path, int mipLevels, bool srgb);
 
 		uint32_t mWidth;
 		uint32_t mHeight;
 		uint32_t mMipLevels;
 		uint32_t mNumSamples;
+	};
+
+	class TextureCube : public Texture
+	{
+	public:
+		TextureCube();
+		~TextureCube();
+
+		static TextureCube* createFromFiles(std::vector<std::string> paths, int mipLevels = -1, bool srgb = true);
+
+		void setData(int faceIndex, int layerIndex, int mipLevel, void* data);
+
+		uint32_t getWidth();
+		uint32_t getHeight();
+		uint32_t getMipLevels();
+	private:
+		bool initFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb);
+
+		uint32_t mWidth;
+		uint32_t mHeight;
+		uint32_t mMipLevels;
 	};
 	/*
 	class Texture

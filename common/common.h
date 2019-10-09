@@ -1,12 +1,7 @@
 #pragma once
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
-
-#define STB_IMAGE_IMPLEMENTATION
-
 #include "ogles.h"
+#include "utility.h"
 #include "buffer.h"
 #include "plane.h"
 #include "frustum.h"

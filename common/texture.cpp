@@ -128,10 +128,10 @@ namespace es
 
 	}
 
-	Texture2D* Texture2D::createFromFile(std::string path, bool srgb)
+	Texture2D* Texture2D::createFromFile(std::string path, int mipLevels, bool srgb)
 	{
 		Texture2D* texture = new (std::nothrow) Texture2D();
-		if (texture && texture->initFromFile(path, srgb))
+		if (texture && texture->initFromFile(path, mipLevels, srgb))
 		{
 			return texture;
 		}
@@ -171,7 +171,7 @@ namespace es
 		}
 	}
 
-	bool Texture2D::initFromFile(std::string path, bool srgb)
+	bool Texture2D::initFromFile(std::string path, int mipLevels, bool srgb)
 	{
 		int width, height, components;
 		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &components, 0);
@@ -183,15 +183,131 @@ namespace es
 
 		GLenum internalFormat, format;
 
-		if (components == 1)
+		switch (components)
 		{
-			internalFormat = GL_R8;
-			format = GL_RED;
+			case 1:
+			{
+				internalFormat = GL_R8;
+				format = GL_RED;
+				break;
+			}
+			case 2:
+			{
+				internalFormat = GL_RG8;
+				format = GL_RG;
+				break;
+			}
+			case 3:
+			{
+				if (srgb)
+				{
+					internalFormat = GL_SRGB8;
+				}
+				else
+				{
+					internalFormat = GL_RGB8;
+				}
+				format = GL_RGB;
+				break;
+			}
+			case 4:
+			{
+				if (srgb)
+				{
+					internalFormat = GL_SRGB8_ALPHA8;
+				}
+				else
+				{
+					internalFormat = GL_RGBA8;
+				}
+				format = GL_RGBA;
+				break;
+			}
+			default:
+			{
+				internalFormat = GL_RGBA8;
+				format = GL_RGBA;
+				break;
+			}
+		}
+
+		mArraySize = 1;
+		mInternalFormat = internalFormat;
+		mFormat = format;
+		mType = GL_UNSIGNED_BYTE;
+		mWidth = width;
+		mHeight = height;
+		mNumSamples = 1;
+
+		if (mipLevels = -1)
+		{
+			mMipLevels = 1;
+
+			while (width > 1 && height > 1)
+			{
+				width = std::max(1, (width / 2));
+				height = std::max(1, (height / 2));
+				mMipLevels++;
+			}
 		}
 		else
 		{
-
+			mMipLevels = mipLevels;
 		}
+
+		if (mArraySize > 1)
+		{
+			mTarget = GL_TEXTURE_2D_ARRAY;
+
+			width = mWidth;
+			height = mHeight;
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+			for (int i = 0; i < mMipLevels; i++)
+			{
+				GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mArraySize, 0, mFormat, mType, nullptr));
+
+				width = std::max(1, (width / 2));
+				height = std::max(1, (height / 2));
+			}
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+		}
+		else
+		{
+			if (mNumSamples > 1)
+			{
+				mTarget = GL_TEXTURE_2D_MULTISAMPLE;
+			}
+			else
+			{
+				mTarget = GL_TEXTURE_2D;
+			}
+
+			width = mWidth;
+			height = mHeight;
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+			
+			for (int i = 0; i < mMipLevels; i++)
+			{
+				GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
+
+				width = std::max(1, (width / 2));
+				height = std::max(1, (height / 2));
+			}
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+		}
+		
+		setWrapping(GL_REPEAT, GL_REPEAT, GL_REPEAT);
+		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		setMagFilter(GL_LINEAR);
+
+		setData(0, 0, data);
+		generateMipmaps();
+
+		stbi_image_free(data);
 	}
 
 	uint32_t Texture2D::getWidth()
@@ -212,6 +328,38 @@ namespace es
 	uint32_t Texture2D::getNumSamples()
 	{
 		return mNumSamples;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------------------------------------
+
+	TextureCube::TextureCube() : Texture()
+	{
+
+	}
+
+	TextureCube::~TextureCube()
+	{
+
+	}
+
+	TextureCube* TextureCube::createFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb)
+	{
+
+	}
+
+	uint32_t TextureCube::getWidth()
+	{
+		return mWidth;
+	}
+
+	uint32_t TextureCube::getHeight()
+	{
+		return mHeight;
+	}
+
+	uint32_t TextureCube::getMipLevels()
+	{
+		return mMipLevels;
 	}
 
 	/*

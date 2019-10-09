@@ -7,6 +7,12 @@
 #include <cstdlib>
 #include <string>
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
+
+#define STB_IMAGE_IMPLEMENTATION
+
 #define IMGUI_IMPL_OPENGL_ES3
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM <GLES3/gl31.h>
 
