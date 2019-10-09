@@ -44,6 +44,35 @@ namespace es
 		return execPath;
 	}
 
+	bool Utility::readFile(const std::string& path, std::string& out)
+	{
+		struct stat info;
+		if (stat(path.c_str(), &info) != 0)
+		{
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to locate file in %s", path.c_str());
+			return false;
+		}
+
+		std::ifstream ifs;
+		ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+		std::stringstream stream;
+		try {
+			ifs.open(path, std::ios::in | std::ios::binary);
+
+			stream << ifs.rdbuf();
+			out = stream.str;
+			ifs.close();
+		}
+		catch (std::ifstream::failure e)
+		{
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to read file in %s", path.c_str());
+			return false;
+		}
+
+		return true;
+	}
+
 	std::string Utility::pathWithoutFile(const std::string& path)
 	{
 #ifdef WIN32

@@ -2,6 +2,8 @@
 
 #include "ogles.h"
 #include "utility.h"
+#include "shader.h"
+#include "program.h"
 #include "buffer.h"
 #include "plane.h"
 #include "frustum.h"

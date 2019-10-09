@@ -344,7 +344,23 @@ namespace es
 
 	TextureCube* TextureCube::createFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb)
 	{
+		TextureCube* texture = new (std::nothrow) TextureCube();
+		if (texture && texture->initFromFiles(paths, mipLevels, srgb))
+		{
+			return texture;
+		}
+		delete(texture);
+		return nullptr;
+	}
 
+	void TextureCube::setData(int faceIndex, int layerIndex, int mipLevel, void* data)
+	{
+
+	}
+
+	bool TextureCube::initFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb)
+	{
+		return false;
 	}
 
 	uint32_t TextureCube::getWidth()
