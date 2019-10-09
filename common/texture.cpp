@@ -118,6 +118,102 @@ namespace es
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------
 
+	Texture2D::Texture2D() : Texture()
+	{
+
+	}
+
+	Texture2D::~Texture2D()
+	{
+
+	}
+
+	Texture2D* Texture2D::createFromFile(std::string path, bool srgb)
+	{
+		Texture2D* texture = new (std::nothrow) Texture2D();
+		if (texture && texture->initFromFile(path, srgb))
+		{
+			return texture;
+		}
+		delete(texture);
+		return nullptr;
+	}
+
+	void Texture2D::setData(int arrayIndex, int mipLevel, void* data)
+	{
+		if (mNumSamples > 1)
+		{
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "OpenGL ES : Multisampled texture data only can be assigned through shaders or FBOs");
+		}
+		else
+		{
+			int width = mWidth;
+			int height = mHeight;
+
+			for (int i = 0; i < mipLevel; i++)
+			{
+				width = std::max(1, width / 2);
+				height = std::max(1, height / 2);
+			}
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+
+			if (mArraySize > 1)
+			{
+				GLES_CHECK_ERROR(glTexImage3D(mTarget, mipLevel, mInternalFormat, width, height, arrayIndex, 0, mFormat, mType, data));
+			}
+			else
+			{
+				GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, width, height, 0, mFormat, mType, data));
+			}
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+		}
+	}
+
+	bool Texture2D::initFromFile(std::string path, bool srgb)
+	{
+		int width, height, components;
+		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &components, 0);
+
+		if (!data)
+		{
+			return false;
+		}
+
+		GLenum internalFormat, format;
+
+		if (components == 1)
+		{
+			internalFormat = GL_R8;
+			format = GL_RED;
+		}
+		else
+		{
+
+		}
+	}
+
+	uint32_t Texture2D::getWidth()
+	{
+		return mWidth;
+	}
+
+	uint32_t Texture2D::getHeight()
+	{
+		return mHeight;
+	}
+
+	uint32_t Texture2D::getMipLevels()
+	{
+		return mMipLevels;
+	}
+
+	uint32_t Texture2D::getNumSamples()
+	{
+		return mNumSamples;
+	}
+
 	/*
 	Texture::Texture()
 	{

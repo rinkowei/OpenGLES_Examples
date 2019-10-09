@@ -54,13 +54,19 @@ namespace es
 	class Texture2D : public Texture
 	{
 	public:
+		Texture2D();
+		~Texture2D();
 		static Texture2D* createFromFile(std::string path, bool srgb = true);
+
+		void setData(int arrayIndex, int mipLevel, void* data);
 
 		uint32_t getWidth();
 		uint32_t getHeight();
 		uint32_t getMipLevels();
 		uint32_t getNumSamples();
 	private:
+		bool initFromFile(std::string path, bool srgb);
+
 		uint32_t mWidth;
 		uint32_t mHeight;
 		uint32_t mMipLevels;
