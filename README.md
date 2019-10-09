@@ -1,5 +1,5 @@
 # OpenGL ES C++ examples
-A comprehensive collection of open source C++ examples for OpenGL ES 3.2 which is from Khronos.
+A comprehensive collection of open source C++ examples for OpenGL ES 3.1 which is from Khronos.
 
 ## Development Environment
 
