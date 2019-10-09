@@ -4,6 +4,123 @@ namespace es
 {
 	Texture::Texture()
 	{
+		GLES_CHECK_ERROR(glGenTextures(1, &mID));
+	}
+
+	Texture::~Texture()
+	{
+		GLES_CHECK_ERROR(glDeleteTextures(1, &mID));
+	}
+
+	void Texture::bind(uint32_t unit)
+	{
+		GLES_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + unit));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+	}
+
+	void Texture::unbind(uint32_t unit)
+	{
+		GLES_CHECK_ERROR(glActiveTexture(GL_TEXTURE0 + unit));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	void Texture::generateMipmaps()
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glGenerateMipmap(mTarget));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	GLuint Texture::getID()
+	{
+		return mID;
+	}
+
+	GLenum Texture::getTarget()
+	{
+		return mTarget;
+	}
+
+	GLenum Texture::getInternalFormat()
+	{
+		return mInternalFormat;
+	}
+
+	GLenum Texture::getFormat()
+	{
+		return mFormat;
+	}
+
+	GLenum Texture::getType()
+	{
+		return mType;
+	}
+
+	uint32_t Texture::getArraySize()
+	{
+		return mArraySize;
+	}
+
+	void Texture::setWrapping(GLenum s, GLenum t, GLenum r)
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, s));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, t));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_R, r));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	void Texture::setBorderColor(float r, float g, float b, float a)
+	{
+		std::array<float, 4> borderColor = { r, g, b, a };
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexParameterfv(mTarget, GL_TEXTURE_BORDER_COLOR_NV, borderColor.data()));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	void Texture::setMinFilter(GLenum filter)
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, filter));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	void Texture::setMagFilter(GLenum filter)
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, filter));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	void Texture::bindImage(uint32_t unit, uint32_t mipLevel, uint32_t layer, GLenum access, GLenum format)
+	{
+		bind(unit);
+
+		if (mArraySize > 1)
+			glBindImageTexture(unit, mID, mipLevel, GL_TRUE, layer, access, format);
+		else
+			glBindImageTexture(unit, mID, mipLevel, GL_FALSE, 0, access, format);
+	}
+
+	void Texture::setCompareMode(GLenum mode)
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_COMPARE_MODE, mode));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	void Texture::setCompareFunc(GLenum func)
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_COMPARE_FUNC, func));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------------------------------
+
+	/*
+	Texture::Texture()
+	{
 
 	}
 
@@ -164,4 +281,5 @@ namespace es
 
 		return true;
 	}
+	*/
 }

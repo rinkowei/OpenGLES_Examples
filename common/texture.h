@@ -7,11 +7,66 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <array>
 
 #include <stb/stb_image.h>
 
 namespace es
 {
+	class Texture
+	{
+	public:
+		Texture();
+		virtual ~Texture();
+
+		// bind texture to specified texture uint
+		void bind(uint32_t unit);
+		void unbind(uint32_t unit);
+
+		// bind to image unit
+		void bindImage(uint32_t unit, uint32_t mipLevel, uint32_t layer, GLenum access, GLenum format);
+
+		void generateMipmaps();
+
+		GLuint getID();
+		GLenum getTarget();
+		GLenum getInternalFormat();
+		GLenum getFormat();
+		GLenum getType();
+		uint32_t getArraySize();
+
+		void setWrapping(GLenum s, GLenum t, GLenum r);
+		void setBorderColor(float r, float g, float b, float a);
+		void setMinFilter(GLenum filter);
+		void setMagFilter(GLenum filter);
+		void setCompareMode(GLenum mode);
+		void setCompareFunc(GLenum func);
+
+	protected:
+		GLuint mID;
+		GLenum mTarget;
+		GLenum mInternalFormat;
+		GLenum mFormat;
+		GLenum mType;
+		uint32_t mArraySize;
+	};
+
+	class Texture2D : public Texture
+	{
+	public:
+		static Texture2D* createFromFile(std::string path, bool srgb = true);
+
+		uint32_t getWidth();
+		uint32_t getHeight();
+		uint32_t getMipLevels();
+		uint32_t getNumSamples();
+	private:
+		uint32_t mWidth;
+		uint32_t mHeight;
+		uint32_t mMipLevels;
+		uint32_t mNumSamples;
+	};
+	/*
 	class Texture
 	{
 	public:
@@ -77,4 +132,5 @@ namespace es
 
 		GLboolean initWithFiles(const std::vector<std::string>& filePaths);
 	};
+	*/
 }
