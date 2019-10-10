@@ -21,22 +21,22 @@ namespace es
 		void apply();
 
 		void uniformBlockBinding(std::string name, int binding);
-		bool setUniform(std::string name, int value);
-		bool setUniform(std::string name, float value);
-		bool setUniform(std::string name, glm::vec2 value);
-		bool setUniform(std::string name, glm::vec3 value);
-		bool setUniform(std::string name, glm::vec4 value);
-		bool setUniform(std::string name, glm::mat2 value);
-		bool setUniform(std::string name, glm::mat3 value);
-		bool setUniform(std::string name, glm::mat4 value);
-		bool setUniform(std::string name, int count, int* value);
-		bool setUniform(std::string name, int count, float* value);
-		bool setUniform(std::string name, int count, glm::vec2* value);
-		bool setUniform(std::string name, int count, glm::vec3* value);
-		bool setUniform(std::string name, int count, glm::vec4* value);
-		bool setUniform(std::string name, int count, glm::mat2* value);
-		bool setUniform(std::string name, int count, glm::mat3* value);
-		bool setUniform(std::string name, int count, glm::mat4* value);
+		bool setUniform(const std::string& name, int value);
+		bool setUniform(const std::string& name, float value);
+		bool setUniform(const std::string& name, const glm::vec2& value);
+		bool setUniform(const std::string& name, const glm::vec3& value);
+		bool setUniform(const std::string& name, const glm::vec4& value);
+		bool setUniform(const std::string& name, const glm::mat2& value);
+		bool setUniform(const std::string& name, const glm::mat3& value);
+		bool setUniform(const std::string& name, const glm::mat4& value);
+		bool setUniform(const std::string& name, int count, int* value);
+		bool setUniform(const std::string& name, int count, float* value);
+		bool setUniform(const std::string& name, int count, glm::vec2* value);
+		bool setUniform(const std::string& name, int count, glm::vec3* value);
+		bool setUniform(const std::string& name, int count, glm::vec4* value);
+		bool setUniform(const std::string& name, int count, glm::mat2* value);
+		bool setUniform(const std::string& name, int count, glm::mat3* value);
+		bool setUniform(const std::string& name, int count, glm::mat4* value);
 	private:
 		bool initFromShaders(const std::vector<Shader*>& shaders);
 

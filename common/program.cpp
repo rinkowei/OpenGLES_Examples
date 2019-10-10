@@ -30,10 +30,19 @@ namespace es
 
 	void Program::uniformBlockBinding(std::string name, int binding)
 	{
+		GLES_CHECK_ERROR(GLuint idx = glGetUniformBlockIndex(mID, name.c_str()));
 
+		if (idx == GL_INVALID_INDEX)
+		{
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "OPENGL: Failed to get Uniform Block Index for Uniform Buffer : %s", name.c_str());
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glUniformBlockBinding(mID, idx, binding));
+		}
 	}
 
-	bool Program::setUniform(std::string name, int value)
+	bool Program::setUniform(const std::string& name, int value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -45,7 +54,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, float value)
+	bool Program::setUniform(const std::string& name, float value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -57,7 +66,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, glm::vec2 value)
+	bool Program::setUniform(const std::string& name, const glm::vec2& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -69,7 +78,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, glm::vec3 value)
+	bool Program::setUniform(const std::string& name, const glm::vec3& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -81,7 +90,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, glm::vec4 value)
+	bool Program::setUniform(const std::string& name, const glm::vec4& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -93,7 +102,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, glm::mat2 value)
+	bool Program::setUniform(const std::string& name, const glm::mat2& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -105,7 +114,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, glm::mat3 value)
+	bool Program::setUniform(const std::string& name, const glm::mat3& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -117,7 +126,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, glm::mat4 value)
+	bool Program::setUniform(const std::string& name, const glm::mat4& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -129,7 +138,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, int* value)
+	bool Program::setUniform(const std::string& name, int count, int* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -141,7 +150,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, float* value)
+	bool Program::setUniform(const std::string& name, int count, float* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -153,7 +162,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, glm::vec2* value)
+	bool Program::setUniform(const std::string& name, int count, glm::vec2* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -165,7 +174,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, glm::vec3* value)
+	bool Program::setUniform(const std::string& name, int count, glm::vec3* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -177,7 +186,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, glm::vec4* value)
+	bool Program::setUniform(const std::string& name, int count, glm::vec4* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -189,7 +198,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, glm::mat2* value)
+	bool Program::setUniform(const std::string& name, int count, glm::mat2* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -201,7 +210,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, glm::mat3* value)
+	bool Program::setUniform(const std::string& name, int count, glm::mat3* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
@@ -213,7 +222,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(std::string name, int count, glm::mat4* value)
+	bool Program::setUniform(const std::string& name, int count, glm::mat4* value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
 		{
