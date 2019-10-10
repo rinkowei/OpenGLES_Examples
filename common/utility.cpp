@@ -22,7 +22,7 @@ namespace es
 
 	std::string Utility::pathForResource(const std::string& resource)
 	{
-
+		return "";
 	}
 
 	std::string Utility::executablePath()
@@ -61,7 +61,7 @@ namespace es
 			ifs.open(path, std::ios::in | std::ios::binary);
 
 			stream << ifs.rdbuf();
-			out = stream.str;
+			out = stream.str();
 			ifs.close();
 		}
 		catch (std::ifstream::failure e)
@@ -73,7 +73,7 @@ namespace es
 		return true;
 	}
 
-	std::string Utility::pathWithoutFile(const std::string& path)
+	std::string Utility::pathWithoutFile(std::string path)
 	{
 #ifdef WIN32
 		std::replace(path.begin(), path.end(), '\\', '/');

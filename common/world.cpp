@@ -40,7 +40,7 @@ namespace es
 			this->globalMaterial.reset();
 		}
 		this->globalMaterial = globalMaterial;
-		this->globalMaterial->apply();
+		//this->globalMaterial->apply();
 		isGlobalMaterialEnabled = true;
 	}
 

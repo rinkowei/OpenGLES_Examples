@@ -15,14 +15,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-
 #define IMGUI_IMPL_OPENGL_ES3
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM <GLES3/gl31.h>
 
 #define SDL_MAIN_HANDLED
 
-#define ENABLE_GL_ERROR_CHECK
+#define STB_IMAGE_IMPLEMENTATION
+
+#include <stb/stb_image.h>
+
+//#define ENABLE_GL_ERROR_CHECK
 #ifdef ENABLE_GL_ERROR_CHECK
 #define GLES_CHECK_ERROR(x)                                                     \
 	x;                                                                          \
@@ -59,6 +61,6 @@
 	}             
                      
 #else
-#define GL_CHECK_ERROR(x)   x
-}
+#define GLES_CHECK_ERROR(x)   x
+
 #endif

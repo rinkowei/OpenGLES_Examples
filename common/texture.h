@@ -1,15 +1,12 @@
 #pragma once
 
 #include "ogles.h"
-#include <glm/glm.hpp>
 
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <array>
-
-#include <stb/stb_image.h>
 
 namespace es
 {

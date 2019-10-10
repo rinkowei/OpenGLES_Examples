@@ -1,5 +1,4 @@
-﻿
-#include <common.h>
+﻿#include <common.h>
 
 class Example : public ExampleBase
 {

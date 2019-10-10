@@ -21,7 +21,7 @@ namespace es
 
 		//static bool preprocessShader(const std::string& path, const std::string& src, std::string& out);
 
-		static std::string pathWithoutFile(const std::string& path);
+		static std::string pathWithoutFile(std::string path);
 
 		static std::string fileExtension(const std::string& filePath);
 
