@@ -10,41 +10,43 @@
 
 #define SDL_MAIN_HANDLED
 
-//#define ENABLE_GL_ERROR_CHECK
+#define ENABLE_GL_ERROR_CHECK
 #ifdef ENABLE_GL_ERROR_CHECK
-#define GLES_CHECK_ERROR(x)                                                     \
-	x;                                                                          \
-	GLenum err(glGetError());                                                   \
-	while (err != GL_NO_ERROR)                                                  \
-	{                                                                           \
-		std::string error;                                                      \
-                                                                                \
-		switch (err)                                                            \
-		{                                                                       \
-		case GL_INVALID_OPERATION:                                              \
-			error = "invalid operation";                                        \
-			break;                                                              \
-		case GL_INVALID_ENUM:                                                   \
-			error = "invalid enum";                                             \
-			break;                                                              \
-		case GL_INVALID_VALUE:                                                  \
-			error = "invalid value";                                            \
-			break;                                                              \
-		case GL_OUT_OF_MEMORY:                                                  \
-			error = "out of memory";                                            \
-			break;                                                              \
-		case GL_INVALID_FRAMEBUFFER_OPERATION:                                  \
-			error = "invalid framebuffer operation";                            \
-			break;                                                              \
-		}                                                                       \
-                                                                                \
-		std::string formattedError = "OpenGL ES : ";                            \
-		formattedError = formattedError + error;                                \
-		formattedError = formattedError + ", line : ";                          \
-		formattedError = formattedError + std::to_string(__LINE__);             \
-		SDL_LogError(SDL_LOG_CATEGORY_ERROR, formattedError.c_str());           \
-		err = glGetError();                                                     \
-	}             
+#define GLES_CHECK_ERROR(x)                                                         \
+	x;																		        \
+	{																			    \
+		GLenum err(glGetError());                                                   \
+		while (err != GL_NO_ERROR)                                                  \
+		{                                                                           \
+			std::string error;                                                      \
+																					\
+			switch (err)                                                            \
+			{                                                                       \
+			case GL_INVALID_OPERATION:                                              \
+				error = "invalid operation";                                        \
+				break;                                                              \
+			case GL_INVALID_ENUM:                                                   \
+				error = "invalid enum";                                             \
+				break;                                                              \
+			case GL_INVALID_VALUE:                                                  \
+				error = "invalid value";                                            \
+				break;                                                              \
+			case GL_OUT_OF_MEMORY:                                                  \
+				error = "out of memory";                                            \
+				break;                                                              \
+			case GL_INVALID_FRAMEBUFFER_OPERATION:                                  \
+				error = "invalid framebuffer operation";                            \
+				break;                                                              \
+			}                                                                       \
+																					\
+			std::string formattedError = "OpenGL ES : ";                            \
+			formattedError = formattedError + error;                                \
+			formattedError = formattedError + ", line : ";                          \
+			formattedError = formattedError + std::to_string(__LINE__);             \
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, formattedError.c_str());           \
+			err = glGetError();                                                     \
+		}																			\
+	}																				\
 
 #else
 #define GLES_CHECK_ERROR(x)   x
