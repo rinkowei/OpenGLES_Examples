@@ -1,4 +1,6 @@
-﻿#include <common.h>
+﻿#include <examplebase.h>
+
+using namespace es;
 
 class Example : public ExampleBase
 {
