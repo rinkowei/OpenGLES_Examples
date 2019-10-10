@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ogles.h"
-#include "program.h"
 
 #include <vector>
 #include <string>
@@ -10,7 +9,6 @@ namespace es
 {
 	class Shader
 	{
-		friend class Program;
 	public:
 		Shader();
 		~Shader();

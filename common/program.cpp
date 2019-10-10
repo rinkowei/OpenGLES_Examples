@@ -9,6 +9,7 @@ namespace es
 
 	Program::~Program()
 	{
+		mLocationMap.swap(std::unordered_map<std::string, GLuint>());
 		GLES_CHECK_ERROR(glDeleteProgram(mID));
 	}
 
@@ -49,7 +50,19 @@ namespace es
 			return false;
 		}
 
-		glUniform1i(mLocationMap[name], value);
+		GLES_CHECK_ERROR(glUniform1i(mLocationMap[name], value));
+
+		return true;
+	}
+
+	bool Program::setUniform(const std::string& name, bool value)
+	{
+		if (mLocationMap.find(name) == mLocationMap.end())
+		{
+			return false;
+		}
+
+		GLES_CHECK_ERROR(glUniform1i(mLocationMap[name], (int)value));
 
 		return true;
 	}
@@ -61,7 +74,7 @@ namespace es
 			return false;
 		}
 
-		glUniform1f(mLocationMap[name], value);
+		GLES_CHECK_ERROR(glUniform1f(mLocationMap[name], value));
 
 		return true;
 	}
@@ -73,7 +86,7 @@ namespace es
 			return false;
 		}
 
-		glUniform2f(mLocationMap[name], value.x, value.y);
+		GLES_CHECK_ERROR(glUniform2f(mLocationMap[name], value.x, value.y));
 
 		return true;
 	}
@@ -81,11 +94,11 @@ namespace es
 	bool Program::setUniform(const std::string& name, const glm::vec3& value)
 	{
 		if (mLocationMap.find(name) == mLocationMap.end())
-		{
+		{ 
 			return false;
 		}
 
-		glUniform3f(mLocationMap[name], value.x, value.y, value.z);
+		GLES_CHECK_ERROR(glUniform3f(mLocationMap[name], value.x, value.y, value.z));
 
 		return true;
 	}
@@ -97,7 +110,7 @@ namespace es
 			return false;
 		}
 
-		glUniform4f(mLocationMap[name], value.x, value.y, value.z, value.w);
+		GLES_CHECK_ERROR(glUniform4f(mLocationMap[name], value.x, value.y, value.z, value.w));
 
 		return true;
 	}
@@ -109,7 +122,7 @@ namespace es
 			return false;
 		}
 
-		glUniformMatrix2fv(mLocationMap[name], 1, GL_FALSE, glm::value_ptr(value));
+		GLES_CHECK_ERROR(glUniformMatrix2fv(mLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
 
 		return true;
 	}
@@ -121,7 +134,7 @@ namespace es
 			return false;
 		}
 
-		glUniformMatrix3fv(mLocationMap[name], 1, GL_FALSE, glm::value_ptr(value));
+		GLES_CHECK_ERROR(glUniformMatrix3fv(mLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
 
 		return true;
 	}
@@ -133,7 +146,7 @@ namespace es
 			return false;
 		}
 
-		glUniformMatrix4fv(mLocationMap[name], 1, GL_FALSE, glm::value_ptr(value));
+		GLES_CHECK_ERROR(glUniformMatrix4fv(mLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
 
 		return true;
 	}
@@ -145,7 +158,7 @@ namespace es
 			return false;
 		}
 
-		glUniform1iv(mLocationMap[name], count, value);
+		GLES_CHECK_ERROR(glUniform1iv(mLocationMap[name], count, value));
 
 		return true;
 	}
@@ -157,7 +170,7 @@ namespace es
 			return false;
 		}
 
-		glUniform1fv(mLocationMap[name], count, value);
+		GLES_CHECK_ERROR(glUniform1fv(mLocationMap[name], count, value));
 
 		return true;
 	}
@@ -169,7 +182,7 @@ namespace es
 			return false;
 		}
 
-		glUniform2fv(mLocationMap[name], count, glm::value_ptr(value[0]));
+		GLES_CHECK_ERROR(glUniform2fv(mLocationMap[name], count, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -181,7 +194,7 @@ namespace es
 			return false;
 		}
 
-		glUniform3fv(mLocationMap[name], count, glm::value_ptr(value[0]));
+		GLES_CHECK_ERROR(glUniform3fv(mLocationMap[name], count, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -193,7 +206,7 @@ namespace es
 			return false;
 		}
 
-		glUniform4fv(mLocationMap[name], count, glm::value_ptr(value[0]));
+		GLES_CHECK_ERROR(glUniform4fv(mLocationMap[name], count, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -205,7 +218,7 @@ namespace es
 			return false;
 		}
 
-		glUniformMatrix2fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0]));
+		GLES_CHECK_ERROR(glUniformMatrix2fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -217,7 +230,7 @@ namespace es
 			return false;
 		}
 
-		glUniformMatrix3fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0]));
+		GLES_CHECK_ERROR(glUniformMatrix3fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -229,7 +242,7 @@ namespace es
 			return false;
 		}
 
-		glUniformMatrix4fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0]));
+		GLES_CHECK_ERROR(glUniformMatrix4fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -259,6 +272,11 @@ namespace es
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, logError.c_str());
 
 			return false;
+		}
+
+		for (std::size_t i = 0; i < shaders.size(); i++)
+		{
+			GLES_CHECK_ERROR(glDeleteShader(shaders[i]->getID()));
 		}
 
 		int uniformCount = 0;

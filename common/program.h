@@ -3,8 +3,6 @@
 #include "ogles.h"
 #include "shader.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <unordered_map>
 
@@ -22,6 +20,7 @@ namespace es
 
 		void uniformBlockBinding(std::string name, int binding);
 		bool setUniform(const std::string& name, int value);
+		bool setUniform(const std::string& name, bool value);
 		bool setUniform(const std::string& name, float value);
 		bool setUniform(const std::string& name, const glm::vec2& value);
 		bool setUniform(const std::string& name, const glm::vec3& value);
