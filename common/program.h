@@ -4,6 +4,7 @@
 #include "shader.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <unordered_map>
 
