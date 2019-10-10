@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EXAMPLEBASE_H_
+#define EXAMPLEBASE_H_
 
 #include "ogles.h"
 
@@ -58,8 +59,6 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_sdl.h>
 #include <imgui/imgui_impl_opengl3.h>
-
-using namespace es;
 
 namespace es
 {
@@ -187,3 +186,5 @@ namespace es
 		virtual void onUpdateUIOverlay(es::UIOverlay* overlay);
 	};
 }                                                                      
+
+#endif

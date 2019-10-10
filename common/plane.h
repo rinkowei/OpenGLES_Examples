@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLANE_H_
+#define PLANE_H_
 
 #include <ogles.h>
 #include <glm/glm.hpp>
@@ -63,3 +64,5 @@ namespace es
 		GLfloat dist;
 	};
 }
+
+#endif

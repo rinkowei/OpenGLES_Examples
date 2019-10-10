@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UIOVERLAY_H_
+#define UIOVERLAY_H_
 
 namespace es
 {
@@ -7,3 +8,5 @@ namespace es
 
 	};
 }
+
+#endif

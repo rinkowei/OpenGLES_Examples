@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TEXTURE_H_
+#define TEXTURE_H_
 
 #include "ogles.h"
 
@@ -7,6 +8,9 @@
 #include <iostream>
 #include <vector>
 #include <array>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 
 namespace es
 {
@@ -159,3 +163,5 @@ namespace es
 	};
 	*/
 }
+
+#endif

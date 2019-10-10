@@ -1,6 +1,8 @@
-#pragma once
+#ifndef OBJECT_H_
+#define OBJECT_H_
 
-#include "ogles.h"
+
+#include <ogles.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -63,3 +65,5 @@ namespace es
 		GLboolean isDirty;
 	};
 }
+
+#endif

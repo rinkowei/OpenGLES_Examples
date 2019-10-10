@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FRUSTUM_H_
+#define FRUSTUM_H_
 
 #include <iostream>
 #include <array>
@@ -34,3 +35,5 @@ namespace es
 		GLboolean initialized;
 	};
 }
+
+#endif

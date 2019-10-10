@@ -1,6 +1,7 @@
-#pragma once
+#ifndef MATERIAL_H_
+#define MATERIAL_H_
 
-#include "ogles.h"
+#include <ogles.h>
 
 #include <string>
 #include <fstream>
@@ -12,8 +13,6 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "texture.h"
-
 namespace es
 {
 	class Material
@@ -21,3 +20,5 @@ namespace es
 
 	};
 }
+
+#endif

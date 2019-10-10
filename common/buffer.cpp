@@ -1,4 +1,3 @@
-
 #include "buffer.h"
 
 namespace es

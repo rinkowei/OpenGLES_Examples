@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODEL_H_
+#define MODEL_H_
 
 #include <ogles.h>
 
@@ -24,3 +25,4 @@ namespace es
 	};
 }
 
+#endif

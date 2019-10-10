@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHADER_H_
+#define SHADER_H_
 
 #include "ogles.h"
 
@@ -26,3 +27,5 @@ namespace es
 		GLenum mType;
 	};
 }
+
+#endif

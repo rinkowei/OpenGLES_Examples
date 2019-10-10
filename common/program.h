@@ -1,7 +1,11 @@
-#pragma once
+#ifndef PROGRAM_H_
+#define PROGRAM_H_
 
-#include "ogles.h"
-#include "shader.h"
+#include <ogles.h>
+#include <shader.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
 #include <unordered_map>
@@ -43,3 +47,5 @@ namespace es
 		std::unordered_map<std::string, GLuint> mLocationMap;
 	};
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WORLD_H_
+#define WORLD_H_
 
 #include <iostream>
 #include <memory>
@@ -49,3 +50,5 @@ namespace es
 		static GarbageDeleter gd;
 	};
 }
+
+#endif

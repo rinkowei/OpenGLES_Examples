@@ -1,6 +1,5 @@
-#pragma once
-
-#include "ogles.h"
+#ifndef MESH_H_
+#define MESH_H_
 
 #include <string>
 #include <fstream>
@@ -21,3 +20,5 @@ namespace es
 
 	};
 }
+
+#endif
