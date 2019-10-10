@@ -7,8 +7,7 @@ namespace es
 	class Buffer
 	{
 	public:
-		Buffer(GLenum type, GLenum usage, std::size_t size, void* data);
-		virtual ~Buffer();
+		static Buffer* createWithData(GLenum type, GLenum usage, std::size_t size, void* data);
 
 		void bind();
 		void bindBase(int index);
@@ -23,5 +22,17 @@ namespace es
 		GLenum mType;
 		GLuint mID;
 		size_t mSize;
+	protected:
+		Buffer(GLenum type, GLenum usage, std::size_t size, void* data);
+		virtual ~Buffer();
+	};
+
+	class VertexBuffer : public Buffer
+	{
+	public:
+		static VertexBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+	private:
+		VertexBuffer(GLenum usage, std::size_t size, void* data);
+		~VertexBuffer();
 	};
 }

@@ -18,6 +18,17 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteBuffers(1, &mID));
 	}
 
+	Buffer* Buffer::createWithData(GLenum type, GLenum usage, std::size_t size, void* data)
+	{
+		Buffer* buffer = new (std::nothrow) Buffer(type, usage, size, data);
+		if (buffer)
+		{
+			return buffer;
+		}
+		delete(buffer);
+		return nullptr;
+	}
+
 	void Buffer::bind()
 	{
 		GLES_CHECK_ERROR(glBindBuffer(mType, mID));
@@ -58,5 +69,15 @@ namespace es
 		GLES_CHECK_ERROR(glBindBuffer(mType, mID));
 		GLES_CHECK_ERROR(glBufferSubData(mType, offset, size, data));
 		GLES_CHECK_ERROR(glBindBuffer(mType, 0));
+	}
+
+	VertexBuffer::VertexBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ARRAY_BUFFER, usage, size, data)
+	{
+
+	}
+
+	VertexBuffer::~VertexBuffer()
+	{
+
 	}
 }
