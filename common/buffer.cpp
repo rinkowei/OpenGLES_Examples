@@ -80,4 +80,36 @@ namespace es
 	{
 
 	}
+
+	VertexBuffer* VertexBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		VertexBuffer* buffer = new (std::nothrow) VertexBuffer(usage, size, data);
+		if (buffer)
+		{
+			return buffer;
+		}
+		delete(buffer);
+		return nullptr;
+	}
+
+	ElementBuffer::ElementBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ELEMENT_ARRAY_BUFFER, usage, size, data)
+	{
+
+	}
+
+	ElementBuffer::~ElementBuffer()
+	{
+
+	}
+
+	ElementBuffer* ElementBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		ElementBuffer* buffer = new (std::nothrow) ElementBuffer(usage, size, data);
+		if (buffer)
+		{
+			return buffer;
+		}
+		delete(buffer);
+		return nullptr;
+	}
 }

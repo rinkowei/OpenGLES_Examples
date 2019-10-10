@@ -35,4 +35,13 @@ namespace es
 		VertexBuffer(GLenum usage, std::size_t size, void* data);
 		~VertexBuffer();
 	};
+
+	class ElementBuffer : public Buffer
+	{
+	public:
+		static ElementBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+	private:
+		ElementBuffer(GLenum usage, std::size_t size, void* data);
+		~ElementBuffer();
+	};
 }
