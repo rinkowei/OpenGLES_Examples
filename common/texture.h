@@ -1,23 +1,20 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
-#include "ogles.h"
+#include <ogles.h>
 
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <array>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
 
 namespace es
 {
 	class Texture
 	{
 	public:
-		Texture();
 		virtual ~Texture();
 
 		// bind texture to specified texture uint
@@ -44,6 +41,8 @@ namespace es
 		void setCompareFunc(GLenum func);
 
 	protected:
+		Texture();
+
 		GLuint mID;
 		GLenum mTarget;
 		GLenum mInternalFormat;
@@ -56,7 +55,10 @@ namespace es
 	class Texture2D : public Texture
 	{
 	public:
-		static Texture2D* createFromFile(std::string path, int mipLevels = -1, bool srgb = true);
+		~Texture2D();
+
+		template<typename... T>
+		static std::shared_ptr<Texture2D> createFromFile(T &&... args);
 
 		void setData(int arrayIndex, int mipLevel, void* data);
 
@@ -64,9 +66,11 @@ namespace es
 		uint32_t getHeight();
 		uint32_t getMipLevels();
 		uint32_t getNumSamples();
+	protected:
+		Texture2D(const Texture2D&) = delete;
+		const Texture2D& operator=(const Texture2D&) = delete;
 	private:
 		Texture2D(std::string path, int mipLevels = -1, bool srgb = true);
-		~Texture2D();
 
 		void initFromFile(std::string path, int mipLevels, bool srgb);
 

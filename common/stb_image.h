@@ -315,6 +315,7 @@ RECENT REVISION HISTORY:
 //     want the zlib decoder to be available, #define STBI_SUPPORT_ZLIB
 //
 
+#define STB_IMAGE_IMPLEMENTATION
 
 #ifndef STBI_NO_STDIO
 #include <stdio.h>

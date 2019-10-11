@@ -1,4 +1,5 @@
 #include "texture.h"
+#include <stb_image.h>
 
 namespace es
 {
@@ -128,15 +129,10 @@ namespace es
 
 	}
 
-	Texture2D* Texture2D::createFromFile(std::string path, int mipLevels, bool srgb)
+	template<typename... T>
+	std::shared_ptr<Texture2D> Texture2D::createFromFile(T &&... args)
 	{
-		Texture2D* texture = new (std::nothrow) Texture2D(path, mipLevels, srgb);
-		if (texture)
-		{
-			return texture;
-		}
-		delete(texture);
-		return nullptr;
+		return std::make_shared<Texture2D>(std::forward<T>(args)...);
 	}
 
 	void Texture2D::setData(int arrayIndex, int mipLevel, void* data)

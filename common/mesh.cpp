@@ -46,16 +46,10 @@ namespace es
 		mEBO.reset(nullptr);
 	}
 
-	template<typename... T>
-	std::shared_ptr<Mesh> Mesh::createWithData(T &&... args)
-	{
-		return std::make_shared<Mesh>(std::forward<T>(args)...);
-	}
-
 	void Mesh::render()
 	{
 		mVAO->bind();
-		glDrawArrays(GL_TRIANGLES, 0, mVertices.size());
+		GLES_CHECK_ERROR(glDrawArrays(GL_TRIANGLES, 0, mVertices.size()));
 		mVAO->unbind();
 	}
 }

@@ -82,12 +82,6 @@ namespace es
 
 	}
 
-	template<typename... T>
-	std::unique_ptr<VertexBuffer> VertexBuffer::createWithData(T &&... args)
-	{
-		return std::make_unique<VertexBuffer>(std::forward<T>(args)...);
-	}
-
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
 	ElementBuffer::ElementBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ELEMENT_ARRAY_BUFFER, usage, size, data)
@@ -98,12 +92,6 @@ namespace es
 	ElementBuffer::~ElementBuffer()
 	{
 
-	}
-
-	template<typename... T>
-	std::unique_ptr<ElementBuffer> createWithData(T &&... args)
-	{
-		return std::make_unique<ElementBuffer>(std::forward<T>(args)...);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
@@ -192,12 +180,6 @@ namespace es
 	VertexArray::~VertexArray()
 	{
 		GLES_CHECK_ERROR(glDeleteVertexArrays(1, &mID));
-	}
-
-	template<typename... T>
-	std::unique_ptr<VertexArray> VertexArray::createWithData(T &&... args)
-	{
-		return std::make_unique<VertexArray>(std::forward<T>(args)...);
 	}
 
 	void VertexArray::bind()

@@ -33,29 +33,33 @@ namespace es
 	class VertexBuffer : public Buffer
 	{
 	public:
+		VertexBuffer(GLenum usage, std::size_t size, void* data);
 		~VertexBuffer();
 
 		template<typename... T>
-		static std::unique_ptr<VertexBuffer> createWithData(T&&... args);
-	protected:
+		static std::unique_ptr<VertexBuffer> createWithData(T&&... args)
+		{
+			return std::make_unique<VertexBuffer>(std::forward<T>(args)...);
+		}
+
 		VertexBuffer(const VertexBuffer&) = delete;
 		const VertexBuffer& operator=(const VertexBuffer&) = delete;
-	private:
-		VertexBuffer(GLenum usage, std::size_t size, void* data);
 	};
 
 	class ElementBuffer : public Buffer
 	{
 	public:
+		ElementBuffer(GLenum usage, std::size_t size, void* data);
 		~ElementBuffer();
 
 		template<typename... T>
-		static std::unique_ptr<ElementBuffer> createWithData(T &&... args);
-	protected:
+		static std::unique_ptr<ElementBuffer> createWithData(T&&... args)
+		{
+			return std::make_unique<ElementBuffer>(std::forward<T>(args)...);
+		}
+
 		ElementBuffer(const ElementBuffer&) = delete;
 		const ElementBuffer& operator=(const ElementBuffer&) = delete;
-	private:
-		ElementBuffer(GLenum usage, std::size_t size, void* data);
 	};
 
 	class UniformBuffer : public Buffer
@@ -87,21 +91,23 @@ namespace es
 	class VertexArray
 	{
 	public:
+		VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs);
 		~VertexArray();
 
 		template<typename... T>
-		static std::unique_ptr<VertexArray> createWithData(T &&... args);
+		static std::unique_ptr<VertexArray> createWithData(T&&... args)
+		{
+			return std::make_unique<VertexArray>(std::forward<T>(args)...);
+		}
 
 		void bind();
 		void unbind();
 
 		GLuint getID() const;
-	protected:
+
 		VertexArray(const VertexArray&) = delete;
 		const VertexArray& operator=(const VertexArray&) = delete;
 	private:
-		VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs);
-
 		GLuint mID;
 	};
 }

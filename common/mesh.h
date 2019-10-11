@@ -8,13 +8,8 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <optional>
 
 #include <buffer.h>
-#include <material.h>
-#include <world.h>
-
-using namespace std;
 
 namespace es
 {
@@ -31,13 +26,25 @@ namespace es
 	class Mesh
 	{
 	public:
+		~Mesh();
+
 		template<typename... T>
-		static std::shared_ptr<Mesh> createWithData(T &&... args);
+		static std::shared_ptr<Mesh> createWithData(T &&... args)
+		{
+			struct EnableMakeShared : public Mesh
+			{
+				EnableMakeShared(T&&... args) : Mesh(std::forward<T>(args)...) {}
+			};
+
+			return std::static_pointer_cast<Mesh>(std::make_shared<EnableMakeShared>(std::forward<T>(args)...));
+		}
 
 		void render();
+	protected:
+		Mesh(const Mesh&) = delete;
+		const Mesh& operator=(const Mesh&) = delete;
 	private:
 		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
-		~Mesh();
 
 		std::string mName;
 
