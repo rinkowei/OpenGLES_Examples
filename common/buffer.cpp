@@ -70,6 +70,8 @@ namespace es
 		GLES_CHECK_ERROR(glBindBuffer(mType, 0));
 	}
 
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
 	VertexBuffer::VertexBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ARRAY_BUFFER, usage, size, data)
 	{
 
@@ -91,6 +93,8 @@ namespace es
 		return nullptr;
 	}
 
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
 	ElementBuffer::ElementBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ELEMENT_ARRAY_BUFFER, usage, size, data)
 	{
 
@@ -110,5 +114,96 @@ namespace es
 		}
 		delete(buffer);
 		return nullptr;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
+	UniformBuffer::UniformBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_UNIFORM_BUFFER, usage, size, data)
+	{
+
+	}
+
+	UniformBuffer::~UniformBuffer()
+	{
+
+	}
+
+	UniformBuffer* UniformBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		UniformBuffer* buffer = new (std::nothrow) UniformBuffer(usage, size, data);
+		if (buffer)
+		{
+			return buffer;
+		}
+		delete(buffer);
+		return nullptr;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
+	VertexArray::VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs)
+	{
+		GLES_CHECK_ERROR(glGenVertexArrays(1, &mID));
+		GLES_CHECK_ERROR(glBindVertexArray(mID));
+		
+		vbo->bind();
+		if (ebo)
+		{
+			ebo->bind();
+		}
+
+		for (std::size_t i = 0; i < attribs.size(); i++)
+		{
+			GLES_CHECK_ERROR(glEnableVertexAttribArray(i));
+
+			if (attribs[i].type == GL_INT)
+			{
+				GLES_CHECK_ERROR(glVertexAttribIPointer(i, attribs[i].numSubElements, attribs[i].type, vertexSize, (void*)((uint64_t)attribs[i].offset)));
+			}
+			else
+			{
+				GLES_CHECK_ERROR(glVertexAttribPointer(i, attribs[i].numSubElements, attribs[i].type, attribs[i].normalized, vertexSize, (void*)((uint64_t)attribs[i].offset)));
+			}
+		}
+
+		GLES_CHECK_ERROR(glBindVertexArray(0));
+
+		vbo->unbind();
+
+		if (ebo)
+		{
+			ebo->unbind();
+		}
+	}
+
+	VertexArray::~VertexArray()
+	{
+		GLES_CHECK_ERROR(glDeleteVertexArrays(1, &mID));
+	}
+
+	VertexArray* VertexArray::createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs)
+	{
+		VertexArray* vao = new (std::nothrow) VertexArray(vbo, ebo, vertexSize, attribs);
+		if (vao)
+		{
+			return vao;
+		}
+		delete(vao);
+		return nullptr;
+	}
+
+	void VertexArray::bind()
+	{
+		GLES_CHECK_ERROR(glBindVertexArray(mID));
+	}
+
+	void VertexArray::unbind()
+	{
+		GLES_CHECK_ERROR(glBindVertexArray(0));
+	}
+
+	GLuint VertexArray::getID() const
+	{
+		return mID;
 	}
 }

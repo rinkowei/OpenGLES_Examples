@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ogles.h>
+#include <vector>
 
 namespace es
 {
@@ -43,5 +44,38 @@ namespace es
 	private:
 		ElementBuffer(GLenum usage, std::size_t size, void* data);
 		~ElementBuffer();
+	};
+
+	class UniformBuffer : public Buffer
+	{
+	public:
+		static UniformBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+	private:
+		UniformBuffer(GLenum usage, std::size_t size, void* data);
+		~UniformBuffer();
+	};
+
+	struct VertexAttrib
+	{
+		uint32_t numSubElements;
+		uint32_t type;
+		bool     normalized;
+		uint32_t offset;
+	};
+
+	class VertexArray
+	{
+	public:
+		static VertexArray* createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs);
+
+		void bind();
+		void unbind();
+
+		GLuint getID() const;
+	private:
+		VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs);
+		~VertexArray();
+
+		GLuint mID;
 	};
 }
