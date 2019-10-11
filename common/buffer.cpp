@@ -164,7 +164,7 @@ namespace es
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
-	VertexArray::VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs)
+	VertexArray::VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs)
 	{
 		GLES_CHECK_ERROR(glGenVertexArrays(1, &mID));
 		GLES_CHECK_ERROR(glBindVertexArray(mID));
@@ -204,7 +204,7 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteVertexArrays(1, &mID));
 	}
 
-	VertexArray* VertexArray::createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs)
+	VertexArray* VertexArray::createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs)
 	{
 		VertexArray* vao = new (std::nothrow) VertexArray(vbo, ebo, vertexSize, attribs);
 		if (vao)

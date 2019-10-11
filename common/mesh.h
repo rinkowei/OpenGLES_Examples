@@ -31,9 +31,17 @@ namespace es
 	class Mesh
 	{
 	public:
+		template<typename... T>
+		static std::shared_ptr<Mesh> createWithData(T &&... args);
 
+		void render();
 	private:
-		std::vector<Vertex*> mVertices;
+		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+		~Mesh();
+
+		std::string mName;
+
+		std::vector<Vertex> mVertices;
 		std::vector<uint32_t> mIndices;
 
 		std::unique_ptr<VertexArray> mVAO = nullptr;

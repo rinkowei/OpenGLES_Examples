@@ -75,14 +75,14 @@ namespace es
 	class VertexArray
 	{
 	public:
-		static VertexArray* createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs);
+		static VertexArray* createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs);
 
 		void bind();
 		void unbind();
 
 		GLuint getID() const;
 	private:
-		VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs);
+		VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs);
 		~VertexArray();
 
 		GLuint mID;
