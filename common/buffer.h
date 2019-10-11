@@ -55,6 +55,15 @@ namespace es
 		~UniformBuffer();
 	};
 
+	class ShaderStorageBuffer : public Buffer
+	{
+	public:
+		static ShaderStorageBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+	private:
+		ShaderStorageBuffer(GLenum usage, std::size_t size, void* data);
+		~ShaderStorageBuffer();
+	};
+
 	struct VertexAttrib
 	{
 		uint32_t numSubElements;

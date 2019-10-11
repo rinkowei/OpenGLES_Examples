@@ -141,6 +141,29 @@ namespace es
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
+	ShaderStorageBuffer::ShaderStorageBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_SHADER_STORAGE_BUFFER, usage, size, data)
+	{
+
+	}
+
+	ShaderStorageBuffer::~ShaderStorageBuffer()
+	{
+
+	}
+
+	ShaderStorageBuffer* ShaderStorageBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		ShaderStorageBuffer* buffer = new (std::nothrow) ShaderStorageBuffer(usage, size, data);
+		if (buffer)
+		{
+			return buffer;
+		}
+		delete(buffer);
+		return nullptr;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
 	VertexArray::VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, std::vector<VertexAttrib> attribs)
 	{
 		GLES_CHECK_ERROR(glGenVertexArrays(1, &mID));
@@ -167,7 +190,7 @@ namespace es
 		}
 
 		GLES_CHECK_ERROR(glBindVertexArray(0));
-
+		
 		vbo->unbind();
 
 		if (ebo)
