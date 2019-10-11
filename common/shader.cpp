@@ -4,6 +4,9 @@
 namespace es
 {
 	Shader::Shader(GLenum type, const std::string& path)
+		:mID(0),
+		 mCompiled(false),
+		 mType(GL_VERTEX_SHADER)
 	{
 		std::string shaderStr;
 		if (!Utility::readFile(path, shaderStr))

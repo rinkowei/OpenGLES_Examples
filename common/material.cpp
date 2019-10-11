@@ -7,7 +7,22 @@ namespace es
 
 	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles)
 	{
+		mProgram = std::make_unique<Program>(shaderFiles);
 
+		for (std::size_t i = 0; i < textureFiles.size(); i++)
+		{
+			std::shared_ptr<Texture2D> tex2d;
+			if (mTextureCache.find(textureFiles[i]) == mTextureCache.end())
+			{
+				tex2d = std::make_shared<Texture2D>(textureFiles[i], 0, false);
+				mTextureCache[textureFiles[i]] = tex2d;
+			}
+			else
+			{
+				tex2d = mTextureCache[textureFiles[i]];
+			}
+			mTextures.push_back(tex2d);
+		}
 	}
 
 	Material::~Material()
@@ -27,6 +42,7 @@ namespace es
 		if (mMatCache.find(name) == mMatCache.end())
 		{
 			mat = new (std::nothrow) Material(name, shaderFiles, textureFiles);
+			mMatCache[name] = std::make_shared<Material>(mat);
 		}
 		else
 		{

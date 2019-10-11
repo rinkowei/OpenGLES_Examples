@@ -16,6 +16,7 @@ namespace es
 	{
 	public:
 		static Program* createFromShaders(const std::vector<Shader*>& shaders);
+		static Program* createFromFiles(const std::vector<std::string>& files);
 
 		void apply();
 
@@ -39,7 +40,10 @@ namespace es
 		bool setUniform(const std::string& name, int count, glm::mat4* value);
 	private:
 		Program(const std::vector<Shader*>& shaders);
+		Program(const std::vector<std::string>& files);
 		~Program();
+
+		void initFromShaders(const std::vector<Shader*>& shaders);
 
 		GLuint mID;
 		std::unordered_map<std::string, GLuint> mLocationMap;

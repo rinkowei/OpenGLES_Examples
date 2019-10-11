@@ -20,9 +20,6 @@ namespace es
 	class Material
 	{
 	public:
-		Material();
-		~Material();
-
 		static Material* createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles);
 	private:
 		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles);

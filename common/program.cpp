@@ -1,58 +1,36 @@
 #include "program.h"
+#include <utility.h>
 
 namespace es
 {
 	Program::Program(const std::vector<Shader*>& shaders)
+		:mID(0)
 	{
-		GLES_CHECK_ERROR(mID = glCreateProgram());
-		for (std::size_t i = 0; i < shaders.size(); i++)
+		initFromShaders(shaders);
+	}
+
+	Program::Program(const std::vector<std::string>& files)
+		:mID(0)
+	{
+		std::vector<Shader*> shaders;
+		for (std::size_t i = 0; i < files.size(); i++)
 		{
-			GLES_CHECK_ERROR(glAttachShader(mID, shaders[i]->getID()));
-		}
-
-		GLES_CHECK_ERROR(glLinkProgram(mID));
-
-		for (std::size_t i = 0; i < shaders.size(); i++)
-		{
-			GLES_CHECK_ERROR(glDeleteShader(shaders[i]->getID()));
-		}
-
-		GLint success;
-		char log[512];
-
-		GLES_CHECK_ERROR(glGetProgramiv(mID, GL_LINK_STATUS, &success));
-
-		if (!success)
-		{
-			glGetProgramInfoLog(mID, 512, nullptr, log);
-
-			std::string logError = "OpenGL ES : failed to link shader program : ";
-			logError += std::string(log);
-
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, logError.c_str());
-
-			return;
-		}
-
-		int uniformCount = 0;
-		GLES_CHECK_ERROR(glGetProgramiv(mID, GL_ACTIVE_UNIFORMS, &uniformCount));
-
-		GLint size;
-		GLenum type;
-		GLsizei length;
-		const GLuint bufSize = 64;
-		GLchar name[bufSize];
-
-		for (int i = 0; i < uniformCount; i++)
-		{
-			GLES_CHECK_ERROR(glGetActiveUniform(mID, i, bufSize, &length, &size, &type, name));
-			GLES_CHECK_ERROR(GLuint loc = glGetUniformLocation(mID, name));
-
-			if (loc != GL_INVALID_INDEX)
+			std::string ext = Utility::fileExtension(files[i]);
+			GLenum shaderType = GL_VERTEX_SHADER;
+			if (ext == "vert")
 			{
-				mLocationMap[std::string(name)] = loc;
+				shaderType = GL_VERTEX_SHADER;
 			}
+			else if (ext == "frag")
+			{
+				shaderType = GL_FRAGMENT_SHADER;
+			}
+
+			Shader* shader = Shader::createFromFile(shaderType, files[i]);
+			shaders.push_back(shader);
 		}
+
+		initFromShaders(shaders);
 	}
 
 	Program::~Program()
@@ -293,5 +271,58 @@ namespace es
 		GLES_CHECK_ERROR(glUniformMatrix4fv(mLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
+	}
+
+	void Program::initFromShaders(const std::vector<Shader*>& shaders)
+	{
+		GLES_CHECK_ERROR(mID = glCreateProgram());
+		for (std::size_t i = 0; i < shaders.size(); i++)
+		{
+			GLES_CHECK_ERROR(glAttachShader(mID, shaders[i]->getID()));
+		}
+
+		GLES_CHECK_ERROR(glLinkProgram(mID));
+
+		for (std::size_t i = 0; i < shaders.size(); i++)
+		{
+			GLES_CHECK_ERROR(glDeleteShader(shaders[i]->getID()));
+		}
+
+		GLint success;
+		char log[512];
+
+		GLES_CHECK_ERROR(glGetProgramiv(mID, GL_LINK_STATUS, &success));
+
+		if (!success)
+		{
+			glGetProgramInfoLog(mID, 512, nullptr, log);
+
+			std::string logError = "OpenGL ES : failed to link shader program : ";
+			logError += std::string(log);
+
+			SDL_LogError(SDL_LOG_CATEGORY_ERROR, logError.c_str());
+
+			return;
+		}
+
+		int uniformCount = 0;
+		GLES_CHECK_ERROR(glGetProgramiv(mID, GL_ACTIVE_UNIFORMS, &uniformCount));
+
+		GLint size;
+		GLenum type;
+		GLsizei length;
+		const GLuint bufSize = 64;
+		GLchar name[bufSize];
+
+		for (int i = 0; i < uniformCount; i++)
+		{
+			GLES_CHECK_ERROR(glGetActiveUniform(mID, i, bufSize, &length, &size, &type, name));
+			GLES_CHECK_ERROR(GLuint loc = glGetUniformLocation(mID, name));
+
+			if (loc != GL_INVALID_INDEX)
+			{
+				mLocationMap[std::string(name)] = loc;
+			}
+		}
 	}
 }

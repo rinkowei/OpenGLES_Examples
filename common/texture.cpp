@@ -118,9 +118,9 @@ namespace es
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------
 
-	Texture2D::Texture2D() : Texture()
+	Texture2D::Texture2D(std::string path, int mipLevels, bool srgb) : Texture()
 	{
-
+		initFromFile(path, mipLevels, srgb);
 	}
 
 	Texture2D::~Texture2D()
@@ -130,8 +130,8 @@ namespace es
 
 	Texture2D* Texture2D::createFromFile(std::string path, int mipLevels, bool srgb)
 	{
-		Texture2D* texture = new (std::nothrow) Texture2D();
-		if (texture && texture->initFromFile(path, mipLevels, srgb))
+		Texture2D* texture = new (std::nothrow) Texture2D(path, mipLevels, srgb);
+		if (texture)
 		{
 			return texture;
 		}
@@ -171,14 +171,15 @@ namespace es
 		}
 	}
 
-	bool Texture2D::initFromFile(std::string path, int mipLevels, bool srgb)
+	void Texture2D::initFromFile(std::string path, int mipLevels, bool srgb)
 	{
 		int width, height, components;
 		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &components, 0);
 
 		if (!data)
 		{
-			return false;
+			stbi_image_free(data);
+			return;
 		}
 
 		GLenum internalFormat, format;
@@ -239,7 +240,7 @@ namespace es
 		mHeight = height;
 		mNumSamples = 1;
 
-		if (mipLevels = -1)
+		if (mipLevels == -1)
 		{
 			mMipLevels = 1;
 
