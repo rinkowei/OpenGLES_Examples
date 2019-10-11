@@ -9,14 +9,20 @@
 
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 namespace es
 {
 	class Program
 	{
 	public:
-		static Program* createFromShaders(const std::vector<Shader*>& shaders);
-		static Program* createFromFiles(const std::vector<std::string>& files);
+		~Program();
+
+		template<typename... T>
+		static std::unique_ptr<Program> createFromShaders(T &&... args);
+
+		template<typename... T>
+		static std::unique_ptr<Program> createFromFiles(T &&... args);
 
 		void apply();
 
@@ -38,12 +44,14 @@ namespace es
 		bool setUniform(const std::string& name, int count, glm::mat2* value);
 		bool setUniform(const std::string& name, int count, glm::mat3* value);
 		bool setUniform(const std::string& name, int count, glm::mat4* value);
+
+		void initFromShaders(const std::vector<Shader*>& shaders);
+	protected:
+		Program(const Program&) = delete;
+		const Program& operator=(const Program&) = delete;
 	private:
 		Program(const std::vector<Shader*>& shaders);
 		Program(const std::vector<std::string>& files);
-		~Program();
-
-		void initFromShaders(const std::vector<Shader*>& shaders);
 
 		GLuint mID;
 		std::unordered_map<std::string, GLuint> mLocationMap;

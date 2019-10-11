@@ -39,15 +39,16 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteProgram(mID));
 	}
 
-	Program* Program::createFromShaders(const std::vector<Shader*>& shaders)
+	template<typename... T>
+	std::unique_ptr<Program> Program::createFromShaders(T &&... args)
 	{
-		Program* program = new (std::nothrow) Program(shaders);
-		if (program)
-		{
-			return program;
-		}
-		delete(program);
-		return nullptr;
+		return std::make_unique<Program>(std::forward<T>(args)...);
+	}
+
+	template<typename... T>
+	std::unique_ptr<Program> Program::createFromFiles(T &&... args)
+	{
+		return std::make_unique<Program>(std::forward<T>(args)...);
 	}
 
 	void Program::apply()

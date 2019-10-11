@@ -82,15 +82,10 @@ namespace es
 
 	}
 
-	VertexBuffer* VertexBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	template<typename... T>
+	std::unique_ptr<VertexBuffer> VertexBuffer::createWithData(T &&... args)
 	{
-		VertexBuffer* buffer = new (std::nothrow) VertexBuffer(usage, size, data);
-		if (buffer)
-		{
-			return buffer;
-		}
-		delete(buffer);
-		return nullptr;
+		return std::make_unique<VertexBuffer>(std::forward<T>(args)...);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
@@ -105,15 +100,10 @@ namespace es
 
 	}
 
-	ElementBuffer* ElementBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	template<typename... T>
+	std::unique_ptr<ElementBuffer> createWithData(T &&... args)
 	{
-		ElementBuffer* buffer = new (std::nothrow) ElementBuffer(usage, size, data);
-		if (buffer)
-		{
-			return buffer;
-		}
-		delete(buffer);
-		return nullptr;
+		return std::make_unique<ElementBuffer>(std::forward<T>(args)...);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
@@ -204,15 +194,10 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteVertexArrays(1, &mID));
 	}
 
-	VertexArray* VertexArray::createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs)
+	template<typename... T>
+	std::unique_ptr<VertexArray> VertexArray::createWithData(T &&... args)
 	{
-		VertexArray* vao = new (std::nothrow) VertexArray(vbo, ebo, vertexSize, attribs);
-		if (vao)
-		{
-			return vao;
-		}
-		delete(vao);
-		return nullptr;
+		return std::make_unique<VertexArray>(std::forward<T>(args)...);
 	}
 
 	void VertexArray::bind()

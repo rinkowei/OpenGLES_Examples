@@ -2,6 +2,7 @@
 
 #include <ogles.h>
 #include <vector>
+#include <memory>
 
 namespace es
 {
@@ -19,31 +20,42 @@ namespace es
 		void unMap();
 
 		void setData(std::size_t offset, std::size_t size, void* data);
+
+		virtual ~Buffer();
 	protected:
 		GLenum mType;
 		GLuint mID;
 		size_t mSize;
 	protected:
 		Buffer(GLenum type, GLenum usage, std::size_t size, void* data);
-		virtual ~Buffer();
 	};
 
 	class VertexBuffer : public Buffer
 	{
 	public:
-		static VertexBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+		~VertexBuffer();
+
+		template<typename... T>
+		static std::unique_ptr<VertexBuffer> createWithData(T&&... args);
+	protected:
+		VertexBuffer(const VertexBuffer&) = delete;
+		const VertexBuffer& operator=(const VertexBuffer&) = delete;
 	private:
 		VertexBuffer(GLenum usage, std::size_t size, void* data);
-		~VertexBuffer();
 	};
 
 	class ElementBuffer : public Buffer
 	{
 	public:
-		static ElementBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+		~ElementBuffer();
+
+		template<typename... T>
+		static std::unique_ptr<ElementBuffer> createWithData(T &&... args);
+	protected:
+		ElementBuffer(const ElementBuffer&) = delete;
+		const ElementBuffer& operator=(const ElementBuffer&) = delete;
 	private:
 		ElementBuffer(GLenum usage, std::size_t size, void* data);
-		~ElementBuffer();
 	};
 
 	class UniformBuffer : public Buffer
@@ -75,15 +87,20 @@ namespace es
 	class VertexArray
 	{
 	public:
-		static VertexArray* createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs);
+		~VertexArray();
+
+		template<typename... T>
+		static std::unique_ptr<VertexArray> createWithData(T &&... args);
 
 		void bind();
 		void unbind();
 
 		GLuint getID() const;
+	protected:
+		VertexArray(const VertexArray&) = delete;
+		const VertexArray& operator=(const VertexArray&) = delete;
 	private:
 		VertexArray(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs);
-		~VertexArray();
 
 		GLuint mID;
 	};

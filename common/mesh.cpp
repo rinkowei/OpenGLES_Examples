@@ -8,13 +8,13 @@ namespace es
 		mVertices = vertices;
 		mIndices = indices;
 
-		mVBO = std::make_unique<VertexBuffer>(GL_STATIC_DRAW, sizeof(Vertex) * vertices.size(), vertices.data());
+		mVBO = VertexBuffer::createWithData(GL_STATIC_DRAW, sizeof(Vertex) * vertices.size(), (void*)vertices.data());
 		if (!mVBO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to create VBO");
 		}
 
-		mEBO = std::make_unique<ElementBuffer>(GL_STATIC_DRAW, sizeof(uint32_t) * indices.size(), indices.data());
+		mEBO = ElementBuffer::createWithData(GL_STATIC_DRAW, sizeof(uint32_t) * indices.size(), (void*)indices.data());
 		if (!mEBO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to create EBO");
@@ -29,7 +29,7 @@ namespace es
 			{ 3, GL_FLOAT, false, offsetof(Vertex, vBitangent) }
 		};
 
-		mVAO = std::make_unique<VertexArray>(mVBO.get(), mEBO.get(), sizeof(Vertex), 5, attribs);
+		mVAO = VertexArray::createWithData(mVBO.get(), mEBO.get(), sizeof(Vertex), attribs);
 		if (!mVAO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to create VAO");

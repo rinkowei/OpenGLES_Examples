@@ -11,6 +11,7 @@ public:
 	{
 		title = "triangle";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(0.40f, 0.40f, 0.50f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/03.triangle/";
