@@ -3,35 +3,12 @@
 
 namespace es
 {
-	Shader::Shader()
-	{
-		mID = 0;
-		mCompiled = false;
-		mType = GL_VERTEX_SHADER;
-	}
-
-	Shader::~Shader()
-	{
-		GLES_CHECK_ERROR(glDeleteShader(mID));
-	}
-
-	Shader* Shader::createFromFile(GLenum type, const std::string& path)
-	{
-		Shader* shader = new (std::nothrow) Shader();
-		if (shader && shader->initFromFile(type, path))
-		{
-			return shader;
-		}
-		delete(shader);
-		return nullptr;
-	}
-
-	bool Shader::initFromFile(GLenum type, const std::string& path)
+	Shader::Shader(GLenum type, const std::string& path)
 	{
 		std::string shaderStr;
 		if (!Utility::readFile(path, shaderStr))
 		{
-			return false;
+			return;
 		}
 
 		mType = type;
@@ -59,8 +36,22 @@ namespace es
 		{
 			mCompiled = true;
 		}
+	}
 
-		return mCompiled;
+	Shader::~Shader()
+	{
+		GLES_CHECK_ERROR(glDeleteShader(mID));
+	}
+
+	Shader* Shader::createFromFile(GLenum type, const std::string& path)
+	{
+		Shader* shader = new (std::nothrow) Shader(type, path);
+		if (shader)
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
 	}
 
 	bool Shader::isCompiled()
