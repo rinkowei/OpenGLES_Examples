@@ -85,7 +85,7 @@ namespace es
 	std::string Utility::fileExtension(const std::string& filePath)
 	{
 		std::size_t found = filePath.find_last_of(".");
-		std::string ext = filePath.substr(found, filePath.size());
+		std::string ext = filePath.substr(found + 1, filePath.size());
 		return ext;
 	}
 }

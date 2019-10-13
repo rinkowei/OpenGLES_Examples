@@ -1,11 +1,13 @@
 ﻿#include <examplebase.h>
 #include <mesh.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Mesh> triangle;
+	std::shared_ptr<Program> program;
 
 	Example()
 	{
@@ -43,6 +45,12 @@ public:
 		
 		// create triangle mesh
 		triangle = Mesh::createWithData("triangle", vertices, indices);
+
+		std::vector<std::string> shaderFiles = {
+			shadersDirectory + "triangle.vert",
+			shadersDirectory + "triangle.frag"
+		};
+		program = Program::createFromFiles(shaderFiles);
 	}
 
 	virtual void render(float deltaTime) override
@@ -52,6 +60,7 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		program->apply();
 		triangle->render();
 	}
 };

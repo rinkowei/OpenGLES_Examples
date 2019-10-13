@@ -2,8 +2,7 @@
 
 namespace es
 {
-	std::unordered_map<std::string, std::shared_ptr<Material>> Material::mMatCache;
-	std::unordered_map<std::string, std::shared_ptr<Texture2D>> Material::mTextureCache;
+	std::unordered_map<std::string, std::shared_ptr<Material>> Material::mMaterialCache;
 
 	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles)
 	{
@@ -11,23 +10,14 @@ namespace es
 
 		for (std::size_t i = 0; i < textureFiles.size(); i++)
 		{
-			std::shared_ptr<Texture2D> tex2d;
-			if (mTextureCache.find(textureFiles[i]) == mTextureCache.end())
-			{
-				tex2d = Texture2D::createFromFile(textureFiles[i], 0, false);
-				mTextureCache[textureFiles[i]] = tex2d;
-			}
-			else
-			{
-				tex2d = mTextureCache[textureFiles[i]];
-			}
+			std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(textureFiles[i], 0, false);
 			mTextures.push_back(tex2d);
 		}
 	}
 
 	Material::~Material()
 	{
-		mProgram.release();
+		mProgram.reset();
 
 		for (std::size_t i = 0; i < mTextures.size(); i++)
 		{

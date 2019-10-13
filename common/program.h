@@ -16,13 +16,13 @@ namespace es
 	class Program
 	{
 	public:
+		Program(const std::vector<Shader*>& shaders);
+		Program(const std::vector<std::string>& files);
 		~Program();
 
-		template<typename... T>
-		static std::unique_ptr<Program> createFromShaders(T &&... args);
+		static std::shared_ptr<Program> createFromShaders(const std::vector<Shader*>& shaders);
 
-		template<typename... T>
-		static std::unique_ptr<Program> createFromFiles(T &&... args);
+		static std::shared_ptr<Program> createFromFiles(const std::vector<std::string>& files);
 
 		void apply();
 
@@ -47,15 +47,11 @@ namespace es
 
 		void initFromShaders(const std::vector<Shader*>& shaders);
 	protected:
-		Program(const Program&) = delete;
-		const Program& operator=(const Program&) = delete;
+		//Program(const Program&) = delete;
+		//const Program& operator=(const Program&) = delete;
 	private:
-		Program(const std::vector<Shader*>& shaders);
-		Program(const std::vector<std::string>& files);
-
 		GLuint mID;
 		std::unordered_map<std::string, GLuint> mLocationMap;
 	};
 }
-
 #endif

@@ -39,16 +39,14 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteProgram(mID));
 	}
 
-	template<typename... T>
-	std::unique_ptr<Program> Program::createFromShaders(T &&... args)
+	std::shared_ptr<Program> Program::createFromShaders(const std::vector<Shader*>& shaders)
 	{
-		return std::make_unique<Program>(std::forward<T>(args)...);
+		return std::make_shared<Program>(shaders);
 	}
 
-	template<typename... T>
-	std::unique_ptr<Program> Program::createFromFiles(T &&... args)
+	std::shared_ptr<Program> Program::createFromFiles(const std::vector<std::string>& files)
 	{
-		return std::make_unique<Program>(std::forward<T>(args)...);
+		return std::make_shared<Program>(files);
 	}
 
 	void Program::apply()
