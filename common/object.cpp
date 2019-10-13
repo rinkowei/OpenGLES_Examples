@@ -2,18 +2,17 @@
 
 namespace es
 {
-	Object::Object()
+	Object::Object(const std::string& name)
+		:mName(name),
+		 mPosition(glm::vec3(0.0f)),
+		 mRotation(glm::vec3(0.0f)),
+		 mScaling(glm::vec3(1.0f)),
+		 mModelMatrix(glm::mat4(1.0f)),
+		 mAutoUpdated(true),
+		 mTransformUpdated(true),
+		 mIsDirty(false)
 	{
-		name = "None";
 
-		position = glm::vec3(0.0f);
-		rotation = glm::vec3(0.0f);
-		scaling = glm::vec3(1.0f);
-		model = glm::mat4(1.0f);
-
-		autoUpdated = true;
-		transformUpdated = true;
-		isDirty = false;
 	};
 
 	Object::~Object()
@@ -21,9 +20,14 @@ namespace es
 
 	}
 
+	std::shared_ptr<Object> Object::create(const std::string& name)
+	{
+		return std::make_shared<Object>(name);
+	}
+
 	GLvoid Object::render(float deltaTime)
 	{
-		if (autoUpdated)
+		if (mAutoUpdated)
 		{
 			update(deltaTime);
 		}
@@ -31,97 +35,97 @@ namespace es
 
 	GLvoid Object::update(float deltaTime)
 	{
-		transformUpdated = false;
-		if (isDirty)
+		mTransformUpdated = false;
+		if (mIsDirty)
 		{
-			model = glm::mat4(1.0f);
+			mModelMatrix = glm::mat4(1.0f);
 
-			model = glm::translate(model, position);
+			mModelMatrix = glm::translate(mModelMatrix, mPosition);
 
-			model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			mModelMatrix = glm::rotate(mModelMatrix, glm::radians(mRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			mModelMatrix = glm::rotate(mModelMatrix, glm::radians(mRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			mModelMatrix = glm::rotate(mModelMatrix, glm::radians(mRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-			model = glm::scale(model, scaling);
+			mModelMatrix = glm::scale(mModelMatrix, mScaling);
 
-			isDirty = false;
+			mIsDirty = false;
 		}
-		transformUpdated = true;
+		mTransformUpdated = true;
 	}
 
-	GLvoid Object::setName(const std::string& name)
+	void Object::setName(const std::string& name)
 	{
-		this->name = name;
+		this->mName = name;
 	}
 		
-	GLvoid Object::translate(const glm::vec3& deltaPosition)
+	void Object::translate(const glm::vec3& deltaPosition)
 	{
-		this->position += deltaPosition;
-		isDirty = true;
+		this->mPosition += deltaPosition;
+		mIsDirty = true;
 	}
 
-	GLvoid Object::rotate(const glm::vec3& deltaEuler)
+	void Object::rotate(const glm::vec3& deltaEuler)
 	{
-		this->rotation += deltaEuler;
-		isDirty = true;
+		this->mRotation += deltaEuler;
+		mIsDirty = true;
 	}
 
-	GLvoid Object::scale(const glm::vec3& deltaScale)
+	void Object::scale(const glm::vec3& deltaScale)
 	{
-		this->scaling += deltaScale;
-		isDirty = true;
+		this->mScaling += deltaScale;
+		mIsDirty = true;
 	}
 
-	GLvoid Object::setPosition(const glm::vec3& position)
+	void Object::setPosition(const glm::vec3& position)
 	{
-		this->position = position;
-		isDirty = true;
+		this->mPosition = position;
+		mIsDirty = true;
 	}
 
-	GLvoid Object::setRotation(const glm::vec3& euler)
+	void Object::setRotation(const glm::vec3& euler)
 	{
-		this->rotation = euler;
-		isDirty = true;
+		this->mRotation = euler;
+		mIsDirty = true;
 	}
 
-	GLvoid Object::setScale(const glm::vec3& scale)
+	void Object::setScale(const glm::vec3& scale)
 	{
-		this->scaling = scale;
-		isDirty = true;
+		this->mScaling = scale;
+		mIsDirty = true;
 	}
 
 	const std::string& Object::getName() const
 	{
-		return name;
+		return mName;
 	}
 
 	const glm::vec3& Object::getPosition() const
 	{
-		return position;
+		return mPosition;
 	}
 
 	const glm::vec3& Object::getRotation() const
 	{
-		return rotation;
+		return mRotation;
 	}
 
 	const glm::vec3& Object::getScaling() const
 	{
-		return scaling;
+		return mScaling;
 	}
 
-	GLvoid Object::setModelMatrix(const glm::mat4& model)
+	void Object::setModelMatrix(const glm::mat4& model)
 	{
-		this->model = model;
+		this->mModelMatrix = model;
 	}
 
 	const glm::mat4& Object::getModelMatrix() const
 	{
-		return model;
+		return mModelMatrix;
 	}
 
-	GLvoid Object::setAutoUpdated(GLboolean autoUpdated)
+	void Object::setAutoUpdated(bool autoUpdated)
 	{
-		this->autoUpdated = autoUpdated;
+		this->mAutoUpdated = autoUpdated;
 	}
 }

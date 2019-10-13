@@ -20,9 +20,9 @@ namespace es
 		Program(const std::vector<std::string>& files);
 		~Program();
 
-		static std::shared_ptr<Program> createFromShaders(const std::vector<Shader*>& shaders);
+		static std::unique_ptr<Program> createFromShaders(const std::vector<Shader*>& shaders);
 
-		static std::shared_ptr<Program> createFromFiles(const std::vector<std::string>& files);
+		static std::unique_ptr<Program> createFromFiles(const std::vector<std::string>& files);
 
 		void apply();
 

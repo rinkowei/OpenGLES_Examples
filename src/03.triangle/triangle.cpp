@@ -7,7 +7,7 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Mesh> triangle;
-	std::shared_ptr<Program> program;
+	std::unique_ptr<Program> program;
 
 	Example()
 	{

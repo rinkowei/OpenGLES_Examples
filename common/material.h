@@ -28,7 +28,7 @@ namespace es
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
 
-		std::shared_ptr<Program> mProgram;
+		std::unique_ptr<Program> mProgram;
 		std::vector<std::shared_ptr<Texture2D>> mTextures;
 	};
 }
