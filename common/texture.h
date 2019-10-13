@@ -9,12 +9,14 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <unordered_map>
 
 namespace es
 {
 	class Texture
 	{
 	public:
+		Texture();
 		virtual ~Texture();
 
 		// bind texture to specified texture uint
@@ -41,8 +43,6 @@ namespace es
 		void setCompareFunc(GLenum func);
 
 	protected:
-		Texture();
-
 		GLuint mID;
 		GLenum mTarget;
 		GLenum mInternalFormat;
@@ -50,15 +50,18 @@ namespace es
 		GLenum mType;
 		GLuint mComponents;
 		uint32_t mArraySize;
+
+		static std::unordered_map<std::string, std::shared_ptr<Texture>> mTextureCache;
 	};
 
 	class Texture2D : public Texture
 	{
 	public:
+		Texture2D(std::string path, int mipLevels = -1, bool srgb = true);
 		~Texture2D();
 
 		template<typename... T>
-		static std::shared_ptr<Texture2D> createFromFile(T &&... args);
+		static std::shared_ptr<Texture2D> createFromFile(std::string path, T &&... args);
 
 		void setData(int arrayIndex, int mipLevel, void* data);
 
@@ -66,12 +69,7 @@ namespace es
 		uint32_t getHeight();
 		uint32_t getMipLevels();
 		uint32_t getNumSamples();
-	protected:
-		Texture2D(const Texture2D&) = delete;
-		const Texture2D& operator=(const Texture2D&) = delete;
 	private:
-		Texture2D(std::string path, int mipLevels = -1, bool srgb = true);
-
 		void initFromFile(std::string path, int mipLevels, bool srgb);
 
 		uint32_t mWidth;

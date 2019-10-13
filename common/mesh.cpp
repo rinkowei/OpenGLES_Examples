@@ -11,13 +11,13 @@ namespace es
 		mVBO = VertexBuffer::createWithData(GL_STATIC_DRAW, sizeof(Vertex) * vertices.size(), (void*)vertices.data());
 		if (!mVBO)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to create VBO");
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create VBO");
 		}
 
 		mEBO = ElementBuffer::createWithData(GL_STATIC_DRAW, sizeof(uint32_t) * indices.size(), (void*)indices.data());
 		if (!mEBO)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to create EBO");
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create EBO");
 		}
 
 		std::vector<VertexAttrib> attribs =
@@ -32,7 +32,7 @@ namespace es
 		mVAO = VertexArray::createWithData(mVBO.get(), mEBO.get(), sizeof(Vertex), attribs);
 		if (!mVAO)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to create VAO");
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create VAO");
 		}
 	}
 

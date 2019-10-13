@@ -24,8 +24,6 @@ namespace es
 
 		template<typename... T>
 		static std::shared_ptr<Material> createFromFiles(T &&... args);
-
-		//static Material* createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles);
 	protected:
 		Material(const Material&) = delete;
 		const Material& operator=(const Material&) = delete;

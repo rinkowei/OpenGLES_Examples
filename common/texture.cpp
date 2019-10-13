@@ -3,7 +3,16 @@
 
 namespace es
 {
+	std::unordered_map<std::string, std::shared_ptr<Texture>> Texture::mTextureCache;
+
 	Texture::Texture()
+		:mID(0),
+		 mTarget(GL_TEXTURE_2D),
+		 mInternalFormat(GL_RGBA8),
+		 mFormat(GL_RGBA),
+		 mType(GL_UNSIGNED_BYTE),
+		 mComponents(4),
+		 mArraySize(1)
 	{
 		GLES_CHECK_ERROR(glGenTextures(1, &mID));
 	}
@@ -130,16 +139,25 @@ namespace es
 	}
 
 	template<typename... T>
-	std::shared_ptr<Texture2D> Texture2D::createFromFile(T &&... args)
+	std::shared_ptr<Texture2D> Texture2D::createFromFile(std::string path, T &&... args)
 	{
-		return std::make_shared<Texture2D>(std::forward<T>(args)...);
+		if (mTextureCache.find(path) == mTextureCache.end())
+		{
+			std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, std::forward<T>(args)...);
+			mTextureCache[path] = tex2d;
+			return tex2d;
+		}
+		else
+		{
+			return mTextureCache[path];
+		}
 	}
 
 	void Texture2D::setData(int arrayIndex, int mipLevel, void* data)
 	{
 		if (mNumSamples > 1)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "OpenGL ES : Multisampled texture data only can be assigned through shaders or FBOs");
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "OpenGL ES : Multisampled texture data only can be assigned through shaders or FBOs");
 		}
 		else
 		{
@@ -235,7 +253,7 @@ namespace es
 		mWidth = width;
 		mHeight = height;
 		mNumSamples = 1;
-
+	    
 		if (mipLevels == -1)
 		{
 			mMipLevels = 1;
