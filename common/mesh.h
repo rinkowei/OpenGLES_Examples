@@ -11,6 +11,7 @@
 
 #include <object.h>
 #include <buffer.h>
+#include <material.h>
 
 namespace es
 {
@@ -27,6 +28,16 @@ namespace es
 	class Mesh : public Object
 	{
 	public:
+		enum class DrawType
+		{
+			ARRAYS,
+			ARRAYS_INDIRECT,
+			ARRAYS_INSTANCED,
+			ELEMENTS,
+			ELEMENTS_INDIRECT,
+			ELEMENTS_INSTANCED
+		};
+
 		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 		~Mesh();
 
@@ -35,6 +46,10 @@ namespace es
 		{
 			return std::make_shared<Mesh>(std::forward<T>(args)...);
 		}
+	
+		void setMaterial(std::shared_ptr<Material> mMat);
+
+		void setDrawType(DrawType drawType);
 
 		void render();
 	private:
@@ -46,6 +61,10 @@ namespace es
 		std::unique_ptr<VertexArray> mVAO = nullptr;
 		std::unique_ptr<VertexBuffer> mVBO = nullptr;
 		std::unique_ptr<ElementBuffer> mEBO = nullptr;
+
+		std::shared_ptr<Material> mMaterial = nullptr;
+
+		DrawType mDrawType;
 	};
 }
 

@@ -50,6 +50,7 @@ public:
 			shadersDirectory + "triangle.vert",
 			shadersDirectory + "triangle.frag"
 		};
+
 		program = Program::createFromFiles(shaderFiles);
 	}
 

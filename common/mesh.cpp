@@ -8,6 +8,8 @@ namespace es
 		mVertices = vertices;
 		mIndices = indices;
 
+		mDrawType = DrawType::ELEMENTS;
+
 		mVBO = VertexBuffer::createWithData(GL_STATIC_DRAW, sizeof(Vertex) * vertices.size(), (void*)vertices.data());
 		if (!mVBO)
 		{
@@ -44,6 +46,20 @@ namespace es
 		mVAO.reset(nullptr);
 		mVBO.reset(nullptr);
 		mEBO.reset(nullptr);
+	}
+
+	void Mesh::setMaterial(std::shared_ptr<Material> mMat)
+	{
+		if (mMaterial != nullptr)
+		{
+			mMaterial.reset();
+		}
+	    mMaterial = mMat;
+	}
+
+	void Mesh::setDrawType(DrawType drawType)
+	{
+		mDrawType = drawType;
 	}
 
 	void Mesh::render()

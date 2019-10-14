@@ -25,7 +25,7 @@ namespace es
 		return std::make_shared<Object>(name);
 	}
 
-	GLvoid Object::render(float deltaTime)
+	void Object::render(float deltaTime)
 	{
 		if (mAutoUpdated)
 		{
@@ -33,7 +33,7 @@ namespace es
 		}
 	}
 
-	GLvoid Object::update(float deltaTime)
+	void Object::update(float deltaTime)
 	{
 		mTransformUpdated = false;
 		if (mIsDirty)
