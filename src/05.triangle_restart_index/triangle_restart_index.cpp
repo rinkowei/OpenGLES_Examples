@@ -26,7 +26,7 @@ public:
 	{
 		ExampleBase::prepare();
 
-		std::vector<GLfloat> vertexAttribs = {
+		std::vector<float> vertexAttribs = {
 			// position
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,

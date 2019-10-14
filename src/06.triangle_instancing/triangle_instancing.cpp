@@ -1,12 +1,14 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <mesh.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
 	GLuint VAO, VBO, EBO, instanceVBO;
-	Material* material;
+	std::unique_ptr<Program> program;
+
 	Example()
 	{
 		title = "triangle instancing";
@@ -17,7 +19,6 @@ public:
 	}
 	~Example()
 	{
-		delete(material);
 		glDeleteBuffers(1, &instanceVBO);
 		glDeleteBuffers(1, &EBO);
 		glDeleteBuffers(1, &VBO);
@@ -82,21 +83,22 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "triangle.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "triangle.frag" }
-		};
-
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
-
-		// create triangle material
-		material = Material::createWithFile(shaderPaths, texturePaths);
+		program = Program::createFromFiles(
+			{
+				shadersDirectory + "triangle.vert",
+				shadersDirectory + "triangle.frag"
+			}
+		);
 
 	}
 	virtual void render(float deltaTime) override
 	{
-		material->apply();
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		program->apply();
 		glBindVertexArray(VAO);
 		glDrawElementsInstanced(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0, 100);
 	}
@@ -107,7 +109,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
