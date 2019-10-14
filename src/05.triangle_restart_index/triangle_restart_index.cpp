@@ -1,11 +1,13 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <mesh.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	Mesh* triangle;
+	std::shared_ptr<Mesh> triangle;
+	std::unique_ptr<Program> program;
 
 	Example()
 	{
@@ -17,14 +19,15 @@ public:
 	}
 	~Example()
 	{
-		delete(triangle);
+
 	}
 public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
 
-		std::vector<GLfloat> vertexPositions = {
+		std::vector<GLfloat> vertexAttribs = {
+			// position
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			-0.5f, 0.5f, 0.0f,
@@ -38,36 +41,34 @@ public:
 		};
 
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexPositions.size() / 3); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 3); i++)
 		{
 			Vertex vertex;
-			vertex.Position = glm::vec3(vertexPositions[i * 3], vertexPositions[i * 3 + 1], vertexPositions[i * 3 + 2]);
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 3], vertexAttribs[i * 3 + 1], vertexAttribs[i * 3 + 2]);
 			vertices.push_back(vertex);
 		}
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "triangle.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "triangle.frag" }
-		};
-
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths = {};
-
-		// create triangle material
-		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
-
 		// create triangle mesh
-		triangle = Mesh::createWithData(vertices, indices, Mesh::DrawType::Elements_Restart_Index, material);
+		triangle = Mesh::createWithData("triangle", vertices, indices);
+		triangle->setDrawType(Mesh::DrawType::ELEMENTS_RESTART_INDEX);
+
+		program = Program::createFromFiles(
+			{
+				shadersDirectory + "triangle.vert",
+				shadersDirectory + "triangle.frag"
+			}
+		);
 	}
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		triangle->render(deltaTime);
+		program->apply();
+		triangle->render();
 	}
 };
 
@@ -76,7 +77,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
