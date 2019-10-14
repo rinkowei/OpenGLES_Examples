@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <optional>
 
 #include <object.h>
 #include <buffer.h>
@@ -43,14 +44,16 @@ namespace es
 		~Mesh();
 
 		template<typename... T>
-		static std::shared_ptr<Mesh> createWithData(T&&... args)
+		static std::shared_ptr<Mesh> createWithData(const std::string name, T&&... args)
 		{
-			return std::make_shared<Mesh>(std::forward<T>(args)...);
+			return std::make_shared<Mesh>(name, std::forward<T>(args)...);
 		}
 	
 		void setMaterial(std::shared_ptr<Material> mMat);
 
 		void setDrawType(DrawType drawType);
+
+		void setInstancingData(uint64_t size, void* data, uint32_t count);
 
 		void render();
 	private:
@@ -59,10 +62,16 @@ namespace es
 		std::vector<Vertex> mVertices;
 		std::vector<uint32_t> mIndices;
 
+		// vertex array object
 		std::unique_ptr<VertexArray> mVAO = nullptr;
+		// vertex buffer object
 		std::unique_ptr<VertexBuffer> mVBO = nullptr;
+		// element buffer object
 		std::unique_ptr<ElementBuffer> mEBO = nullptr;
-
+		// instance buffer object
+		std::optional<std::unique_ptr<InstanceBuffer>> mIBO = std::nullopt;
+		std::optional<uint32_t> mInstanceCount = std::nullopt;
+		
 		std::shared_ptr<Material> mMaterial = nullptr;
 
 		DrawType mDrawType;

@@ -96,6 +96,18 @@ namespace es
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
+	InstanceBuffer::InstanceBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ARRAY_BUFFER, usage, size, data)
+	{
+
+	}
+
+	InstanceBuffer::~InstanceBuffer()
+	{
+
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
 	UniformBuffer::UniformBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_UNIFORM_BUFFER, usage, size, data)
 	{
 
@@ -166,6 +178,7 @@ namespace es
 				GLES_CHECK_ERROR(glVertexAttribPointer(i, attribs[i].numSubElements, attribs[i].type, attribs[i].normalized, vertexSize, (void*)((uint64_t)attribs[i].offset)));
 			}
 		}
+		mVertexAttribCount = attribs.size();
 
 		GLES_CHECK_ERROR(glBindVertexArray(0));
 		
@@ -195,5 +208,10 @@ namespace es
 	GLuint VertexArray::getID() const
 	{
 		return mID;
+	}
+
+	GLuint VertexArray::getVertexAttribCount() const
+	{
+		return mVertexAttribCount;
 	}
 }

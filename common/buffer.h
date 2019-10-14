@@ -62,6 +62,22 @@ namespace es
 		const ElementBuffer& operator=(const ElementBuffer&) = delete;
 	};
 
+	class InstanceBuffer : public Buffer
+	{
+	public:
+		InstanceBuffer(GLenum usage, std::size_t size, void* data);
+		~InstanceBuffer();
+
+		template<typename... T>
+		static std::unique_ptr<InstanceBuffer> createWithData(T&&... args)
+		{
+			return std::make_unique<InstanceBuffer>(std::forward<T>(args)...);
+		}
+
+		InstanceBuffer(const InstanceBuffer&) = delete;
+		const InstanceBuffer& operator=(const InstanceBuffer&) = delete;
+	};
+
 	class UniformBuffer : public Buffer
 	{
 	public:
@@ -105,9 +121,12 @@ namespace es
 
 		GLuint getID() const;
 
+		GLuint getVertexAttribCount() const;
+
 		VertexArray(const VertexArray&) = delete;
 		const VertexArray& operator=(const VertexArray&) = delete;
 	private:
 		GLuint mID;
+		GLuint mVertexAttribCount;
 	};
 }
