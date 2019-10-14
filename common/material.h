@@ -27,7 +27,7 @@ namespace es
 		static std::shared_ptr<Material> createFromFiles(T &&... args);
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
-
+	
 		std::unique_ptr<Program> mProgram;
 		std::vector<std::shared_ptr<Texture2D>> mTextures;
 	};

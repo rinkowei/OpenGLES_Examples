@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 
+#include <object.h>
 #include <buffer.h>
 
 namespace es
@@ -23,29 +24,20 @@ namespace es
 		glm::vec3 vBitangent;
 	};
 
-	class Mesh
+	class Mesh : public Object
 	{
 	public:
+		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 		~Mesh();
 
 		template<typename... T>
-		static std::shared_ptr<Mesh> createWithData(T &&... args)
+		static std::shared_ptr<Mesh> createWithData(T&&... args)
 		{
-			struct EnableMakeShared : public Mesh
-			{
-				EnableMakeShared(T&&... args) : Mesh(std::forward<T>(args)...) {}
-			};
-
-			return std::static_pointer_cast<Mesh>(std::make_shared<EnableMakeShared>(std::forward<T>(args)...));
+			return std::make_shared<Mesh>(std::forward<T>(args)...);
 		}
 
 		void render();
-	protected:
-		Mesh(const Mesh&) = delete;
-		const Mesh& operator=(const Mesh&) = delete;
 	private:
-		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
-
 		std::string mName;
 
 		std::vector<Vertex> mVertices;

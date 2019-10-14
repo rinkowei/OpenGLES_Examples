@@ -44,7 +44,7 @@ namespace es
 
 	Camera::Camera()
 	{
-		rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		mRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		front = glm::vec3(0.0f, 0.0f, -1.0f);
 		right = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -124,9 +124,9 @@ namespace es
 		if (viewDirty)
 		{
 			glm::vec3 camFront;
-			camFront.x = -cos(glm::radians(rotation.x)) * sin(glm::radians(rotation.y));
-			camFront.y = sin(glm::radians(rotation.x));
-			camFront.z = cos(glm::radians(rotation.x)) * cos(glm::radians(rotation.y));
+			camFront.x = -cos(glm::radians(mRotation.x)) * sin(glm::radians(mRotation.y));
+			camFront.y = sin(glm::radians(mRotation.x));
+			camFront.z = cos(glm::radians(mRotation.x)) * cos(glm::radians(mRotation.y));
 			
 			front = -glm::normalize(camFront);
 			right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -151,27 +151,27 @@ namespace es
 
 	void Camera::translate(const glm::vec3& deltaPosition)
 	{
-		this->position += deltaPosition;
+		this->mPosition += deltaPosition;
 		viewDirty = true;
 	}
 
 	void Camera::rotate(const glm::vec3& deltaEuler)
 	{
-		this->rotation += deltaEuler;
-		this->rotation.x = glm::clamp(this->rotation.x, -90.0f, 90.0f);
+		this->mRotation += deltaEuler;
+		this->mRotation.x = glm::clamp(this->mRotation.x, -90.0f, 90.0f);
 		viewDirty = true;
 	}
 
 	void Camera::setPosition(const glm::vec3& position)
 	{
-		this->position = position;
+		this->mPosition = position;
 		viewDirty = true;
 	}
 
 	void Camera::setRotation(const glm::vec3& euler)
 	{
-		this->rotation = euler;
-		this->rotation.x = glm::clamp(this->rotation.x, -90.0f, 90.0f);
+		this->mRotation = euler;
+		this->mRotation.x = glm::clamp(this->mRotation.x, -90.0f, 90.0f);
 		viewDirty = true;
 	}
 
@@ -198,10 +198,10 @@ namespace es
 	void Camera::updateViewMatrix()
 	{
 		view = glm::mat4(1.0f);
-		view = glm::rotate(view, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		view = glm::rotate(view, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		view = glm::rotate(view, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		view = glm::rotate(view, glm::radians(mRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		view = glm::rotate(view, glm::radians(mRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::rotate(view, glm::radians(mRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		view = glm::translate(view, -position);
+		view = glm::translate(view, -mPosition);
 	}
 }

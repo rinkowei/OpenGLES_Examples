@@ -14,6 +14,7 @@ namespace es
 	class Object
 	{
 	public:
+		Object() = default;
 		Object(const std::string& name);
 
 		virtual ~Object();
