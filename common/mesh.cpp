@@ -21,7 +21,7 @@ namespace es
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create EBO");
 		}
-
+		
 		std::vector<VertexAttrib> attribs =
 		{
 			{ 3, GL_FLOAT, false, 0 },
@@ -65,7 +65,44 @@ namespace es
 	void Mesh::render()
 	{
 		mVAO->bind();
-		GLES_CHECK_ERROR(glDrawArrays(GL_TRIANGLES, 0, mVertices.size()));
+
+		switch (mDrawType)
+		{
+			case DrawType::ARRAYS:
+			{
+				GLES_CHECK_ERROR(glDrawArrays(GL_TRIANGLES, 0, mVertices.size()));
+				break;
+			}
+			case DrawType::ARRAYS_INDIRECT:
+			{
+
+			}
+			case DrawType::ARRAYS_INSTANCED:
+			{
+
+			}
+			case DrawType::ELEMENTS:
+			{
+				GLES_CHECK_ERROR(glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, 0));
+				break;
+			}
+			case DrawType::ELEMENTS_INDIRECT:
+			{
+
+			}
+			case DrawType::ELEMENTS_INSTANCED:
+			{
+
+			}
+			case DrawType::ELEMENTS_RESTART_INDEX:
+			{
+				GLES_CHECK_ERROR(glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX));
+				GLES_CHECK_ERROR(glDrawElements(GL_TRIANGLE_STRIP, mIndices.size(), GL_UNSIGNED_INT, 0));
+				GLES_CHECK_ERROR(glDisable(GL_PRIMITIVE_RESTART_FIXED_INDEX));
+				break;
+			}
+		}
+
 		mVAO->unbind();
 	}
 }

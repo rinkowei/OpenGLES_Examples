@@ -35,7 +35,8 @@ namespace es
 			ARRAYS_INSTANCED,
 			ELEMENTS,
 			ELEMENTS_INDIRECT,
-			ELEMENTS_INSTANCED
+			ELEMENTS_INSTANCED,
+			ELEMENTS_RESTART_INDEX
 		};
 
 		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
