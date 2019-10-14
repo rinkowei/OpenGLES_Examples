@@ -27,17 +27,18 @@ public:
 	{
 		ExampleBase::prepare();
 
-		std::vector<float> vertexPositions = {
+		std::vector<float> vertexAttribs = {
+			// position
 			-0.5f, -0.5f, 0.0f,
 			0.5f, -0.5f, 0.0f,
 			0.0f,  0.5f, 0.0f
 		};
 		
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexPositions.size() / 3); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 3); i++)
 		{
 			Vertex vertex;
-			vertex.vPosition = glm::vec3(vertexPositions[i * 3], vertexPositions[i * 3 + 1], vertexPositions[i * 3 + 2]);
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 3], vertexAttribs[i * 3 + 1], vertexAttribs[i * 3 + 2]);
 			vertices.push_back(vertex);
 		}
 

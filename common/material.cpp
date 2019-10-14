@@ -5,6 +5,7 @@ namespace es
 	std::unordered_map<std::string, std::shared_ptr<Material>> Material::mMaterialCache;
 
 	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles)
+		:mName(name)
 	{
 		mProgram = Program::createFromFiles(shaderFiles);
 
@@ -17,7 +18,7 @@ namespace es
 
 	Material::~Material()
 	{
-		mProgram.reset();
+		mProgram.reset(nullptr);
 
 		for (std::size_t i = 0; i < mTextures.size(); i++)
 		{
@@ -27,8 +28,17 @@ namespace es
 	}
 
 	template<typename... T>
-	std::shared_ptr<Material> Material::createFromFiles(T &&... args)
+	std::shared_ptr<Material> Material::createFromFiles(const std::string& name, T &&... args)
 	{
-		return std::make_shared<Material>(std::forward<T>(args)...);
+		if (mMaterialCache.find(name) == mMaterialCache.end())
+		{
+			std::shared_ptr<Material> mat = std::make_shared<Material>(name, std::forward<T>(args)...);
+			mMaterialCache[name] = mat;
+			return mat;
+		}
+		else
+		{
+			return mMaterialCache[name];
+		}
 	}
 }

@@ -24,10 +24,12 @@ namespace es
 		~Material();
 
 		template<typename... T>
-		static std::shared_ptr<Material> createFromFiles(T &&... args);
+		static std::shared_ptr<Material> createFromFiles(const std::string& name, T &&... args);
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
 	
+		std::string mName;
+
 		std::unique_ptr<Program> mProgram;
 		std::vector<std::shared_ptr<Texture2D>> mTextures;
 	};
