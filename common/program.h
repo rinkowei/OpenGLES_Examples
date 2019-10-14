@@ -47,11 +47,13 @@ namespace es
 
 		void initFromShaders(const std::vector<Shader*>& shaders);
 	protected:
-		//Program(const Program&) = delete;
-		//const Program& operator=(const Program&) = delete;
+		Program(const Program&) = delete;
+		const Program& operator=(const Program&) = delete;
 	private:
 		GLuint mID;
-		std::unordered_map<std::string, GLuint> mLocationMap;
+
+		std::unordered_map<std::string, GLuint> mAttribLocationMap;
+		std::unordered_map<std::string, GLuint> mUniformLocationMap;
 	};
 }
 #endif

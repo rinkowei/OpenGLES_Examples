@@ -56,6 +56,7 @@ public:
 		{
 			Vertex vertex;
 			vertex.vPosition = glm::vec3(vertexAttribs[i * 7], vertexAttribs[i * 7 + 1], vertexAttribs[i * 7 + 2]);
+			vertex.vColor = glm::vec4(vertexAttribs[i * 7 + 3], vertexAttribs[i * 7 + 4], vertexAttribs[i * 7 + 5], vertexAttribs[i * 7 + 6]);
 			vertices.push_back(vertex);
 		}
 

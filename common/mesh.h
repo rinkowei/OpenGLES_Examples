@@ -20,7 +20,7 @@ namespace es
 	struct Vertex
 	{
 		glm::vec3 vPosition;
-		glm::vec2 vTexcoord;
+		glm::vec2 vColor;
 		glm::vec3 vNormal;
 		glm::vec3 vTangent;
 		glm::vec3 vBitangent;

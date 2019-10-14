@@ -25,10 +25,10 @@ namespace es
 		std::vector<VertexAttrib> attribs =
 		{
 			{ 3, GL_FLOAT, false, 0 },
-			{ 2, GL_FLOAT, false, offsetof(Vertex, vTexcoord) },
-			{ 3, GL_FLOAT, false, offsetof(Vertex, vNormal) },
-			{ 3, GL_FLOAT, false, offsetof(Vertex, vTangent) },
-			{ 3, GL_FLOAT, false, offsetof(Vertex, vBitangent) }
+			{ 4, GL_FLOAT, false, offsetof(Vertex, vColor) }
+			//{ 3, GL_FLOAT, false, offsetof(Vertex, vNormal) },
+			//{ 3, GL_FLOAT, false, offsetof(Vertex, vTangent) },
+			//{ 3, GL_FLOAT, false, offsetof(Vertex, vBitangent) }
 		};
 
 		mVAO = VertexArray::createWithData(mVBO.get(), mEBO.get(), sizeof(Vertex), attribs);
