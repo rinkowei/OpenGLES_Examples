@@ -45,13 +45,14 @@ public:
 		
 		// create triangle mesh
 		triangle = Mesh::createWithData("triangle", vertices, indices);
+		triangle->setDrawType(Mesh::DrawType::ARRAYS);
 
-		std::vector<std::string> shaderFiles = {
-			shadersDirectory + "triangle.vert",
-			shadersDirectory + "triangle.frag"
-		};
-
-		program = Program::createFromFiles(shaderFiles);
+		program = Program::createFromFiles(
+			{
+				shadersDirectory + "triangle.vert",
+				shadersDirectory + "triangle.frag"
+			}
+		);
 	}
 
 	virtual void render(float deltaTime) override
