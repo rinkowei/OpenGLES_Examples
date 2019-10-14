@@ -62,26 +62,6 @@ namespace es
 		mDrawType = drawType;
 	}
 
-	void Mesh::setInstancingData(uint64_t size, void* data, uint32_t count)
-	{
-		if (mIBO.has_value())
-		{
-			mIBO.value().reset(nullptr);
-		}
-		mIBO = InstanceBuffer::createWithData(GL_STATIC_DRAW, size, data);
-		mInstanceCount = count;
-
-		mVAO->bind();
-		mIBO.value()->bind();
-
-		glVertexAttribPointer(mVAO->getVertexAttribCount(), 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(mVAO->getVertexAttribCount());
-		glVertexAttribDivisor(mVAO->getVertexAttribCount(), 1);
-
-		mIBO.value()->unbind();
-		mVAO->bind();
-	}
-
 	void Mesh::render()
 	{
 		mVAO->bind();

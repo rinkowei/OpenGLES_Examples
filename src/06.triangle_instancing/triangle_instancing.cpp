@@ -6,23 +6,21 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	GLuint VAO, VBO, EBO, instanceVBO;
+	std::shared_ptr<Mesh> triangle;
 	std::unique_ptr<Program> program;
 
 	Example()
 	{
 		title = "triangle instancing";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/06.triangle_instancing/";
 	}
 	~Example()
 	{
-		glDeleteBuffers(1, &instanceVBO);
-		glDeleteBuffers(1, &EBO);
-		glDeleteBuffers(1, &VBO);
-		glDeleteVertexArrays(1, &VAO);
+
 	}
 public:
 	virtual void prepare() override
@@ -42,46 +40,29 @@ public:
 			}
 		}
 
-		std::vector<GLfloat> vertexAttrs = {
+		std::vector<float> vertexAttribs = {
 			 // positions           // colors
 			 0.05f, -0.05f, 0.0f,   1.0f, 0.0f, 0.0f, 1.0f,
 			-0.05f, -0.05f, 0.0f,   0.0f, 1.0f, 0.0f, 1.0f,
 			-0.05f,  0.05f, 0.0f,   0.0f, 0.0f, 1.0f, 1.0f,
 		};
 
-		std::vector<GLuint> indices = {
+		std::vector<uint32_t> indices = {
 			0, 1, 2
 		};
 
-		glGenBuffers(1, &instanceVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * locations.size(), locations.data(), GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		std::vector<Vertex> vertices = {};
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 7); i++)
+		{
+			Vertex vertex;
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 7], vertexAttribs[i * 7 + 1], vertexAttribs[i * 7 + 2]);
+			vertices.push_back(vertex);
+		}
 
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
-
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, vertexAttrs.size() * sizeof(GLfloat), vertexAttrs.data(), GL_STATIC_DRAW);
-		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(1);
-
-		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(2);
-		glVertexAttribDivisor(2, 1);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		// create triangle mesh
+		triangle = Mesh::createWithData("triangle", vertices, indices);
+		triangle->setDrawType(Mesh::DrawType::ELEMENTS_INSTANCED);
+		triangle->setInstancingData<float>(sizeof(glm::vec2) * locations.size(), (void*)locations.data(), 100);
 
 		program = Program::createFromFiles(
 			{
@@ -99,8 +80,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		program->apply();
-		glBindVertexArray(VAO);
-		glDrawElementsInstanced(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0, 100);
+		triangle->render();
 	}
 };
 
