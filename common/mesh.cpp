@@ -2,7 +2,7 @@
 
 namespace es
 {
-	Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : Object(name)
+	Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttrib>& attribLayout) : Object(name)
 	{
 		mName = name;
 		mVertices = vertices;
@@ -21,17 +21,8 @@ namespace es
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create EBO");
 		}
-		
-		std::vector<VertexAttrib> attribs =
-		{
-			{ 3, GL_FLOAT, false, 0 },
-			{ 4, GL_FLOAT, false, offsetof(Vertex, vColor) }
-			//{ 3, GL_FLOAT, false, offsetof(Vertex, vNormal) },
-			//{ 3, GL_FLOAT, false, offsetof(Vertex, vTangent) },
-			//{ 3, GL_FLOAT, false, offsetof(Vertex, vBitangent) }
-		};
 
-		mVAO = VertexArray::createWithData(mVBO.get(), mEBO.get(), sizeof(Vertex), attribs);
+		mVAO = VertexArray::createWithData(mVBO.get(), mEBO.get(), sizeof(Vertex), attribLayout);
 		if (!mVAO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create VAO");

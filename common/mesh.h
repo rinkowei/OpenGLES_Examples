@@ -19,11 +19,12 @@ namespace es
 	// vertex attribute structure
 	struct Vertex
 	{
-		glm::vec3 vPosition;
-		glm::vec2 vColor;
-		glm::vec3 vNormal;
-		glm::vec3 vTangent;
-		glm::vec3 vBitangent;
+		std::optional<glm::vec3> vPosition;
+		std::optional<glm::vec2> vTexcoord;
+		std::optional<glm::vec3> vNormal;
+		std::optional<glm::vec3> vTangent;
+		std::optional<glm::vec3> vBitangent;
+		std::optional<glm::vec4> vColor;
 	};
 
 	class Mesh : public Object
@@ -40,7 +41,7 @@ namespace es
 			ELEMENTS_RESTART_INDEX
 		};
 
-		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttrib>& attribLayout);
 		~Mesh();
 
 		template<typename... T>
