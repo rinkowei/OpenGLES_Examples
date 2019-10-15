@@ -83,7 +83,7 @@ namespace es
 	{
 		if (mMaterial != nullptr)
 		{
-		
+			mMaterial->apply();
 		}
 		mVAO->bind();
 
@@ -126,5 +126,9 @@ namespace es
 		}
 
 		mVAO->unbind();
+		if (mMaterial != nullptr)
+		{
+			mMaterial->unapply();
+		}
 	}
 }

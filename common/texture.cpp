@@ -3,8 +3,6 @@
 
 namespace es
 {
-	std::unordered_map<std::string, std::shared_ptr<Texture>> Texture::mTextureCache;
-
 	Texture::Texture()
 		:mID(0),
 		 mTarget(GL_TEXTURE_2D),
@@ -128,6 +126,8 @@ namespace es
 
 	// ------------------------------------------------------------------------------------------------------------------------------------------
 
+	std::unordered_map<std::string, std::shared_ptr<Texture2D>> Texture2D::mTexture2DCache;
+
 	Texture2D::Texture2D(std::string path, int mipLevels, bool srgb) : Texture()
 	{
 		initFromFile(path, mipLevels, srgb);
@@ -136,21 +136,6 @@ namespace es
 	Texture2D::~Texture2D()
 	{
 
-	}
-
-	template<typename... T>
-	std::shared_ptr<Texture2D> Texture2D::createFromFile(std::string path, T &&... args)
-	{
-		if (mTextureCache.find(path) == mTextureCache.end())
-		{
-			std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, std::forward<T>(args)...);
-			mTextureCache[path] = tex2d;
-			return tex2d;
-		}
-		else
-		{
-			return mTextureCache[path];
-		}
 	}
 
 	void Texture2D::setData(int arrayIndex, int mipLevel, void* data)

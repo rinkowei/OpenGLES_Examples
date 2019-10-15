@@ -1,6 +1,4 @@
-﻿// Implementation of Common library
-
-#include "examplebase.h"
+﻿#include "examplebase.h"
 #include "world.h"
 
 namespace es

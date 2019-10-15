@@ -8,32 +8,45 @@ namespace es
 		:mName(name)
 	{
 		mProgram = Program::createFromFiles(shaderFiles);
+		mProgram->apply();
 
+		int location = 0;
+		const std::unordered_map<std::string, GLuint>& uniformMap = mProgram->getUniformLocationMap();
 		for (auto iter = textureFiles.begin(); iter != textureFiles.end(); iter++)
 		{
 			std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 0, false);
-			mTextures[iter->first] = tex2d;
+
+			for (auto uniform = uniformMap.begin(); uniform != uniformMap.end(); uniform++)
+			{
+				if (iter->first == uniform->first)
+				{
+					mProgram->setUniform(iter->first, location);
+					mTextureMap[std::make_pair(iter->first, location)] = tex2d;
+					location++;
+				}
+			}
 		}
+
+		mProgram->unapply();
 	}
 
 	Material::~Material()
 	{
 		mProgram.reset(nullptr);
 
-		for (auto iter = mTextures.begin(); iter != mTextures.end(); iter++)
+		for (auto iter = mTextureMap.begin(); iter != mTextureMap.end(); iter++)
 		{
 			iter->second.reset();
 			iter->second = nullptr;
 		}
-		mTextures.swap(std::unordered_map<std::string, std::shared_ptr<Texture2D>>());
+		mTextureMap.swap(std::unordered_map<std::pair<std::string, GLuint>, std::shared_ptr<Texture2D>, PairHash>());
 	}
 
-	template<typename... T>
-	std::shared_ptr<Material> Material::createFromFiles(const std::string& name, T &&... args)
+	std::shared_ptr<Material> Material::createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles)
 	{
 		if (mMaterialCache.find(name) == mMaterialCache.end())
 		{
-			std::shared_ptr<Material> mat = std::make_shared<Material>(name, std::forward<T>(args)...);
+			std::shared_ptr<Material> mat = std::make_shared<Material>(name, shaderFiles, textureFiles);
 			mMaterialCache[name] = mat;
 			return mat;
 		}
@@ -41,7 +54,7 @@ namespace es
 		{
 			return mMaterialCache[name];
 		}
-	} 
+	}
 
 	void Material::apply()
 	{
@@ -49,19 +62,22 @@ namespace es
 		{
 			mProgram->apply();
 
-			int location = 0;
-			const std::unordered_map<std::string, GLuint>& uniformMap = mProgram->getUniformLocationMap();
-			for (auto uniform = uniformMap.begin(); uniform != uniformMap.end(); uniform++)
+			for (auto iter = mTextureMap.begin(); iter != mTextureMap.end(); iter++)
 			{
-				for (auto tex = mTextures.begin(); tex != mTextures.end(); tex++)
-				{
-					if (tex->first == uniform->first)
-					{
-						mProgram->setUniform(tex->first, location);
-						tex->second->bind(location);
-						location++;
-					}
-				}
+				iter->second->bind(iter->first.second);
+			}
+		}
+	}
+
+	void Material::unapply()
+	{
+		if (mProgram != nullptr)
+		{
+			mProgram->unapply();
+
+			for (auto iter = mTextureMap.begin(); iter != mTextureMap.end(); iter++)
+			{
+				iter->second->unbind(iter->first.second);
 			}
 		}
 	}

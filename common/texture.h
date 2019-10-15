@@ -50,8 +50,6 @@ namespace es
 		GLenum mType;
 		GLuint mComponents;
 		uint32_t mArraySize;
-
-		static std::unordered_map<std::string, std::shared_ptr<Texture>> mTextureCache;
 	};
 
 	class Texture2D : public Texture
@@ -61,7 +59,19 @@ namespace es
 		~Texture2D();
 
 		template<typename... T>
-		static std::shared_ptr<Texture2D> createFromFile(std::string path, T &&... args);
+		static std::shared_ptr<Texture2D> createFromFile(std::string path, T&&... args)
+		{
+			if (mTexture2DCache.find(path) == mTexture2DCache.end())
+			{
+				std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, std::forward<T>(args)...);
+				mTexture2DCache[path] = tex2d;
+				return tex2d;
+			}
+			else
+			{
+				return mTexture2DCache[path];
+			}
+		}
 
 		void setData(int arrayIndex, int mipLevel, void* data);
 
@@ -76,6 +86,8 @@ namespace es
 		uint32_t mHeight;
 		uint32_t mMipLevels;
 		uint32_t mNumSamples;
+
+		static std::unordered_map<std::string, std::shared_ptr<Texture2D>> mTexture2DCache;
 	};
 
 	class TextureCube : public Texture

@@ -54,6 +54,11 @@ namespace es
 		GLES_CHECK_ERROR(glUseProgram(mID));
 	}
 
+	void Program::unapply()
+	{
+		GLES_CHECK_ERROR(glUseProgram(0));
+	}
+
 	void Program::uniformBlockBinding(std::string name, int binding)
 	{
 		GLES_CHECK_ERROR(GLuint idx = glGetUniformBlockIndex(mID, name.c_str()));
