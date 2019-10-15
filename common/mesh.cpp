@@ -65,6 +65,11 @@ namespace es
 		mEBO.reset(nullptr);
 	}
 
+	std::shared_ptr<Mesh> Mesh::createWithData(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+	{
+		return std::make_shared<Mesh>(name, vertices, indices);
+	}
+
 	void Mesh::setMaterial(std::shared_ptr<Material> mMat)
 	{
 		if (mMaterial != nullptr)

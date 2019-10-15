@@ -7,7 +7,6 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Mesh> triangle;
-	std::unique_ptr<Program> program;
 
 	Example()
 	{
@@ -41,18 +40,20 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		std::vector<uint32_t> indices = {};
-		
-		// create triangle mesh
-		triangle = Mesh::createWithData("triangle", vertices, indices);
-		triangle->setDrawType(Mesh::DrawType::ARRAYS);
-
-		program = Program::createFromFiles(
+		std::shared_ptr<Material> mat = Material::createFromFiles("triangle_mat",
 			{
 				shadersDirectory + "triangle.vert",
 				shadersDirectory + "triangle.frag"
+			},
+			{
+				
 			}
 		);
+		
+		// create triangle mesh
+		triangle = Mesh::createWithData("triangle", vertices, {});
+		triangle->setDrawType(Mesh::DrawType::ARRAYS);
+		triangle->setMaterial(mat);
 	}
 
 	virtual void render(float deltaTime) override
@@ -62,7 +63,6 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		program->apply();
 		triangle->render();
 	}
 };

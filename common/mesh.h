@@ -44,11 +44,7 @@ namespace es
 		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 		~Mesh();
 
-		template<typename... T>
-		static std::shared_ptr<Mesh> createWithData(const std::string name, T&&... args)
-		{
-			return std::make_shared<Mesh>(name, std::forward<T>(args)...);
-		}
+		static std::shared_ptr<Mesh> createWithData(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 	
 		void setMaterial(std::shared_ptr<Material> mMat);
 
