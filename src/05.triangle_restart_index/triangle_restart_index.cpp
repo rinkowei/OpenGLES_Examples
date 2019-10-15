@@ -7,7 +7,6 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Mesh> triangle;
-	std::unique_ptr<Program> program;
 
 	Example()
 	{
@@ -34,12 +33,6 @@ public:
 			0.5f, 0.5f, 0.0f
 		}; 
 
-		std::vector<GLuint> indices = {
-			0, 1, 2,
-			0xFFFF,    // restart index
-			1, 3, 2
-		};
-
 		std::vector<Vertex> vertices = {};
 		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 3); i++)
 		{
@@ -48,16 +41,26 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		// create triangle mesh
-		triangle = Mesh::createWithData("triangle", vertices, indices);
-		triangle->setDrawType(Mesh::DrawType::ELEMENTS_RESTART_INDEX);
+		std::vector<GLuint> indices = {
+			0, 1, 2,
+			0xFFFF,    // restart index
+			1, 3, 2
+		};
 
-		program = Program::createFromFiles(
+		std::shared_ptr<Material> mat = Material::createFromFiles("triangle_mat",
 			{
 				shadersDirectory + "triangle.vert",
 				shadersDirectory + "triangle.frag"
+			},
+			{
+
 			}
 		);
+
+		// create triangle mesh
+		triangle = Mesh::createWithData("triangle", vertices, indices);
+		triangle->setDrawType(Mesh::DrawType::ELEMENTS_RESTART_INDEX);
+		triangle->setMaterial(mat);
 	}
 
 	virtual void render(float deltaTime) override
@@ -67,7 +70,6 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		program->apply();
 		triangle->render();
 	}
 };
