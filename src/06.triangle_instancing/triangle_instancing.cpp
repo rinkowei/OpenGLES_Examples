@@ -59,14 +59,8 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		std::vector<VertexAttrib> attribLayout =
-		{
-			{ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vPosition)},
-			{ 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, vColor)}
-		};
-
 		// create triangle mesh
-		triangle = Mesh::createWithData("triangle", vertices, indices, attribLayout);
+		triangle = Mesh::createWithData("triangle", vertices, indices);
 		triangle->setDrawType(Mesh::DrawType::ELEMENTS_INSTANCED);
 		triangle->setInstancingData<float>(sizeof(glm::vec2) * locations.size(), (void*)locations.data(), 100);
 

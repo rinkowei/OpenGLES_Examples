@@ -2,7 +2,7 @@
 
 namespace es
 {
-	Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttrib>& attribLayout) : Object(name)
+	Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : Object(name)
 	{
 		mName = name;
 		mVertices = vertices;
@@ -20,6 +20,32 @@ namespace es
 		if (!mEBO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create EBO");
+		}
+
+		std::vector<VertexAttrib> attribLayout = {};
+		if (vertices[0].vPosition.has_value())
+		{
+			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vPosition) });
+		}
+		if (vertices[0].vTexcoord.has_value())
+		{
+			attribLayout.push_back({ 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, vTexcoord) });
+		}
+		if (vertices[0].vNormal.has_value())
+		{
+			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vNormal) });
+		}
+		if (vertices[0].vTangent.has_value())
+		{
+			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vTangent) });
+		}
+		if (vertices[0].vBitangent.has_value())
+		{
+			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vBitangent) });
+		}
+		if (vertices[0].vColor.has_value())
+		{
+			attribLayout.push_back({ 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, vColor) });
 		}
 
 		mVAO = VertexArray::createWithData(mVBO.get(), mEBO.get(), sizeof(Vertex), attribLayout);
