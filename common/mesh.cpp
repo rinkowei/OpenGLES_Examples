@@ -81,6 +81,10 @@ namespace es
 
 	void Mesh::render()
 	{
+		if (mMaterial != nullptr)
+		{
+		
+		}
 		mVAO->bind();
 
 		switch (mDrawType)

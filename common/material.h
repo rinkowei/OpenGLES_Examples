@@ -20,18 +20,20 @@ namespace es
 	class Material
 	{
 	public:
-		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles);
+		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
 		~Material();
 
 		template<typename... T>
 		static std::shared_ptr<Material> createFromFiles(const std::string& name, T &&... args);
+
+		void apply();
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
 	
 		std::string mName;
 
 		std::unique_ptr<Program> mProgram;
-		std::vector<std::shared_ptr<Texture2D>> mTextures;
+		std::unordered_map<std::string, std::shared_ptr<Texture2D>> mTextures;
 	};
 }
 

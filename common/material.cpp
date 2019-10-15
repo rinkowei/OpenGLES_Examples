@@ -4,15 +4,15 @@ namespace es
 {
 	std::unordered_map<std::string, std::shared_ptr<Material>> Material::mMaterialCache;
 
-	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::vector<std::string>& textureFiles)
+	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles)
 		:mName(name)
 	{
 		mProgram = Program::createFromFiles(shaderFiles);
 
-		for (std::size_t i = 0; i < textureFiles.size(); i++)
+		for (auto iter = textureFiles.begin(); iter != textureFiles.end(); iter++)
 		{
-			std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(textureFiles[i], 0, false);
-			mTextures.push_back(tex2d);
+			std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 0, false);
+			mTextures[iter->first] = tex2d;
 		}
 	}
 
@@ -20,11 +20,12 @@ namespace es
 	{
 		mProgram.reset(nullptr);
 
-		for (std::size_t i = 0; i < mTextures.size(); i++)
+		for (auto iter = mTextures.begin(); iter != mTextures.end(); iter++)
 		{
-			mTextures[i].reset();
-			mTextures[i] = nullptr;
+			iter->second.reset();
+			iter->second = nullptr;
 		}
+		mTextures.swap(std::unordered_map<std::string, std::shared_ptr<Texture2D>>());
 	}
 
 	template<typename... T>
@@ -40,5 +41,10 @@ namespace es
 		{
 			return mMaterialCache[name];
 		}
+	}
+
+	void Material::apply()
+	{
+
 	}
 }
