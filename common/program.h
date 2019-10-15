@@ -46,6 +46,9 @@ namespace es
 		bool setUniform(const std::string& name, int count, glm::mat4* value);
 
 		void initFromShaders(const std::vector<Shader*>& shaders);
+
+		const std::unordered_map<std::string, GLuint>& getAttribLocationMap() const;
+		const std::unordered_map<std::string, GLuint>& getUniformLocationMap() const;
 	protected:
 		Program(const Program&) = delete;
 		const Program& operator=(const Program&) = delete;

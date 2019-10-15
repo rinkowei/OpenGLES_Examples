@@ -336,4 +336,14 @@ namespace es
 			}
 		}
 	}
+
+	const std::unordered_map<std::string, GLuint>& Program::getAttribLocationMap() const
+	{
+		return mAttribLocationMap;
+	}
+
+	const std::unordered_map<std::string, GLuint>& Program::getUniformLocationMap() const
+	{
+		return mUniformLocationMap;
+	}
 }

@@ -41,10 +41,28 @@ namespace es
 		{
 			return mMaterialCache[name];
 		}
-	}
+	} 
 
 	void Material::apply()
 	{
+		if (mProgram != nullptr)
+		{
+			mProgram->apply();
 
+			int location = 0;
+			const std::unordered_map<std::string, GLuint>& uniformMap = mProgram->getUniformLocationMap();
+			for (auto uniform = uniformMap.begin(); uniform != uniformMap.end(); uniform++)
+			{
+				for (auto tex = mTextures.begin(); tex != mTextures.end(); tex++)
+				{
+					if (tex->first == uniform->first)
+					{
+						mProgram->setUniform(tex->first, location);
+						tex->second->bind(location);
+						location++;
+					}
+				}
+			}
+		}
 	}
 }
