@@ -7,7 +7,6 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Mesh> quadrangle;
-	std::unique_ptr<Program> program;
 
 	Example()
 	{
@@ -34,11 +33,6 @@ public:
 			-0.5f,  0.5f, 0.0f
 		};
 
-		std::vector<GLuint> indices = {
-			0, 1, 3,
-			1, 2, 3
-		};
-
 		std::vector<Vertex> vertices = {};
 		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 3); i++)
 		{
@@ -47,16 +41,25 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		// create quadrangle mesh
-		quadrangle = Mesh::createWithData("quadrangle", vertices, indices);
-		quadrangle->setDrawType(Mesh::DrawType::ELEMENTS);
+		std::vector<GLuint> indices = {
+			0, 1, 3,
+			1, 2, 3
+		};
 
-		program = Program::createFromFiles(
+		std::shared_ptr<Material> mat = Material::createFromFiles("quadrangle_mat",
 			{
 				shadersDirectory + "quadrangle.vert",
 				shadersDirectory + "quadrangle.frag"
+			},
+			{
+
 			}
 		);
+
+		// create quadrangle mesh
+		quadrangle = Mesh::createWithData("quadrangle", vertices, indices);
+		quadrangle->setDrawType(Mesh::DrawType::ELEMENTS);
+		quadrangle->setMaterial(mat);
 	}
 
 	virtual void render(float deltaTime) override
@@ -66,7 +69,6 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		program->apply();
 		quadrangle->render();
 	}
 };
