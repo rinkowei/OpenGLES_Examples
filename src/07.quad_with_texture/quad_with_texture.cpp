@@ -1,11 +1,12 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <mesh.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	Mesh* quad;
+	std::shared_ptr<Mesh> quad;
 
 	Example()
 	{
@@ -18,7 +19,7 @@ public:
 	}
 	~Example()
 	{
-		delete(quad);
+		
 	}
 public:
 	virtual void prepare() override
