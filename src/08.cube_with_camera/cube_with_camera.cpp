@@ -98,10 +98,6 @@ public:
 		cube = Mesh::createWithData("cube", vertices, {});
 		cube->setDrawType(Mesh::DrawType::ARRAYS);
 		cube->setMaterial(mat);
-
-		mat->setUniform("model", glm::mat4(1.0f));
-		mat->setUniform("view", glm::mat4(1.0f));
-		mat->setUniform("projection", glm::mat4(1.0f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -111,6 +107,9 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		cube->getMaterial().get()->setUniform("model", glm::mat4(1.0f));
+		cube->getMaterial().get()->setUniform("view", glm::mat4(1.0f));
+		cube->getMaterial().get()->setUniform("projection", glm::mat4(1.0f));
 		cube->render();
 	}
 };

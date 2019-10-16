@@ -94,7 +94,7 @@ namespace es
 		std::string shadersDirectory;
 		std::string texturesDirectory;
 
-		Camera* camera;
+		std::unique_ptr<Camera> mainCamera;
 	public:
 		bool prepared = false;
 		GLint defaultWindowWidth = 1280;

@@ -136,4 +136,9 @@ namespace es
 			mMaterial->unapply();
 		}
 	}
+
+	std::shared_ptr<Material> Mesh::getMaterial() const
+	{
+		return mMaterial;
+	}
 }

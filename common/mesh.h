@@ -72,6 +72,8 @@ namespace es
 		}
 
 		void render();
+
+		std::shared_ptr<Material> getMaterial() const;
 	private:
 		std::string mName;
 

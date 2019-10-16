@@ -42,6 +42,10 @@ namespace es
 
 	ExampleBase::~ExampleBase()
 	{
+		if (mainCamera != nullptr)
+		{
+			mainCamera.reset(nullptr);
+		}
 		SDL_Quit();
 	}
 
@@ -124,8 +128,8 @@ namespace es
 
 	void ExampleBase::prepare()
 	{
-		// default camera
-		
+		// create main camera
+		mainCamera = Camera::create(45.0f, 0.1f, 100.0f, (float)defaultWindowWidth / (float)defaultWindowHeight, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 
 	void ExampleBase::renderFrame()
@@ -155,7 +159,7 @@ namespace es
 		auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 		frameTimer = (float)timeDiff / 1000.0f;
 		// update camera
-		//camera->update(frameTimer);
+		mainCamera->update();
 		viewUpdated = true;
 
 		if (!paused)
@@ -184,8 +188,6 @@ namespace es
 
 	void ExampleBase::renderLoop()
 	{
-		destWidth = defaultWindowWidth;
-		destHeight = defaultWindowHeight;
 		lastTimestamp = std::chrono::high_resolution_clock::now();
 
 		GLboolean quit = false;
