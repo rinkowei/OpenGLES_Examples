@@ -31,6 +31,9 @@ namespace es
 
 		bool aabbInsidePlane(Plane plane, glm::vec3 maxV, glm::vec3 minV);
 
+		const glm::mat4& getView() const;
+
+		const glm::mat4& getProjection() const;
 	private:
 		float mFov;
 		float mNear;

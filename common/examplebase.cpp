@@ -86,6 +86,18 @@ namespace es
 			return false;
 		}
 
+		if (settings.vsync == true)
+		{
+			if (SDL_GL_SetSwapInterval(-1) != 0)
+			{
+				SDL_GL_SetSwapInterval(1);
+			}
+		}
+		else
+		{
+			SDL_GL_SetSwapInterval(0);
+		}
+
 		return true;
 	}
 
@@ -129,7 +141,7 @@ namespace es
 	void ExampleBase::prepare()
 	{
 		// create main camera
-		mainCamera = Camera::create(45.0f, 0.1f, 100.0f, (float)defaultWindowWidth / (float)defaultWindowHeight, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+		mainCamera = Camera::create(45.0f, 0.1f, 100.0f, (float)defaultWindowWidth / (float)defaultWindowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 
 	void ExampleBase::renderFrame()

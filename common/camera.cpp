@@ -90,4 +90,14 @@ namespace es
 	{
 		return true;
 	}
+
+	const glm::mat4& Camera::getView() const
+	{
+		return mView;
+	}
+
+	const glm::mat4& Camera::getProjection() const
+	{
+		return mProjection;
+	}
 }
