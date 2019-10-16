@@ -16,8 +16,6 @@ namespace es
 		~World();
 
 		static World* getWorld();
-
-		Camera* getDefaultCamera() const;
 		
 		GLvoid enableGlobalMaterial(std::shared_ptr<Material> globalMaterial);
 
@@ -27,7 +25,6 @@ namespace es
 
 		GLboolean getGlobalMaterialEnabled() const;
 	private:
-		Camera* defaultCamera;
 
 		std::shared_ptr<Material> globalMaterial;
 		GLboolean isGlobalMaterialEnabled;

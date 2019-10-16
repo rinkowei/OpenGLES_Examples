@@ -2,206 +2,92 @@
 
 namespace es
 {
-	Camera* Camera::create()
+	Camera::Camera(float fov, float near, float far, float aspectRatio, const glm::vec3& position, const glm::vec3& forward)
+		:mNear(near),
+		 mFar(far),
+		 mAspectRatio(aspectRatio),
+		 mPosition(position)
 	{
-		Camera* camera = new (std::nothrow) Camera();
-		camera->initDefault();
-		camera->setDepth(0.0f);
+		mForward = glm::normalize(forward);
+		mWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		mRight = glm::normalize(glm::cross(mForward, mWorldUp));
+		mUp = glm::normalize(glm::cross(mRight, mForward));
 
-		return camera;
-	}
+		mRoll = 0.0f;
+		mPitch = 0.0f;
+		mYaw = 0.0f;
 
-	Camera* Camera::createPerspective(float fov, float aspectRatio, float nearPlane, float farPlane)
-	{
-		Camera* camera = new (std::nothrow) Camera();
-		if (camera)
-		{
-			camera->initPerspective(fov, aspectRatio, nearPlane, farPlane);
-			return camera;
-		}
-		delete(camera);
-		camera = nullptr;
-		return nullptr;
-	}
+		mOrientation = glm::quat();
+		mProjection = glm::perspective(glm::radians(fov), aspectRatio, near, far);
+		mPrevViewProjection = glm::mat4(1.0f);
 
-	Camera* Camera::createOrthographic(float zoomX, float zoomY, float nearPlane, float farPlane)
-	{
-		Camera* camera = new (std::nothrow) Camera();
-		if (camera)
-		{
-			camera->initOrthoGraphic(zoomX, zoomY, nearPlane, farPlane);
-			return camera;
-		}
-		delete(camera);
-		camera = nullptr;
-		return nullptr;
-	}
-
-	Camera* Camera::getDefaultCamera()
-	{
-		return World::getWorld()->getDefaultCamera();
-	}
-
-	Camera::Camera()
-	{
-		mRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		front = glm::vec3(0.0f, 0.0f, -1.0f);
-		right = glm::vec3(1.0f, 0.0f, 0.0f);
-		up = glm::vec3(0.0f, 1.0f, 0.0f);
+		update();
 	}
 
 	Camera::~Camera()
 	{
-	
-	}
-
-	void Camera::lookAt(const glm::vec3& target, const glm::vec3& up)
-	{
 
 	}
 
-	const glm::mat4& Camera::getProjectionMatrix() const
+	std::unique_ptr<Camera> Camera::create(float fov, float near, float far, float aspectRatio, const glm::vec3& position, const glm::vec3& forward)
 	{
-		return projection;
+		return std::make_unique<Camera>(fov, near, far, aspectRatio, position, forward);
 	}
 
-	glm::mat4 Camera::getViewMatrix()
+	void Camera::setTranslationDelta(glm::vec3 direction, float amount)
 	{
-		return view;
+		mPosition += direction * amount;
 	}
 
-	const glm::mat4& Camera::getViewProjectionMatrix() const
+	void Camera::setRotationDelta(glm::vec3 angle)
 	{
-		return projection * view;
+		mYaw = glm::radians(angle.y);
+		mPitch = glm::radians(angle.x);
+		mRoll = glm::radians(angle.z);
 	}
 
-	bool Camera::initDefault()
+	void Camera::setPosition(glm::vec3 position)
 	{
-		initPerspective(45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
-		setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+		mPosition = position;
+	}
+
+	void Camera::update()
+	{
+		glm::quat qPitch = glm::angleAxis(mPitch, glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::quat qYaw = glm::angleAxis(mYaw, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::quat qRoll = glm::angleAxis(mRoll, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		mOrientation = qPitch * mOrientation;
+		mOrientation = mOrientation * qYaw;
+		mOrientation = qRoll * mOrientation;
+		mOrientation = glm::normalize(mOrientation);
+
+		mRotate = glm::mat4_cast(mOrientation);
+		mForward = glm::conjugate(mOrientation) * glm::vec3(0.0f, 0.0f, -1.0f);
+
+		mRight = glm::normalize(glm::cross(mForward, mWorldUp));
+		mUp = glm::normalize(glm::cross(mRight, mForward));
+
+		mTranslate = glm::translate(glm::mat4(1.0f), -mPosition);
+		mView = mRotate * mTranslate;
+		mPrevViewProjection = mViewProjection;
+		mViewProjection = mProjection * mView;
+
+		frustumFromMatrix(mFrustum, mViewProjection);
+	}
+
+	void Camera::updateProjection(float fov, float near, float far, float aspectRatio)
+	{
+		mProjection = glm::perspective(glm::radians(fov), aspectRatio, near, far);
+	}
+
+	bool Camera::aabbInsideFrustum(glm::vec3 maxV, glm::vec3 minV)
+	{
 		return true;
 	}
 
-	bool Camera::initPerspective(float fov, float aspectRatio, float nearPlane, float farPlane)
+	bool Camera::aabbInsidePlane(Plane plane, glm::vec3 maxV, glm::vec3 minV)
 	{
-		this->fov = fov;
-		this->aspectRatio = aspectRatio;
-		this->nearPlane = nearPlane;
-		this->farPlane = farPlane;
-		projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
-		viewDirty = true;
-		frustumDirty = true;
-		type = Camera::Type::Perspective;
-
 		return true;
-	}
-
-	bool Camera::initOrthoGraphic(float zoomX, float zoomY, float nearPlane, float farPlane)
-	{
-		this->zoom[0] = zoomX;
-		this->zoom[1] = zoomY;
-		this->nearPlane = nearPlane;
-		this->farPlane = farPlane;
-		projection = glm::ortho(0.0f, zoomX, 0.0f, zoomY, nearPlane, farPlane);
-		viewDirty = true;
-		frustumDirty = true;
-		type = Camera::Type::Orthographic;
-
-		return true;
-	}
-
-	void Camera::setDepth(int8_t depth)
-	{
-		if (this->depth != depth)
-		{
-			this->depth = depth;
-		}
-	}
-
-	void Camera::update(float deltaTime)
-	{
-		if (viewDirty)
-		{
-			glm::vec3 camFront;
-			camFront.x = -cos(glm::radians(mRotation.x)) * sin(glm::radians(mRotation.y));
-			camFront.y = sin(glm::radians(mRotation.x));
-			camFront.z = cos(glm::radians(mRotation.x)) * cos(glm::radians(mRotation.y));
-			
-			front = -glm::normalize(camFront);
-			right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
-			up = glm::normalize(glm::cross(right, front));
-
-			float moveSpeed = deltaTime * movementSpeed;
-
-			if (keys.forward)
-				translate(front * moveSpeed);
-			if (keys.backward)
-				translate(-front * moveSpeed);
-			if (keys.leftward)
-				translate(-right * moveSpeed);
-			if (keys.rightward)
-				translate(right * moveSpeed);
-			
-			updateViewMatrix();
-
-			viewDirty = false;
-		}
-	}
-
-	void Camera::translate(const glm::vec3& deltaPosition)
-	{
-		this->mPosition += deltaPosition;
-		viewDirty = true;
-	}
-
-	void Camera::rotate(const glm::vec3& deltaEuler)
-	{
-		this->mRotation += deltaEuler;
-		this->mRotation.x = glm::clamp(this->mRotation.x, -90.0f, 90.0f);
-		viewDirty = true;
-	}
-
-	void Camera::setPosition(const glm::vec3& position)
-	{
-		this->mPosition = position;
-		viewDirty = true;
-	}
-
-	void Camera::setRotation(const glm::vec3& euler)
-	{
-		this->mRotation = euler;
-		this->mRotation.x = glm::clamp(this->mRotation.x, -90.0f, 90.0f);
-		viewDirty = true;
-	}
-
-	const glm::vec3& Camera::getFrontVector() const
-	{
-		return front;
-	}
-
-	const glm::vec3& Camera::getRightVector() const
-	{
-		return right;
-	}
-
-	const glm::vec3& Camera::getUpVector() const
-	{
-		return up;
-	}
-
-	bool Camera::moving() const
-	{
-		return keys.leftward || keys.rightward || keys.forward || keys.backward;
-	}
-
-	void Camera::updateViewMatrix()
-	{
-		view = glm::mat4(1.0f);
-		view = glm::rotate(view, glm::radians(mRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-		view = glm::rotate(view, glm::radians(mRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-		view = glm::rotate(view, glm::radians(mRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		view = glm::translate(view, -mPosition);
 	}
 }

@@ -1,122 +1,64 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <geometry.h>
 #include <iostream>
+#include <memory>
 #include <array>
-#include "object.h"
-#include "frustum.h"
-#include "world.h"
 
 namespace es
 {
-	class Camera : public Object
+	class Camera
 	{
 	public:
-		enum class Type
-		{
-			Perspective = 1,
-			Orthographic = 2
-		};
-
-		static Camera* createPerspective(float fov, float aspectRatio, float nearPlane, float farPlane);
-
-		static Camera* createOrthographic(float zoomX, float zoomY, float nearPlane, float farPlane);
-
-		static Camera* create();
-
-		static Camera* getDefaultCamera();
-
-		Camera::Type getType() const
-		{
-			return type;
-		}
-
-		void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
-
-		glm::mat4 getViewMatrix();
-
-		const glm::mat4& getProjectionMatrix() const;
-
-		const glm::mat4& getViewProjectionMatrix() const;
-
-		void setDepth(int8_t depth);
-
-		int8_t getDepth() const
-		{
-			return depth;
-		}
-
-		float getFarPlane() const
-		{
-			return farPlane;
-		}
-
-		float getNearPlane() const
-		{
-			return nearPlane;
-		}
-
-		virtual void update(float deltaTime) override;
-
-		virtual void translate(const glm::vec3& deltaPosition) override;
-
-		virtual void rotate(const glm::vec3& deltaEuler) override;
-
-		virtual void setPosition(const glm::vec3& position) override;
-
-		virtual void setRotation(const glm::vec3& euler) override;
-
-		const glm::vec3& getFrontVector() const;
-
-		const glm::vec3& getRightVector() const;
-
-		const glm::vec3& getUpVector() const;
-
-		bool moving() const;
-	public:
-		Camera();
+		Camera(float fov, float near, float far, float aspectRatio, const glm::vec3& position, const glm::vec3& forward);
 		~Camera();
 
-		bool initDefault();
-		bool initPerspective(float fov, float aspectRatio, float nearPlane, float farPlane);
-		bool initOrthoGraphic(float zoomX, float zoomY, float nearPlane, float farPlane);
-	public:
-		float rotationSpeed = 1.0f;
-		float movementSpeed = 1.0f;
-		float zoomSpeed = 1.0f;
+		static std::unique_ptr<Camera> create(float fov, float near, float far, float aspectRatio, const glm::vec3& position, const glm::vec3& forward);
 
-		struct
-		{
-			bool leftward = false;
-			bool rightward = false;
-			bool forward = false;
-			bool backward = false;
-		} keys;
-	protected:
-		Camera::Type type;
+		void setTranslationDelta(glm::vec3 direction, float amount);
+		void setRotationDelta(glm::vec3 angle);
+		void setPosition(glm::vec3 position);
 
-		glm::mat4 projection;
-		mutable glm::mat4 view;
-		mutable glm::mat4 viewInv;
-		mutable glm::mat4 viewProjection;
+		void update();
 
-		glm::vec3 front;
-		glm::vec3 right;
-		glm::vec3 up;
+		void updateProjection(float fov, float near, float far, float aspectRatio);
 
-		std::array<float, 2> zoom;
-		float fov;
-		float aspectRatio;
-		float nearPlane;
-		float farPlane;
-		mutable bool viewDirty = true;
+		bool aabbInsideFrustum(glm::vec3 maxV, glm::vec3 minV);
 
-		mutable Frustum frustum;
-		mutable bool frustumDirty = true;
+		bool aabbInsidePlane(Plane plane, glm::vec3 maxV, glm::vec3 minV);
 
-		int8_t depth = -1;
 	private:
-		void updateViewMatrix();
+		float mFov;
+		float mNear;
+		float mFar;
+		float mAspectRatio;
+
+		glm::vec3 mPosition;
+		glm::vec3 mForward;
+		glm::vec3 mUp;
+		glm::vec3 mRight;
+		glm::vec3 mWorldUp;
+		glm::quat mOrientation;
+
+		float mYaw;
+		float mPitch;
+		float mRoll;
+
+		glm::mat4 mModel;
+		glm::mat4 mView;
+		glm::mat4 mProjection;
+		glm::mat4 mViewProjection;
+		glm::mat4 mPrevViewProjection;
+		glm::mat4 mRotate;
+		glm::mat4 mTranslate;
+
+		std::array<Plane, 6> mPlanes;
+
+		Frustum mFrustum;
 	};
 }
 

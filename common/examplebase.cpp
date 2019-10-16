@@ -125,7 +125,7 @@ namespace es
 	void ExampleBase::prepare()
 	{
 		// default camera
-		camera = World::getWorld()->getDefaultCamera();
+		
 	}
 
 	void ExampleBase::renderFrame()
@@ -155,7 +155,7 @@ namespace es
 		auto timeDiff = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 		frameTimer = (float)timeDiff / 1000.0f;
 		// update camera
-		camera->update(frameTimer);
+		//camera->update(frameTimer);
 		viewUpdated = true;
 
 		if (!paused)
@@ -324,20 +324,17 @@ namespace es
 		// mouse left button down
 		if (ImGui::IsMouseDown(0))
 		{
-			camera->rotate(glm::vec3(deltaY * camera->rotationSpeed, deltaX * camera->rotationSpeed, 0.0f));
-			viewUpdated = true;
+
 		}
 		// mouse right button down
 		if (ImGui::IsMouseDown(1))
 		{
-			camera->translate(glm::vec3(-0.0f, 0.0f, deltaY * 0.005f * camera->zoomSpeed));
-			viewUpdated = true;
+
 		}
 		// mouse middle button down
 		if (ImGui::IsMouseDown(2))
 		{
-			camera->translate(glm::vec3(-deltaX * 0.01f, deltaY * 0.01f, 0.0f));
-			viewUpdated = true;
+
 		}
 	}
 
