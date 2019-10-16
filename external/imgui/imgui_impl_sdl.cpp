@@ -105,6 +105,12 @@ bool ImGui_ImplSDL2_ProcessEvent(const SDL_Event* event)
             return true;
         }
     case SDL_KEYDOWN:
+		{
+			int key = event->key.keysym.scancode;
+			IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
+			io.KeysDown[key] = (event->type != SDL_KEYUP);
+			return true;
+		}
     case SDL_KEYUP:
         {
             int key = event->key.keysym.scancode;

@@ -68,11 +68,13 @@ namespace es
 		// get window title with example name
 		std::string getWindowTitle();
 		bool viewUpdated = false;
-		GLboolean resizing = false;
+		bool resizing = false;
+		bool mIsApplicationQuit = false;
 
 		void windowResize();
-		void handleKeyboardInput();
+		void handleKeyboardInput(char c);
 		void handleMouseMove();
+		void handleEvent(SDL_Event event);
 
 	protected:
 		enum class ResourceType
@@ -84,6 +86,7 @@ namespace es
 
 		SDL_Window* window;
 		SDL_GLContext context;
+		SDL_Event event;
 
 		// frame counter to display fps
 		GLuint64 frameCounter = 0;

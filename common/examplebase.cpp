@@ -202,18 +202,14 @@ namespace es
 	{
 		lastTimestamp = std::chrono::high_resolution_clock::now();
 
-		GLboolean quit = false;
-		while (!quit)
+		while (!mIsApplicationQuit)
 		{
-			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
-				if (event.type == SDL_QUIT)
-				{
-					quit = true;
-				}
+				handleEvent(event);
 			}
-			handleInput();
+
+			handleMouseMove();
 			renderFrame();
 			SDL_GL_SwapWindow(window);
 		}
@@ -294,40 +290,47 @@ namespace es
 
 	}
 
-	void ExampleBase::handleInput()
+	void ExampleBase::handleEvent(SDL_Event event)
 	{
-		handleKeyboardInput();
-		handleMouseMove();
+		ImGui_ImplSDL2_ProcessEvent(&event);
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (event.type == SDL_QUIT)
+		{
+			mIsApplicationQuit = true;
+		}
+		if (io.KeysDown[SDL_SCANCODE_A])
+		{
+			SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "11111111111111");
+		}
 	}
 
-	void ExampleBase::handleKeyboardInput()
+	void ExampleBase::handleInput()
+	{
+		//handleKeyboardInput();
+		//handleMouseMove();
+	}
+
+	void ExampleBase::handleKeyboardInput(char c)
 	{
 		/*
-		// handle keyboard input
-		if (ImGui::IsKeyPressed(GLFW_KEY_ESCAPE))
-			glfwSetWindowShouldClose(window, true);
-
-		if (ImGui::IsKeyPressed(GLFW_KEY_P))
-			paused = !paused;
-
-		if (ImGui::IsKeyPressed(GLFW_KEY_W))
-			camera->keys.forward = true;
-		if (ImGui::IsKeyPressed(GLFW_KEY_S))
-			camera->keys.backward = true;
-		if (ImGui::IsKeyPressed(GLFW_KEY_A))
-			camera->keys.leftward = true;
-		if (ImGui::IsKeyPressed(GLFW_KEY_D))
-			camera->keys.rightward = true;
-
-		if (ImGui::IsKeyReleased(GLFW_KEY_W))
-			camera->keys.forward = false;
-		if (ImGui::IsKeyReleased(GLFW_KEY_S))
-			camera->keys.backward = false;
-		if (ImGui::IsKeyReleased(GLFW_KEY_A))
-			camera->keys.leftward = false;
-		if (ImGui::IsKeyReleased(GLFW_KEY_D))
-			camera->keys.rightward = false;
-			*/
+		if (c == 'w')
+		{
+			mainCamera->setTranslationDelta(mainCamera->getForward(), 0.001f);
+		}
+		else if (c == 's')
+		{
+			mainCamera->setTranslationDelta(-mainCamera->getForward(), 0.001f);
+		}
+		else if (c == 'a')
+		{
+			mainCamera->setTranslationDelta(-mainCamera->getRight(), 0.001f);
+		}
+		else if (c == 'd')
+		{
+			mainCamera->setTranslationDelta(mainCamera->getRight(), 0.001f);
+		}
+		*/
 	}
 
 	void ExampleBase::handleMouseMove()
@@ -335,10 +338,13 @@ namespace es
 		ImGuiIO& io = ImGui::GetIO();
 		float deltaX = io.MouseDelta.x;
 		float deltaY = io.MouseDelta.y;
+
 		// mouse left button down
 		if (ImGui::IsMouseDown(0))
 		{
-
+			mainCamera->setRotationDelta(glm::vec3((float)(deltaY * 0.08f),
+				(float)(deltaX * 0.08f),
+				(float)(0.0f)));
 		}
 		// mouse right button down
 		if (ImGui::IsMouseDown(1))
