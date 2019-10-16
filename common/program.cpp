@@ -80,7 +80,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform1i(mUniformLocationMap[name], value));
+		GLES_CHECK_ERROR(glProgramUniform1i(mID, mUniformLocationMap[name], value));
 
 		return true;
 	}
@@ -92,7 +92,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform1i(mUniformLocationMap[name], (int)value));
+		GLES_CHECK_ERROR(glProgramUniform1i(mID, mUniformLocationMap[name], (int)value));
 
 		return true;
 	}
@@ -104,7 +104,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform1f(mUniformLocationMap[name], value));
+		GLES_CHECK_ERROR(glProgramUniform1f(mID, mUniformLocationMap[name], value));
 
 		return true;
 	}
@@ -116,7 +116,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform2f(mUniformLocationMap[name], value.x, value.y));
+		GLES_CHECK_ERROR(glProgramUniform2f(mID, mUniformLocationMap[name], value.x, value.y));
 
 		return true;
 	}
@@ -128,7 +128,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform3f(mUniformLocationMap[name], value.x, value.y, value.z));
+		GLES_CHECK_ERROR(glProgramUniform3f(mID, mUniformLocationMap[name], value.x, value.y, value.z));
 
 		return true;
 	}
@@ -140,7 +140,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform4f(mUniformLocationMap[name], value.x, value.y, value.z, value.w));
+		GLES_CHECK_ERROR(glProgramUniform4f(mID, mUniformLocationMap[name], value.x, value.y, value.z, value.w));
 
 		return true;
 	}
@@ -152,7 +152,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniformMatrix2fv(mUniformLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
+		GLES_CHECK_ERROR(glProgramUniformMatrix2fv(mID, mUniformLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
 
 		return true;
 	}
@@ -164,7 +164,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniformMatrix3fv(mUniformLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
+		GLES_CHECK_ERROR(glProgramUniformMatrix3fv(mID, mUniformLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
 
 		return true;
 	}
@@ -175,9 +175,9 @@ namespace es
 		{
 			return false;
 		}
-
-		GLES_CHECK_ERROR(glUniformMatrix4fv(mUniformLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
-
+		
+		GLES_CHECK_ERROR(glProgramUniformMatrix4fv(mID, mUniformLocationMap[name], 1, GL_FALSE, glm::value_ptr(value)));
+	
 		return true;
 	}
 
@@ -188,7 +188,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform1iv(mUniformLocationMap[name], count, value));
+		GLES_CHECK_ERROR(glProgramUniform1iv(mID, mUniformLocationMap[name], count, value));
 
 		return true;
 	}
@@ -200,7 +200,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform1fv(mUniformLocationMap[name], count, value));
+		GLES_CHECK_ERROR(glProgramUniform1fv(mID, mUniformLocationMap[name], count, value));
 
 		return true;
 	}
@@ -212,7 +212,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform2fv(mUniformLocationMap[name], count, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniform2fv(mID, mUniformLocationMap[name], count, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -224,7 +224,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform3fv(mUniformLocationMap[name], count, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniform3fv(mID, mUniformLocationMap[name], count, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -236,7 +236,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniform4fv(mUniformLocationMap[name], count, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniform4fv(mID, mUniformLocationMap[name], count, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -248,7 +248,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniformMatrix2fv(mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniformMatrix2fv(mID, mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -260,7 +260,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniformMatrix3fv(mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniformMatrix3fv(mID, mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
@@ -272,7 +272,7 @@ namespace es
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glUniformMatrix4fv(mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniformMatrix4fv(mID, mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
