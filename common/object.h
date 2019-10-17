@@ -9,6 +9,9 @@
 #include <string>
 #include <memory>
 
+#include <camera.h>
+#include <world.h>
+
 namespace es
 {
 	class Object
@@ -60,6 +63,8 @@ namespace es
 		glm::vec3 mScaling;
 
 		glm::mat4 mModelMatrix;
+
+		Camera* camera;
 
 		// is auto call update function in render()
 		bool mAutoUpdated;

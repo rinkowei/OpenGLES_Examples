@@ -53,7 +53,6 @@
 
 #include "world.h"
 #include "object.h"
-#include "camera.h"
 #include "UIOverlay.h"
 
 #include <imgui/imgui.h>
@@ -97,7 +96,7 @@ namespace es
 		std::string shadersDirectory;
 		std::string texturesDirectory;
 
-		std::unique_ptr<Camera> mainCamera;
+		Camera* mMainCamera;
 	public:
 		bool prepared = false;
 		GLint defaultWindowWidth = 1280;

@@ -108,9 +108,6 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		cube->getMaterial().get()->setUniform("model", glm::mat4(1.0f));
-		cube->getMaterial().get()->setUniform("view", mainCamera->getView());
-		cube->getMaterial().get()->setUniform("projection", mainCamera->getProjection());
 		cube->render();
 	}
 };

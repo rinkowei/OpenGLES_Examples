@@ -94,6 +94,9 @@ namespace es
 		if (mMaterial != nullptr)
 		{
 			mMaterial->apply();
+			mMaterial->setUniform("model", mModelMatrix);
+			mMaterial->setUniform("view", camera->getView());
+			mMaterial->setUniform("projection", camera->getProjection());
 		}
 		mVAO->bind();
 

@@ -1,6 +1,8 @@
 #ifndef WORLD_H_
 #define WORLD_H_
 
+#include <glm/glm.hpp>
+
 #include <iostream>
 #include <memory>
 
@@ -17,17 +19,23 @@ namespace es
 
 		static World* getWorld();
 		
-		GLvoid enableGlobalMaterial(std::shared_ptr<Material> globalMaterial);
+		void enableGlobalMaterial(std::shared_ptr<Material> globalMaterial);
 
-		GLvoid disableGlobalMaterial();
+		void disableGlobalMaterial();
 
 		std::shared_ptr<Material> getGlobalMaterial() const;
 
-		GLboolean getGlobalMaterialEnabled() const;
-	private:
+		bool getGlobalMaterialEnabled() const;
 
-		std::shared_ptr<Material> globalMaterial;
-		GLboolean isGlobalMaterialEnabled;
+		void update(float deltaTime);
+
+		void createMainCamera(float fov, float near, float far, float aspectRatio, glm::vec3 position, glm::vec3 forward);
+
+		Camera* getMainCamera() const;
+	private:
+		std::unique_ptr<Camera> mMainCamera;
+		std::shared_ptr<Material> mGlobalMaterial;
+		bool mIsGlobalMaterialEnabled;
 
 		static World* world;
 

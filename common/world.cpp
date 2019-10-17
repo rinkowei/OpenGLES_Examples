@@ -1,4 +1,3 @@
-
 #include "world.h"
 
 namespace es
@@ -8,13 +7,22 @@ namespace es
 
 	World::World()
 	{
-		globalMaterial = nullptr;
-		isGlobalMaterialEnabled = false;
+		mMainCamera = nullptr;
+		mGlobalMaterial = nullptr;
+		mIsGlobalMaterialEnabled = false;
 	}
 
 	World::~World()
 	{
-
+		if (mMainCamera != nullptr)
+		{
+			mMainCamera.reset(nullptr);
+		}
+		if (mGlobalMaterial != nullptr)
+		{
+			mGlobalMaterial.reset();
+			mGlobalMaterial = nullptr;
+		}
 	}
 
 	World* World::getWorld()
@@ -27,34 +35,56 @@ namespace es
 	}
 
 
-	GLvoid World::enableGlobalMaterial(std::shared_ptr<Material> globalMaterial)
+	void World::enableGlobalMaterial(std::shared_ptr<Material> globalMaterial)
 	{
-		if (this->globalMaterial != nullptr)
+		if (this->mGlobalMaterial != nullptr)
 		{
-			this->globalMaterial.reset();
+			this->mGlobalMaterial.reset();
 		}
-		this->globalMaterial = globalMaterial;
+		this->mGlobalMaterial = globalMaterial;
 		//this->globalMaterial->apply();
-		isGlobalMaterialEnabled = true;
+		mIsGlobalMaterialEnabled = true;
 	}
 
-	GLvoid World::disableGlobalMaterial()
+	void World::disableGlobalMaterial()
 	{
-		if (this->globalMaterial != nullptr)
+		if (this->mGlobalMaterial != nullptr)
 		{
-			this->globalMaterial.reset();
-			this->globalMaterial = nullptr;
+			this->mGlobalMaterial.reset();
+			this->mGlobalMaterial = nullptr;
 		}
-		isGlobalMaterialEnabled = false;
+		mIsGlobalMaterialEnabled = false;
 	}
 
 	std::shared_ptr<Material> World::getGlobalMaterial() const
 	{
-		return globalMaterial;
+		return mGlobalMaterial;
 	}
 
-	GLboolean World::getGlobalMaterialEnabled() const
+	bool World::getGlobalMaterialEnabled() const
 	{
-		return isGlobalMaterialEnabled;
+		return mIsGlobalMaterialEnabled;
+	}
+
+	void World::update(float deltaTime)
+	{
+		if (mMainCamera != nullptr)
+		{
+			mMainCamera->update();
+		}
+	}
+
+	void World::createMainCamera(float fov, float near, float far, float aspectRatio, glm::vec3 position, glm::vec3 forward)
+	{
+		if (mMainCamera != nullptr)
+		{
+			mMainCamera.reset(nullptr);
+		}
+		mMainCamera = Camera::create(fov, near, far, aspectRatio, position, forward);
+	}
+
+	Camera* World::getMainCamera() const
+	{
+		return mMainCamera.get();
 	}
 }

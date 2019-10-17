@@ -12,12 +12,12 @@ namespace es
 		 mTransformUpdated(true),
 		 mIsDirty(false)
 	{
-
+		camera = World::getWorld()->getMainCamera();
 	};
 
 	Object::~Object()
 	{
-
+		camera = nullptr;
 	}
 
 	std::shared_ptr<Object> Object::create(const std::string& name)
