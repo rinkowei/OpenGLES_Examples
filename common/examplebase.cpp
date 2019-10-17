@@ -274,15 +274,6 @@ namespace es
 
 	}
 
-	void ExampleBase::keyPressed(GLuint)
-	{
-
-	}
-	void ExampleBase::mouseMoved(double x, double y, bool& handled)
-	{
-
-	}
-
 	void ExampleBase::windowResize()
 	{
 

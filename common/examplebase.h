@@ -165,10 +165,6 @@ namespace es
 
 		virtual void viewChanged();
 
-		virtual void keyPressed(GLuint);
-
-		virtual void mouseMoved(double x, double y, bool& handled);
-
 		virtual void windowResized();
 
 		virtual void prepare();
