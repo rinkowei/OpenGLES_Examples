@@ -23,6 +23,7 @@ namespace es
 		}
 
 		std::vector<VertexAttrib> attribLayout = {};
+
 		if (vertices[0].vPosition.has_value())
 		{
 			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vPosition) });
@@ -57,6 +58,12 @@ namespace es
 
 	Mesh::~Mesh()
 	{
+		if (mMaterial != nullptr)
+		{
+			mMaterial.reset();
+			mMaterial = nullptr;
+		}
+
 		mVertices.swap(std::vector<Vertex>());
 		mIndices.swap(std::vector<uint32_t>());
 

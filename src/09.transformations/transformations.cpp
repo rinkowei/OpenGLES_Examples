@@ -91,7 +91,7 @@ public:
 			{
 				{ "diffuseMap_0", texturesDirectory + "face.png" }
 			}
-			);
+		);
 
 		// create cube mesh
 		cube = Mesh::createWithData("cube", vertices, {});

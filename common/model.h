@@ -28,12 +28,15 @@ namespace es
 
 		static std::shared_ptr<Model> createFromFile(const std::string& path, bool loadMaterials = true);
 
+		void setMaterial(std::shared_ptr<Material> mMat);
+
 		void render(bool isUseLocalMaterial = true);
 	private:
 		void handleNode(aiNode* node, const aiScene* scene);
 		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene);
 
 		std::string mDirectory;
+		std::shared_ptr<Material> mMaterial;
 		std::map<std::string, std::shared_ptr<Mesh>> mMeshes;
 		static std::unordered_map<std::string, std::shared_ptr<Model>> mModelCache;
 	};

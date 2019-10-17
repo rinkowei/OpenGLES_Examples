@@ -7,6 +7,7 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Model> model;
+	std::shared_ptr<Material> mat;
 
 	Example()
 	{
@@ -31,7 +32,19 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
+		mat = Material::createFromFiles("model_mat",
+			{
+				shadersDirectory + "model.vert",
+				shadersDirectory + "model.frag"
+			},
+			{
+				{ "diffuseMap_0", modelsDirectory + "/nanosuit/body_dif.png" }
+			}
+		);
+
 		model = Model::createFromFile(modelsDirectory + "/nanosuit/nanosuit.obj");
+		//model->setMaterial(mat);
+		model->setPosition(glm::vec3(0.0f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -41,6 +54,10 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		mat->apply();
+		mat->setUniform("model", glm::mat4(1.0f));
+		mat->setUniform("view", mMainCamera->getView());
+		mat->setUniform("projection", mMainCamera->getProjection());
 		model->render();
 	}
 };
