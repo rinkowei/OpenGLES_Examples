@@ -204,11 +204,12 @@ namespace es
 
 		while (!mIsApplicationQuit)
 		{
-			while (SDL_PollEvent(&event))
+			if (SDL_PollEvent(&event) != 0)
 			{
-				handleEvent(event);
+				handleSDLEvent(event);
 			}
 
+			handleKeyboardInput();
 			handleMouseMove();
 			renderFrame();
 			SDL_GL_SwapWindow(window);
@@ -290,7 +291,7 @@ namespace es
 
 	}
 
-	void ExampleBase::handleEvent(SDL_Event event)
+	void ExampleBase::handleSDLEvent(const SDL_Event& event)
 	{
 		ImGui_ImplSDL2_ProcessEvent(&event);
 		ImGuiIO& io = ImGui::GetIO();
@@ -299,38 +300,44 @@ namespace es
 		{
 			mIsApplicationQuit = true;
 		}
-		if (io.KeysDown[SDL_SCANCODE_A])
+		else if (event.type == SDL_KEYDOWN)
 		{
-			SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "11111111111111");
+			if (io.KeysDown[SDL_SCANCODE_ESCAPE])
+			{
+				mIsApplicationQuit = true;
+			}
 		}
+		else if (event.type == SDL_KEYUP)
+		{
+			mainCamera->setTranslationDelta(glm::vec3(0.0f), 0.001f);
+		}
+
 	}
 
-	void ExampleBase::handleInput()
+	void ExampleBase::handleKeyboardInput()
 	{
-		//handleKeyboardInput();
-		//handleMouseMove();
-	}
+		ImGuiIO& io = ImGui::GetIO();
+		if (ImGui::IsKeyDown(SDL_SCANCODE_W))
+		{
+			mainCamera->setTranslationDelta(mainCamera->getForward(), 0.0005f);
+		}
+		if (ImGui::IsKeyDown(SDL_SCANCODE_S))
+		{
+			mainCamera->setTranslationDelta(-mainCamera->getForward(), 0.0005f);
+		}
+		if (ImGui::IsKeyDown(SDL_SCANCODE_A))
+		{
+			mainCamera->setTranslationDelta(-mainCamera->getRight(), 0.0005f);
+		}
+		if (ImGui::IsKeyDown(SDL_SCANCODE_D))
+		{
+			mainCamera->setTranslationDelta(mainCamera->getRight(), 0.0005f);
+		}
 
-	void ExampleBase::handleKeyboardInput(char c)
-	{
-		/*
-		if (c == 'w')
+		if (ImGui::IsKeyReleased(SDL_SCANCODE_W) || ImGui::IsKeyReleased(SDL_SCANCODE_S) || ImGui::IsKeyReleased(SDL_SCANCODE_A) || ImGui::IsKeyReleased(SDL_SCANCODE_D))
 		{
-			mainCamera->setTranslationDelta(mainCamera->getForward(), 0.001f);
+			mainCamera->setTranslationDelta(glm::vec3(0.0f), 0.0f);
 		}
-		else if (c == 's')
-		{
-			mainCamera->setTranslationDelta(-mainCamera->getForward(), 0.001f);
-		}
-		else if (c == 'a')
-		{
-			mainCamera->setTranslationDelta(-mainCamera->getRight(), 0.001f);
-		}
-		else if (c == 'd')
-		{
-			mainCamera->setTranslationDelta(mainCamera->getRight(), 0.001f);
-		}
-		*/
 	}
 
 	void ExampleBase::handleMouseMove()
@@ -338,7 +345,7 @@ namespace es
 		ImGuiIO& io = ImGui::GetIO();
 		float deltaX = io.MouseDelta.x;
 		float deltaY = io.MouseDelta.y;
-
+	
 		// mouse left button down
 		if (ImGui::IsMouseDown(0))
 		{
@@ -346,6 +353,11 @@ namespace es
 				(float)(deltaX * 0.08f),
 				(float)(0.0f)));
 		}
+		else
+		{
+			mainCamera->setRotationDelta(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
+
 		// mouse right button down
 		if (ImGui::IsMouseDown(1))
 		{

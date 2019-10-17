@@ -72,9 +72,9 @@ namespace es
 		bool mIsApplicationQuit = false;
 
 		void windowResize();
-		void handleKeyboardInput(char c);
+		void handleKeyboardInput();
 		void handleMouseMove();
-		void handleEvent(SDL_Event event);
+		void handleSDLEvent(const SDL_Event& event);
 
 	protected:
 		enum class ResourceType
@@ -171,8 +171,6 @@ namespace es
 		virtual void mouseMoved(double x, double y, bool& handled);
 
 		virtual void windowResized();
-
-		virtual void handleInput();
 
 		virtual void prepare();
 
