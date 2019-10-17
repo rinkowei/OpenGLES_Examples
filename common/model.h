@@ -8,20 +8,34 @@
 #include <sstream>
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "mesh.h"
-#include "world.h"
+#include <mesh.h>
+#include <utility.h>
 
 namespace es
 {
-	class Model
+	class Model : public Object
 	{
+	public:
+		Model(const std::string& path, bool loadMaterials = true);
+		~Model();
 
+		static std::shared_ptr<Model> createFromFile(const std::string& path, bool loadMaterials = true);
+
+		void render(bool isUseLocalMaterial = true);
+	private:
+		void handleNode(aiNode* node, const aiScene* scene);
+		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene);
+
+		std::string mDirectory;
+		std::map<std::string, std::shared_ptr<Mesh>> mMeshes;
+		static std::unordered_map<std::string, std::shared_ptr<Model>> mModelCache;
 	};
 }
 
