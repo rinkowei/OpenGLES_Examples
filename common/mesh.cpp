@@ -86,6 +86,11 @@ namespace es
 
 	void Mesh::render()
 	{
+		if (mAutoUpdated)
+		{
+			update();
+		}
+
 		if (mMaterial != nullptr)
 		{
 			mMaterial->apply();
@@ -135,6 +140,11 @@ namespace es
 		{
 			mMaterial->unapply();
 		}
+	}
+
+	void Mesh::update()
+	{
+		Object::update();
 	}
 
 	std::shared_ptr<Material> Mesh::getMaterial() const

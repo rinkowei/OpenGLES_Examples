@@ -98,6 +98,7 @@ public:
 		cube = Mesh::createWithData("cube", vertices, {});
 		cube->setDrawType(Mesh::DrawType::ARRAYS);
 		cube->setMaterial(mat);
+		cube->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
 	virtual void render(float deltaTime) override

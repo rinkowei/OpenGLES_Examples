@@ -21,9 +21,9 @@ namespace es
 
 		static std::shared_ptr<Object> create(const std::string& name);
 
-		virtual void render(float deltaTime);
+		virtual void render();
 
-		virtual void update(float deltaTime);
+		virtual void update();
 
 		virtual void setName(const std::string& name);
 		

@@ -71,7 +71,9 @@ namespace es
 			mVAO->bind();
 		}
 
-		void render();
+		virtual void render() override;
+
+		virtual void update() override;
 
 		std::shared_ptr<Material> getMaterial() const;
 	private:

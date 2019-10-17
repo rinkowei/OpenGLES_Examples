@@ -25,15 +25,15 @@ namespace es
 		return std::make_shared<Object>(name);
 	}
 
-	void Object::render(float deltaTime)
+	void Object::render()
 	{
 		if (mAutoUpdated)
 		{
-			update(deltaTime);
+			update();
 		}
 	}
 
-	void Object::update(float deltaTime)
+	void Object::update()
 	{
 		mTransformUpdated = false;
 		if (mIsDirty)
