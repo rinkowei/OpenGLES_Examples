@@ -12,7 +12,6 @@ public:
 	{
 		title = "cube with camera";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/08.cube_with_camera/";
