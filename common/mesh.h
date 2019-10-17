@@ -71,7 +71,7 @@ namespace es
 			mVAO->bind();
 		}
 
-		virtual void render() override;
+		void render(bool isUseLocalMaterial = true);
 
 		virtual void update() override;
 

@@ -84,14 +84,14 @@ namespace es
 		mDrawType = drawType;
 	}
 
-	void Mesh::render()
+	void Mesh::render(bool isUseLocalMaterial)
 	{
 		if (mAutoUpdated)
 		{
 			update();
 		}
 
-		if (mMaterial != nullptr)
+		if (isUseLocalMaterial && mMaterial != nullptr)
 		{
 			mMaterial->apply();
 			mMaterial->setUniform("model", mModelMatrix);
@@ -139,7 +139,7 @@ namespace es
 		}
 
 		mVAO->unbind();
-		if (mMaterial != nullptr)
+		if (isUseLocalMaterial && mMaterial != nullptr)
 		{
 			mMaterial->unapply();
 		}
