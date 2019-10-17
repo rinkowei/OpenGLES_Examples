@@ -38,11 +38,17 @@ namespace es
 		const glm::mat4& getView() const;
 
 		const glm::mat4& getProjection() const;
+
+		void setMoveSensitivity(float sensitivity);
+
+		float getMoveSensitivity() const;
 	private:
 		float mFov;
 		float mNear;
 		float mFar;
 		float mAspectRatio;
+
+		float mMoveSensitivity;
 
 		glm::vec3 mPosition;
 		glm::vec3 mForward;

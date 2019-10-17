@@ -309,19 +309,19 @@ namespace es
 
 		if (ImGui::IsKeyDown(SDL_SCANCODE_W))
 		{
-			mMainCamera->setTranslationDelta(mMainCamera->getForward(), frameTimer * 10.0f);
+			mMainCamera->setTranslationDelta(mMainCamera->getForward(), frameTimer);
 		}
 		if (ImGui::IsKeyDown(SDL_SCANCODE_S))
 		{
-			mMainCamera->setTranslationDelta(-mMainCamera->getForward(), frameTimer * 10.0f);
+			mMainCamera->setTranslationDelta(-mMainCamera->getForward(), frameTimer);
 		}
 		if (ImGui::IsKeyDown(SDL_SCANCODE_A))
 		{
-			mMainCamera->setTranslationDelta(-mMainCamera->getRight(), frameTimer * 10.0f);
+			mMainCamera->setTranslationDelta(-mMainCamera->getRight(), frameTimer);
 		}
 		if (ImGui::IsKeyDown(SDL_SCANCODE_D))
 		{
-			mMainCamera->setTranslationDelta(mMainCamera->getRight(), frameTimer * 10.0f);
+			mMainCamera->setTranslationDelta(mMainCamera->getRight(), frameTimer);
 		}
 
 		if (ImGui::IsKeyReleased(SDL_SCANCODE_W) || ImGui::IsKeyReleased(SDL_SCANCODE_S) || ImGui::IsKeyReleased(SDL_SCANCODE_A) || ImGui::IsKeyReleased(SDL_SCANCODE_D))

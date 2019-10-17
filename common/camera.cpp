@@ -6,6 +6,7 @@ namespace es
 		:mNear(near),
 		 mFar(far),
 		 mAspectRatio(aspectRatio),
+		 mMoveSensitivity(10.0f),
 		 mPosition(position)
 	{
 		mForward = glm::normalize(forward);
@@ -34,9 +35,9 @@ namespace es
 		return std::make_unique<Camera>(fov, near, far, aspectRatio, position, forward);
 	}
 
-	void Camera::setTranslationDelta(glm::vec3 direction, float amount)
+	void Camera::setTranslationDelta(glm::vec3 direction, float rate)
 	{
-		mPosition += direction * amount;
+		mPosition += direction * rate * mMoveSensitivity;
 	}
 
 	void Camera::setRotationDelta(glm::vec3 angle)
@@ -109,5 +110,15 @@ namespace es
 	const glm::mat4& Camera::getProjection() const
 	{
 		return mProjection;
+	}
+
+	void Camera::setMoveSensitivity(float sensitivity)
+	{
+		mMoveSensitivity = sensitivity;
+	}
+
+	float Camera::getMoveSensitivity() const
+	{
+		return mMoveSensitivity;
 	}
 }
