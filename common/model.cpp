@@ -204,7 +204,8 @@ namespace es
 			texType = static_cast<aiTextureType>(texType + 1);
 		}
 
-		std::shared_ptr<Material> subMaterial = Material::createFromFiles(mName + "_" + std::string(mesh->mName.C_Str()) + "_mat", mShaderFiles, textureFiles);
+		std::shared_ptr<Program> singleProgram = Program::createFromFiles(mName + "_program", mShaderFiles);
+		std::shared_ptr<Material> subMaterial = Material::createFromProgram(mName + "_" + std::string(mesh->mName.C_Str()) + "_mat", singleProgram, textureFiles);
 		return subMaterial;
 	}
 }

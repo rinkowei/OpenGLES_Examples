@@ -16,13 +16,13 @@ namespace es
 	class Program
 	{
 	public:
-		Program(const std::vector<Shader*>& shaders);
-		Program(const std::vector<std::string>& files);
+		Program(const std::string& name, const std::vector<Shader*>& shaders);
+		Program(const std::string& name, const std::vector<std::string>& files);
 		~Program();
 
-		static std::unique_ptr<Program> createFromShaders(const std::vector<Shader*>& shaders);
+		static std::shared_ptr<Program> createFromShaders(const std::string& name, const std::vector<Shader*>& shaders);
 
-		static std::unique_ptr<Program> createFromFiles(const std::vector<std::string>& files);
+		static std::shared_ptr<Program> createFromFiles(const std::string& name, const std::vector<std::string>& files);
 
 		void apply();
 		void unapply();
@@ -48,16 +48,16 @@ namespace es
 
 		const std::unordered_map<std::string, GLuint>& getAttribLocationMap() const;
 		const std::unordered_map<std::string, GLuint>& getUniformLocationMap() const;
-	protected:
-		Program(const Program&) = delete;
-		const Program& operator=(const Program&) = delete;
 	private:
 		void initFromShaders(const std::vector<Shader*>& shaders);
 
 		GLuint mID;
+		std::string mName;
 
 		std::unordered_map<std::string, GLuint> mAttribLocationMap;
 		std::unordered_map<std::string, GLuint> mUniformLocationMap;
+
+		static std::unordered_map<std::string, std::shared_ptr<Program>> mProgramCache;
 	};
 }
 #endif

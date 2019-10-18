@@ -3,14 +3,18 @@
 
 namespace es
 {
-	Program::Program(const std::vector<Shader*>& shaders)
-		:mID(0)
+	std::unordered_map<std::string, std::shared_ptr<Program>> Program::mProgramCache;
+
+	Program::Program(const std::string& name, const std::vector<Shader*>& shaders)
+		:mID(0),
+		 mName(name)
 	{
 		initFromShaders(shaders);
 	}
 
-	Program::Program(const std::vector<std::string>& files)
-		:mID(0)
+	Program::Program(const std::string& name, const std::vector<std::string>& files)
+		:mID(0),
+		 mName(name)
 	{
 		std::vector<Shader*> shaders;
 		for (std::size_t i = 0; i < files.size(); i++)
@@ -39,14 +43,32 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteProgram(mID));
 	}
 
-	std::unique_ptr<Program> Program::createFromShaders(const std::vector<Shader*>& shaders)
+	std::shared_ptr<Program> Program::createFromShaders(const std::string& name, const std::vector<Shader*>& shaders)
 	{
-		return std::make_unique<Program>(shaders);
+		if (mProgramCache.find(name) == mProgramCache.end())
+		{
+			std::shared_ptr<Program> program = std::make_shared<Program>(name, shaders);
+			mProgramCache[name] = program;
+			return program;
+		}
+		else
+		{
+			return mProgramCache[name];
+		}
 	}
 
-	std::unique_ptr<Program> Program::createFromFiles(const std::vector<std::string>& files)
+	std::shared_ptr<Program> Program::createFromFiles(const std::string& name, const std::vector<std::string>& files)
 	{
-		return std::make_unique<Program>(files);
+		if (mProgramCache.find(name) == mProgramCache.end())
+		{
+			std::shared_ptr<Program> program = std::make_shared<Program>(name, files);
+			mProgramCache[name] = program;
+			return program;
+		}
+		else
+		{
+			return mProgramCache[name];
+		}
 	}
 
 	void Program::apply()

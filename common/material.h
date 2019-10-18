@@ -31,9 +31,12 @@ namespace es
 		};
 	public:
 		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
+		Material(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles);
 		~Material();
 
 		static std::shared_ptr<Material> createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
+
+		static std::shared_ptr<Material> createFromProgram(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles);
 
 		void apply();
 		void unapply();
@@ -51,7 +54,7 @@ namespace es
 	
 		std::string mName;
 
-		std::unique_ptr<Program> mProgram;
+		std::shared_ptr<Program> mProgram;
 		std::unordered_map<std::pair<std::string, GLuint>, std::shared_ptr<Texture2D>, PairHash> mTextureMap;
 	};
 }
