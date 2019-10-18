@@ -8,6 +8,7 @@
 #include <cassert>
 #include <algorithm>
 #include <stdio.h>
+#include <objbase.h>
 
 namespace es
 {
@@ -19,12 +20,14 @@ namespace es
 		static std::string executablePath();
 
 		static bool readFile(const std::string& path, std::string& out);
-
+		
 		//static bool preprocessShader(const std::string& path, const std::string& src, std::string& out);
 
 		static std::string pathWithoutFile(std::string path);
 
 		static std::string fileExtension(const std::string& filePath);
+
+		static std::string createNewGUID();
 
 		static std::string execPath;
 	};
