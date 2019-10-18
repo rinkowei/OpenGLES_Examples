@@ -2,9 +2,24 @@
 
 namespace es
 {
+	std::array<std::string, 11> Model::kTextureTypeStrings =
+	{
+		"diffuseMap",
+		"specularMap",
+		"ambientMap",
+		"emissiveMap",
+		"heightMap",
+		"normalsMap",
+		"shininessMap",
+		"opacityMap",
+		"displacementMap",
+		"lightMap",
+		"reflectionMap"
+	};
+
 	std::unordered_map<std::string, std::shared_ptr<Model>> Model::mModelCache;
 
-	Model::Model(const std::string& name, const std::string& path, bool loadMaterials) : Object(name)
+	Model::Model(const std::string& name, const std::string& path, const std::vector<std::string>& shaderFiles, bool isLoadMaterials) : Object(name)
 	{
 		const aiScene* scene;
 		Assimp::Importer importer;
@@ -17,8 +32,9 @@ namespace es
 		}
 
 		mDirectory = Utility::pathWithoutFile(path);
+		mShaderFiles = shaderFiles;
 
-		handleNode(scene->mRootNode, scene);
+		handleNode(scene->mRootNode, scene, isLoadMaterials);
 	}
 
 	Model::~Model()
@@ -40,22 +56,26 @@ namespace es
 		mMeshes.swap(std::map<std::string, std::shared_ptr<Mesh>>());
 	}
 
-	std::shared_ptr<Model> Model::createFromFile(const std::string& name, const std::string& path, bool loadMaterials)
+	std::shared_ptr<Model> Model::createFromFile(const std::string& name, const std::string& path, const std::vector<std::string>& shaderFiles, bool isLoadMaterials)
 	{
-		if (mModelCache.find(path) == mModelCache.end())
+		if (mModelCache.find(name) == mModelCache.end())
 		{
-			std::shared_ptr<Model> model = std::make_shared<Model>(name, path, loadMaterials);
-			mModelCache[path] = model;
+			std::shared_ptr<Model> model = std::make_shared<Model>(name, path, shaderFiles, isLoadMaterials);
+			mModelCache[name] = model;
 			return model;
 		}
 		else
 		{
-			return mModelCache[path];
+			return mModelCache[name];
 		}
 	}
 
 	void Model::setMaterial(std::shared_ptr<Material> mMat)
 	{
+		if (mMaterial != nullptr)
+		{
+			mMaterial.reset();
+		}
 		mMaterial = mMat;
 
 		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
@@ -78,21 +98,21 @@ namespace es
 		}
 	}
 
-	void Model::handleNode(aiNode* node, const aiScene* scene)
+	void Model::handleNode(aiNode* node, const aiScene* scene, bool isLoadMaterials)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			mMeshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), handleMesh(mesh, scene)));
+			mMeshes.insert(std::make_pair(std::string(mesh->mName.C_Str()), handleMesh(mesh, scene, isLoadMaterials)));
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
-			handleNode(node->mChildren[i], scene);
+			handleNode(node->mChildren[i], scene, isLoadMaterials);
 		}
 	}
 
-	std::shared_ptr<Mesh> Model::handleMesh(aiMesh* mesh, const aiScene* scene)
+	std::shared_ptr<Mesh> Model::handleMesh(aiMesh* mesh, const aiScene* scene, bool isLoadMaterials)
 	{
 		std::vector<Vertex> vertices(mesh->mNumVertices);
 		std::vector<uint32_t> indices(mesh->mNumFaces * 3);
@@ -154,6 +174,37 @@ namespace es
 		}
 		subMesh->setAutoUpdated(false);
 
+		if (isLoadMaterials)
+		{
+			std::shared_ptr<Material> mat = handleMaterial(mesh, scene);
+			subMesh->setMaterial(mat);
+		}
+
 		return subMesh;
+	}
+
+	std::shared_ptr<Material> Model::handleMaterial(aiMesh* mesh, const aiScene* scene)
+	{
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		aiTextureType texType = aiTextureType::aiTextureType_DIFFUSE;
+
+		std::unordered_map<std::string, std::string> textureFiles;
+
+		for (std::size_t i = 0; i < kTextureTypeStrings.size(); i++)
+		{
+			unsigned int texCount = material->GetTextureCount(texType);
+			for (unsigned int j = 0; j < texCount; j++)
+			{
+				aiString str;
+				material->GetTexture(texType, j, &str);
+				
+				std::string texName = Utility::pathWithoutFile(std::string(str.C_Str()));
+				textureFiles.insert(std::make_pair(kTextureTypeStrings[i] + "_" + std::to_string(j), mDirectory + "/" + texName));
+			}
+			texType = static_cast<aiTextureType>(texType + 1);
+		}
+
+		std::shared_ptr<Material> subMaterial = Material::createFromFiles(mName + "_" + std::string(mesh->mName.C_Str()) + "_mat", mShaderFiles, textureFiles);
+		return subMaterial;
 	}
 }

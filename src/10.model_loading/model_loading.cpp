@@ -7,7 +7,6 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Model> model;
-	std::shared_ptr<Material> mat;
 
 	Example()
 	{
@@ -32,18 +31,14 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		mat = Material::createFromFiles("model_mat",
+		model = Model::createFromFile("nanosuit", 
+			modelsDirectory + "/nanosuit/nanosuit.obj", 
 			{
 				shadersDirectory + "model.vert",
 				shadersDirectory + "model.frag"
-			},
-			{
-				{ "diffuseMap_0", modelsDirectory + "/nanosuit/body_dif.png" }
 			}
 		);
 
-		model = Model::createFromFile("nanosuit", modelsDirectory + "/nanosuit/nanosuit.obj");
-		model->setMaterial(mat);
 		model->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
 		model->setScale(glm::vec3(0.2f));
 	}

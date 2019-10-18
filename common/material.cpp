@@ -14,12 +14,12 @@ namespace es
 		const std::unordered_map<std::string, GLuint>& uniformMap = mProgram->getUniformLocationMap();
 		for (auto iter = textureFiles.begin(); iter != textureFiles.end(); iter++)
 		{
-			std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 0, false);
-
 			for (auto uniform = uniformMap.begin(); uniform != uniformMap.end(); uniform++)
 			{
 				if (iter->first == uniform->first)
 				{
+					std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 0, false);
+
 					mProgram->setUniform(iter->first, location);
 					mTextureMap[std::make_pair(iter->first, location)] = tex2d;
 					location++;

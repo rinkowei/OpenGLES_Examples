@@ -23,21 +23,26 @@ namespace es
 	class Model : public Object
 	{
 	public:
-		Model(const std::string& name, const std::string& path, bool loadMaterials = true);
+		Model(const std::string& name, const std::string& path, const std::vector<std::string>& shaderFiles, bool isLoadMaterials = true);
 		~Model();
 
-		static std::shared_ptr<Model> createFromFile(const std::string& name, const std::string& path, bool loadMaterials = true);
+		static std::shared_ptr<Model> createFromFile(const std::string& name, const std::string& path, const std::vector<std::string>& shaderFiles, bool isLoadMaterials = true);
 
 		void setMaterial(std::shared_ptr<Material> mMat);
 
 		void render(bool isUseLocalMaterial = true);
 	private:
-		void handleNode(aiNode* node, const aiScene* scene);
-		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene);
+		void handleNode(aiNode* node, const aiScene* scene, bool isLoadMaterials);
+		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene, bool isLoadMaterials);
+		std::shared_ptr<Material> handleMaterial(aiMesh* mesh, const aiScene* scene);
 
 		std::string mDirectory;
+		std::vector<std::string> mShaderFiles;
 		std::shared_ptr<Material> mMaterial;
 		std::map<std::string, std::shared_ptr<Mesh>> mMeshes;
+
+		static std::array<std::string, 11> kTextureTypeStrings;
+
 		static std::unordered_map<std::string, std::shared_ptr<Model>> mModelCache;
 	};
 }
