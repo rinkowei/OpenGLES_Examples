@@ -29,7 +29,7 @@ namespace es
 
 		void uniformBlockBinding(std::string name, int binding);
 		bool setUniform(const std::string& name, const int& value);
-		bool setUniform(const std::string& name, bool value);
+		bool setUniform(const std::string& name, const bool& value);
 		bool setUniform(const std::string& name, const float& value);
 		bool setUniform(const std::string& name, const glm::vec2& value);
 		bool setUniform(const std::string& name, const glm::vec3& value);

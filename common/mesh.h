@@ -80,7 +80,10 @@ namespace es
 		template<typename T>
 		void setUniform(const std::string& name, const T& value)
 		{
-			mMaterial->setUniform(name, value);
+			if (mMaterial != nullptr)
+			{
+				mMaterial->setUniform(name, value);
+			}
 		}
 	private:
 		std::string mName;

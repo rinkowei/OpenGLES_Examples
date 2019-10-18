@@ -38,23 +38,14 @@ namespace es
 		void apply();
 		void unapply();
 
-		bool setUniform(const std::string& name, int value);
-		bool setUniform(const std::string& name, bool value);
-		bool setUniform(const std::string& name, float value);
-		bool setUniform(const std::string& name, const glm::vec2& value);
-		bool setUniform(const std::string& name, const glm::vec3& value);
-		bool setUniform(const std::string& name, const glm::vec4& value);
-		bool setUniform(const std::string& name, const glm::mat2& value);
-		bool setUniform(const std::string& name, const glm::mat3& value);
-		bool setUniform(const std::string& name, const glm::mat4& value);
-		bool setUniform(const std::string& name, int count, int* value);
-		bool setUniform(const std::string& name, int count, float* value);
-		bool setUniform(const std::string& name, int count, glm::vec2* value);
-		bool setUniform(const std::string& name, int count, glm::vec3* value);
-		bool setUniform(const std::string& name, int count, glm::vec4* value);
-		bool setUniform(const std::string& name, int count, glm::mat2* value);
-		bool setUniform(const std::string& name, int count, glm::mat3* value);
-		bool setUniform(const std::string& name, int count, glm::mat4* value);
+		template<typename T>
+		void setUniform(const std::string& name, const T& value)
+		{
+			if (mProgram != nullptr)
+			{
+				mProgram->setUniform(name, value);
+			}
+		}
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
 	

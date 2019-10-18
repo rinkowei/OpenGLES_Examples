@@ -85,7 +85,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, bool value)
+	bool Program::setUniform(const std::string& name, const bool& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
