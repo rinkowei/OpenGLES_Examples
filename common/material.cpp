@@ -20,9 +20,9 @@ namespace es
 			{
 				if (iter->first == uniform->first)
 				{
-					location = static_cast<int>(uniform->second);
 					mProgram->setUniform(iter->first, location);
 					mTextureMap[std::make_pair(iter->first, location)] = tex2d;
+					location++;
 				}
 			}
 		}

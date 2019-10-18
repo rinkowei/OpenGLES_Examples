@@ -44,7 +44,8 @@ public:
 
 		model = Model::createFromFile("nanosuit", modelsDirectory + "/nanosuit/nanosuit.obj");
 		model->setMaterial(mat);
-		model->setPosition(glm::vec3(0.0f));
+		model->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
+		model->setScale(glm::vec3(0.2f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -54,10 +55,6 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//mat->apply();
-		//mat->setUniform("model", glm::mat4(1.0f));
-		//mat->setUniform("view", mMainCamera->getView());
-		//mat->setUniform("projection", mMainCamera->getProjection());
 		model->render();
 	}
 };
