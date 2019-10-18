@@ -23,10 +23,10 @@ namespace es
 	class Model : public Object
 	{
 	public:
-		Model(const std::string& path, bool loadMaterials = true);
+		Model(const std::string& name, const std::string& path, bool loadMaterials = true);
 		~Model();
 
-		static std::shared_ptr<Model> createFromFile(const std::string& path, bool loadMaterials = true);
+		static std::shared_ptr<Model> createFromFile(const std::string& name, const std::string& path, bool loadMaterials = true);
 
 		void setMaterial(std::shared_ptr<Material> mMat);
 

@@ -4,7 +4,7 @@ namespace es
 {
 	std::unordered_map<std::string, std::shared_ptr<Model>> Model::mModelCache;
 
-	Model::Model(const std::string& path, bool loadMaterials)
+	Model::Model(const std::string& name, const std::string& path, bool loadMaterials) : Object(name)
 	{
 		const aiScene* scene;
 		Assimp::Importer importer;
@@ -40,11 +40,11 @@ namespace es
 		mMeshes.swap(std::map<std::string, std::shared_ptr<Mesh>>());
 	}
 
-	std::shared_ptr<Model> Model::createFromFile(const std::string& path, bool loadMaterials)
+	std::shared_ptr<Model> Model::createFromFile(const std::string& name, const std::string& path, bool loadMaterials)
 	{
 		if (mModelCache.find(path) == mModelCache.end())
 		{
-			std::shared_ptr<Model> model = std::make_shared<Model>(path, loadMaterials);
+			std::shared_ptr<Model> model = std::make_shared<Model>(name, path, loadMaterials);
 			mModelCache[path] = model;
 			return model;
 		}
@@ -56,10 +56,6 @@ namespace es
 
 	void Model::setMaterial(std::shared_ptr<Material> mMat)
 	{
-		if (mMaterial != nullptr)
-		{
-			mMaterial.reset();
-		}
 		mMaterial = mMat;
 
 		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
@@ -99,7 +95,7 @@ namespace es
 	std::shared_ptr<Mesh> Model::handleMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		std::vector<Vertex> vertices(mesh->mNumVertices);
-		std::vector<uint32_t> indices;
+		std::vector<uint32_t> indices(mesh->mNumFaces * 3);
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
@@ -142,7 +138,7 @@ namespace es
 				aiFace face = mesh->mFaces[i];
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
 				{
-					indices.at(i + i * j) = (face.mIndices[j]);
+					indices.at(i * 3 + j) = (face.mIndices[j]);
 				}
 			}
 		}
