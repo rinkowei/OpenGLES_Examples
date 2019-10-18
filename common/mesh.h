@@ -76,6 +76,12 @@ namespace es
 		virtual void update() override;
 
 		std::shared_ptr<Material> getMaterial() const;
+
+		template<typename T>
+		void setUniform(const std::string& name, const T& value)
+		{
+			mMaterial->setUniform(name, value);
+		}
 	private:
 		std::string mName;
 

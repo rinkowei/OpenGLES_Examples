@@ -31,6 +31,15 @@ namespace es
 		void setMaterial(std::shared_ptr<Material> mMat);
 
 		void render(bool isUseLocalMaterial = true);
+
+		template<typename T>
+		void setUniform(const std::string& name, const T& value)
+		{
+			for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
+			{
+				iter->second->setUniform(name, value);
+			}
+		}
 	private:
 		void handleNode(aiNode* node, const aiScene* scene, bool isLoadMaterials);
 		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene, bool isLoadMaterials);

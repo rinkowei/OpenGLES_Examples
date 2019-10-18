@@ -73,7 +73,7 @@ namespace es
 		}
 	}
 
-	bool Program::setUniform(const std::string& name, int value)
+	bool Program::setUniform(const std::string& name, const int& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
@@ -97,7 +97,7 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, float value)
+	bool Program::setUniform(const std::string& name, const float& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
@@ -181,98 +181,98 @@ namespace es
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, int* value)
+	bool Program::setUniform(const std::string& name, const std::vector<int>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniform1iv(mID, mUniformLocationMap[name], count, value));
+		GLES_CHECK_ERROR(glProgramUniform1iv(mID, mUniformLocationMap[name], value.size(), value.data()));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, float* value)
+	bool Program::setUniform(const std::string& name, const std::vector<float>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniform1fv(mID, mUniformLocationMap[name], count, value));
+		GLES_CHECK_ERROR(glProgramUniform1fv(mID, mUniformLocationMap[name], value.size(), value.data()));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, glm::vec2* value)
+	bool Program::setUniform(const std::string& name, const std::vector<glm::vec2>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniform2fv(mID, mUniformLocationMap[name], count, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniform2fv(mID, mUniformLocationMap[name], value.size(), glm::value_ptr(value[0])));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, glm::vec3* value)
+	bool Program::setUniform(const std::string& name, const std::vector<glm::vec3>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniform3fv(mID, mUniformLocationMap[name], count, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniform3fv(mID, mUniformLocationMap[name], value.size(), glm::value_ptr(value[0])));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, glm::vec4* value)
+	bool Program::setUniform(const std::string& name, const std::vector<glm::vec4>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniform4fv(mID, mUniformLocationMap[name], count, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniform4fv(mID, mUniformLocationMap[name], value.size(), glm::value_ptr(value[0])));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, glm::mat2* value)
+	bool Program::setUniform(const std::string& name, const std::vector<glm::mat2>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniformMatrix2fv(mID, mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniformMatrix2fv(mID, mUniformLocationMap[name], value.size(), GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, glm::mat3* value)
+	bool Program::setUniform(const std::string& name, const std::vector<glm::mat3>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniformMatrix3fv(mID, mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniformMatrix3fv(mID, mUniformLocationMap[name], value.size(), GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}
 
-	bool Program::setUniform(const std::string& name, int count, glm::mat4* value)
+	bool Program::setUniform(const std::string& name, const std::vector<glm::mat4>& value)
 	{
 		if (mUniformLocationMap.find(name) == mUniformLocationMap.end())
 		{
 			return false;
 		}
 
-		GLES_CHECK_ERROR(glProgramUniformMatrix4fv(mID, mUniformLocationMap[name], count, GL_FALSE, glm::value_ptr(value[0])));
+		GLES_CHECK_ERROR(glProgramUniformMatrix4fv(mID, mUniformLocationMap[name], value.size(), GL_FALSE, glm::value_ptr(value[0])));
 
 		return true;
 	}

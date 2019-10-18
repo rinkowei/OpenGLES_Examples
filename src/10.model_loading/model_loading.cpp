@@ -41,6 +41,8 @@ public:
 
 		model->setPosition(glm::vec3(0.0f, -1.5f, 0.0f));
 		model->setScale(glm::vec3(0.2f));
+
+		model->setUniform("a", 0.2f);
 	}
 
 	virtual void render(float deltaTime) override

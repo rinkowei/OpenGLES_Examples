@@ -28,23 +28,23 @@ namespace es
 		void unapply();
 
 		void uniformBlockBinding(std::string name, int binding);
-		bool setUniform(const std::string& name, int value);
+		bool setUniform(const std::string& name, const int& value);
 		bool setUniform(const std::string& name, bool value);
-		bool setUniform(const std::string& name, float value);
+		bool setUniform(const std::string& name, const float& value);
 		bool setUniform(const std::string& name, const glm::vec2& value);
 		bool setUniform(const std::string& name, const glm::vec3& value);
 		bool setUniform(const std::string& name, const glm::vec4& value);
 		bool setUniform(const std::string& name, const glm::mat2& value);
 		bool setUniform(const std::string& name, const glm::mat3& value);
 		bool setUniform(const std::string& name, const glm::mat4& value);
-		bool setUniform(const std::string& name, int count, int* value);
-		bool setUniform(const std::string& name, int count, float* value);
-		bool setUniform(const std::string& name, int count, glm::vec2* value);
-		bool setUniform(const std::string& name, int count, glm::vec3* value);
-		bool setUniform(const std::string& name, int count, glm::vec4* value);
-		bool setUniform(const std::string& name, int count, glm::mat2* value);
-		bool setUniform(const std::string& name, int count, glm::mat3* value);
-		bool setUniform(const std::string& name, int count, glm::mat4* value);
+		bool setUniform(const std::string& name, const std::vector<int>& value);
+		bool setUniform(const std::string& name, const std::vector<float>& value);
+		bool setUniform(const std::string& name, const std::vector<glm::vec2>& value);
+		bool setUniform(const std::string& name, const std::vector<glm::vec3>& value);
+		bool setUniform(const std::string& name, const std::vector<glm::vec4>& value);
+		bool setUniform(const std::string& name, const std::vector<glm::mat2>& value);
+		bool setUniform(const std::string& name, const std::vector<glm::mat3>& value);
+		bool setUniform(const std::string& name, const std::vector<glm::mat4>& value);
 
 		const std::unordered_map<std::string, GLuint>& getAttribLocationMap() const;
 		const std::unordered_map<std::string, GLuint>& getUniformLocationMap() const;
