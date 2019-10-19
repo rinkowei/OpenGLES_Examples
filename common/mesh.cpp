@@ -4,7 +4,6 @@ namespace es
 {
 	Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : Object(name)
 	{
-		mName = name;
 		mVertices.assign(vertices.begin(), vertices.end());
 		mIndices.assign(indices.begin(), indices.end());
 
@@ -56,6 +55,30 @@ namespace es
 		}
 	}
 
+	Mesh::Mesh(const std::string& name, const Mesh* mesh) : Object(name)
+	{
+		mPosition = mesh->mPosition;
+		mRotation = mesh->mRotation;
+		mScaling = mesh->mScaling;
+		mModelMatrix = mesh->mModelMatrix;
+		mAutoUpdated = mesh->mAutoUpdated;
+		mTransformUpdated = mesh->mTransformUpdated;
+		mIsDirty = mesh->mIsDirty;
+
+		mVertices.assign(mesh->mVertices.begin(), mesh->mVertices.end());
+		mIndices.assign(mesh->mIndices.begin(), mesh->mIndices.end());
+
+		mVAO = mesh->mVAO;
+		mVBO = mesh->mVBO;
+		mEBO = mesh->mEBO;
+		mIBO = mesh->mIBO;
+		mInstanceCount = mesh->mInstanceCount;
+
+		mMaterial = mesh->mMaterial;
+
+		mDrawType = mesh->mDrawType;
+	}
+
 	Mesh::~Mesh()
 	{
 		if (mMaterial != nullptr)
@@ -78,6 +101,11 @@ namespace es
 	std::shared_ptr<Mesh> Mesh::createWithData(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 	{
 		return std::make_shared<Mesh>(name, vertices, indices);
+	}
+
+	std::shared_ptr<Mesh> Mesh::clone(const std::string& name, const Mesh* mesh)
+	{
+		return std::make_shared<Mesh>(name, mesh);
 	}
 
 	void Mesh::setMaterial(std::shared_ptr<Material> mMat)

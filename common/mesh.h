@@ -42,10 +42,13 @@ namespace es
 		};
 
 		Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+		Mesh(const std::string& name, const Mesh* mesh);
 		~Mesh();
 
 		static std::shared_ptr<Mesh> createWithData(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 	
+		static std::shared_ptr<Mesh> clone(const std::string& name, const Mesh* mesh);
+
 		void setMaterial(std::shared_ptr<Material> mMat);
 
 		void setDrawType(DrawType drawType);
@@ -86,8 +89,6 @@ namespace es
 			}
 		}
 	private:
-		std::string mName;
-
 		std::vector<Vertex> mVertices;
 		std::vector<uint32_t> mIndices;
 

@@ -7,8 +7,10 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Mesh> cube1;
+	std::shared_ptr<Mesh> cube2;
 
 	std::shared_ptr<Mesh> outlineCube1;
+	std::shared_ptr<Mesh> outlineCube2;
 
 	Example()
 	{
@@ -115,11 +117,19 @@ public:
 		cube1 = Mesh::createWithData("cube1", vertices, {});
 		cube1->setDrawType(Mesh::DrawType::ARRAYS);
 		cube1->setMaterial(cubeMat);
+		cube1->setPosition(glm::vec3(-1.0f, 0.0f, 0.5f));
 
-		outlineCube1 = Mesh::createWithData("outlineCube1", vertices, {});
+		cube2 = Mesh::clone("cube2", cube1.get());
+		cube2->setPosition(glm::vec3(1.0f, 0.0f, -0.5f));
+
+		outlineCube1 = Mesh::createWithData("outline_cube1", vertices, {});
 		outlineCube1->setDrawType(Mesh::DrawType::ARRAYS);
 		outlineCube1->setMaterial(outlineMat);
-		outlineCube1->setScale(glm::vec3(1.1f));
+		outlineCube1->setPosition(cube1->getPosition());
+		outlineCube1->setScale(glm::vec3(1.07f));
+
+		outlineCube2 = Mesh::clone("outline_cube2", outlineCube1.get());
+		outlineCube2->setPosition(cube2->getPosition());
 	}
 
 	virtual void render(float deltaTime) override
@@ -133,12 +143,14 @@ public:
 		glStencilMask(0xFF);
 	
 		cube1->render();
+		cube2->render();
 
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
 		glDisable(GL_DEPTH_TEST);
 
 		outlineCube1->render();
+		outlineCube2->render();
 	
 		glStencilMask(0xFF);
 		glEnable(GL_DEPTH_TEST);
