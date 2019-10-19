@@ -55,7 +55,7 @@ namespace es
 		{
 			if (mIBO.has_value())
 			{
-				mIBO.value().reset(nullptr);
+				mIBO.value().reset();
 			}
 			mIBO = InstanceBuffer::createWithData(GL_STATIC_DRAW, size, data);
 			mInstanceCount = count;
@@ -92,13 +92,13 @@ namespace es
 		std::vector<uint32_t> mIndices;
 
 		// vertex array object
-		std::unique_ptr<VertexArray> mVAO = nullptr;
+		std::shared_ptr<VertexArray> mVAO = nullptr;
 		// vertex buffer object
-		std::unique_ptr<VertexBuffer> mVBO = nullptr;
+		std::shared_ptr<VertexBuffer> mVBO = nullptr;
 		// element buffer object
-		std::unique_ptr<ElementBuffer> mEBO = nullptr;
+		std::shared_ptr<ElementBuffer> mEBO = nullptr;
 		// instance buffer object
-		std::optional<std::unique_ptr<InstanceBuffer>> mIBO = std::nullopt;
+		std::optional<std::shared_ptr<InstanceBuffer>> mIBO = std::nullopt;
 		std::optional<uint32_t> mInstanceCount = std::nullopt;
 		
 		std::shared_ptr<Material> mMaterial = nullptr;

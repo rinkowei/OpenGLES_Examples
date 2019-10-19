@@ -17,15 +17,9 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteBuffers(1, &mID));
 	}
 
-	Buffer* Buffer::createWithData(GLenum type, GLenum usage, std::size_t size, void* data)
+	std::shared_ptr<Buffer> Buffer::createWithData(GLenum type, GLenum usage, std::size_t size, void* data)
 	{
-		Buffer* buffer = new (std::nothrow) Buffer(type, usage, size, data);
-		if (buffer)
-		{
-			return buffer;
-		}
-		delete(buffer);
-		return nullptr;
+		return std::make_shared<Buffer>(type, usage, size, data);
 	}
 
 	void Buffer::bind()
@@ -82,6 +76,11 @@ namespace es
 
 	}
 
+	std::shared_ptr<VertexBuffer> VertexBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		return std::make_shared<VertexBuffer>(usage, size, data);
+	}
+
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
 	ElementBuffer::ElementBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ELEMENT_ARRAY_BUFFER, usage, size, data)
@@ -94,6 +93,11 @@ namespace es
 
 	}
 
+	std::shared_ptr<ElementBuffer> ElementBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		return std::make_shared<ElementBuffer>(usage, size, data);
+	}
+
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
 	InstanceBuffer::InstanceBuffer(GLenum usage, std::size_t size, void* data) : Buffer(GL_ARRAY_BUFFER, usage, size, data)
@@ -104,6 +108,11 @@ namespace es
 	InstanceBuffer::~InstanceBuffer()
 	{
 
+	}
+
+	std::shared_ptr<InstanceBuffer> InstanceBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	{
+		return std::make_shared<InstanceBuffer>(usage, size, data);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
@@ -193,6 +202,11 @@ namespace es
 	VertexArray::~VertexArray()
 	{
 		GLES_CHECK_ERROR(glDeleteVertexArrays(1, &mID));
+	}
+
+	std::shared_ptr<VertexArray> VertexArray::createWithData(VertexBuffer* vbo, ElementBuffer* ebo, std::size_t vertexSize, const std::vector<VertexAttrib>& attribs)
+	{
+		return std::make_shared<VertexArray>(vbo, ebo, vertexSize, attribs);
 	}
 
 	void VertexArray::bind()

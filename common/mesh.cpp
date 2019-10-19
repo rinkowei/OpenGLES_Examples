@@ -5,18 +5,18 @@ namespace es
 	Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : Object(name)
 	{
 		mName = name;
-		mVertices = vertices;
-		mIndices = indices;
+		mVertices.assign(vertices.begin(), vertices.end());
+		mIndices.assign(indices.begin(), indices.end());
 
 		mDrawType = DrawType::ELEMENTS;
 
-		mVBO = VertexBuffer::createWithData(GL_STATIC_DRAW, sizeof(Vertex) * vertices.size(), (void*)vertices.data());
+		mVBO = VertexBuffer::createWithData(GL_STATIC_DRAW, sizeof(Vertex) * mVertices.size(), (void*)mVertices.data());
 		if (!mVBO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create VBO");
 		}
 
-		mEBO = ElementBuffer::createWithData(GL_STATIC_DRAW, sizeof(uint32_t) * indices.size(), (void*)indices.data());
+		mEBO = ElementBuffer::createWithData(GL_STATIC_DRAW, sizeof(uint32_t) * mIndices.size(), (void*)mIndices.data());
 		if (!mEBO)
 		{
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to create EBO");
@@ -24,27 +24,27 @@ namespace es
 
 		std::vector<VertexAttrib> attribLayout = {};
 
-		if (vertices[0].vPosition.has_value())
+		if (mVertices[0].vPosition.has_value())
 		{
 			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vPosition) });
 		}
-		if (vertices[0].vTexcoord.has_value())
+		if (mVertices[0].vTexcoord.has_value())
 		{
 			attribLayout.push_back({ 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, vTexcoord) });
 		}
-		if (vertices[0].vNormal.has_value())
+		if (mVertices[0].vNormal.has_value())
 		{
 			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vNormal) });
 		}
-		if (vertices[0].vTangent.has_value())
+		if (mVertices[0].vTangent.has_value())
 		{
 			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vTangent) });
 		}
-		if (vertices[0].vBitangent.has_value())
+		if (mVertices[0].vBitangent.has_value())
 		{
 			attribLayout.push_back({ 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, vBitangent) });
 		}
-		if (vertices[0].vColor.has_value())
+		if (mVertices[0].vColor.has_value())
 		{
 			attribLayout.push_back({ 4, GL_FLOAT, GL_FALSE, offsetof(Vertex, vColor) });
 		}
@@ -67,9 +67,12 @@ namespace es
 		mVertices.swap(std::vector<Vertex>());
 		mIndices.swap(std::vector<uint32_t>());
 
-		mVAO.reset(nullptr);
-		mVBO.reset(nullptr);
-		mEBO.reset(nullptr);
+		mVAO.reset();
+		mVAO = nullptr;
+		mVBO.reset();
+		mVBO = nullptr;
+		mEBO.reset();
+		mEBO = nullptr;
 	}
 
 	std::shared_ptr<Mesh> Mesh::createWithData(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
