@@ -116,7 +116,11 @@ namespace es
 			ProgramUniform proUni;
 			proUni.typeName = typeid(T).name();
 		
-			if (proUni.typeName == "float")
+			if (proUni.typeName == "int")
+			{
+				proUni.uniformValue.intValue = value;
+			}
+			else if (proUni.typeName == "float")
 			{
 				proUni.uniformValue.floatValue = value;
 			}
