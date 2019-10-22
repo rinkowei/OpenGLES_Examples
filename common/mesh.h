@@ -16,6 +16,36 @@
 
 namespace es
 {
+	// unique program uniform in every single mesh
+	struct ProgramUniform
+	{
+		std::string typeName;
+
+		union UniformValue
+		{
+			int intValue;
+			bool boolValue;
+			float floatValue;
+			glm::vec2 vec2Value;
+			glm::vec3 vec3Value;
+			glm::vec4 vec4Value;
+			glm::mat2 mat2Value;
+			glm::mat3 mat3Value;
+			glm::mat4 mat4Value;
+			/*
+			std::vector<int> intVecValue;
+			std::vector<bool> boolVecValue;
+			std::vector<float> floatVecValue;
+			std::vector<glm::vec2> vec2VecValue;
+			std::vector<glm::vec3> vec3VecValue;
+			std::vector<glm::vec4> vec4VecValue;
+			std::vector<glm::mat2> mat2VecValue;
+			std::vector<glm::mat3> mat3VecValue;
+			std::vector<glm::mat4> mat4VecValue;
+			*/
+		} uniformValue;
+	};
+
 	// vertex attribute structure
 	struct Vertex
 	{
@@ -26,7 +56,7 @@ namespace es
 		std::optional<glm::vec3> vBitangent;
 		std::optional<glm::vec4> vColor;
 	};
-
+	
 	class Mesh : public Object
 	{
 	public:
@@ -83,10 +113,14 @@ namespace es
 		template<typename T>
 		void setUniform(const std::string& name, const T& value)
 		{
-			if (mMaterial != nullptr)
+			ProgramUniform proUni;
+			proUni.typeName = typeid(T).name();
+		
+			if (proUni.typeName == "float")
 			{
-				mMaterial->setUniform(name, value);
+				proUni.uniformValue.floatValue = value;
 			}
+			mProgramUniformMap.insert(std::make_pair(name, proUni));
 		}
 	private:
 		std::vector<Vertex> mVertices;
@@ -103,6 +137,8 @@ namespace es
 		std::optional<uint32_t> mInstanceCount = std::nullopt;
 		
 		std::shared_ptr<Material> mMaterial = nullptr;
+
+		std::unordered_map<std::string, ProgramUniform> mProgramUniformMap;
 
 		DrawType mDrawType;
 	};

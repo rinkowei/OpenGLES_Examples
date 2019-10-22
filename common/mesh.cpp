@@ -135,6 +135,14 @@ namespace es
 			mMaterial->setUniform("model", mModelMatrix);
 			mMaterial->setUniform("view", camera->getView());
 			mMaterial->setUniform("projection", camera->getProjection());
+
+			for (auto iter = mProgramUniformMap.begin(); iter != mProgramUniformMap.end(); iter++)
+			{
+				if (iter->second.typeName == "float")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.floatValue);
+				}
+			}
 		}
 		mVAO->bind();
 

@@ -118,9 +118,11 @@ public:
 		cube1->setDrawType(Mesh::DrawType::ARRAYS);
 		cube1->setMaterial(cubeMat);
 		cube1->setPosition(glm::vec3(-1.0f, 0.0f, 0.5f));
+		//cube1->setUniform("a", 0.5f);
 
 		cube2 = Mesh::clone("cube2", cube1.get());
 		cube2->setPosition(glm::vec3(1.0f, 0.0f, -0.5f));
+		cube2->setUniform("a", 0.3f);
 
 		outlineCube1 = Mesh::createWithData("outline_cube1", vertices, {});
 		outlineCube1->setDrawType(Mesh::DrawType::ARRAYS);
