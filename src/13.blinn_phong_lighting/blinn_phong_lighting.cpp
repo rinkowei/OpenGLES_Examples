@@ -7,11 +7,13 @@ class Example final : public ExampleBase
 {
 public:
 	std::vector<std::shared_ptr<Mesh>> cubes;
+	std::shared_ptr<Material> cubeMat;
 
 	Example()
 	{
 		title = "blinn phong lighting";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/13.blinn_phong_lighting/";
@@ -98,24 +100,49 @@ public:
 			vertices.push_back(vertex);
 		}
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
-		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "cube.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "cube.frag" }
-		};
+		cubeMat = Material::createFromFiles("cube_mat",
+			{
+				shadersDirectory + "cube.vert",
+				shadersDirectory + "cube.frag"
+			},
+			{
+				{ "diffuseMap_0", texturesDirectory + "cube_diffuse.png" },
+				{ "specularMap_0", texturesDirectory + "cube_specular.png" }
+			}
+		);
 
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
-		{
-			std::make_pair(Texture::Type::DIFFUSE, texturesDirectory + "cube_diffuse.png"),
-			std::make_pair(Texture::Type::SPECULAR, texturesDirectory + "cube_specular.png")
-		};
+		cubeMat->setUniform("shininess", 32.0f);
+		// directional light
+		cubeMat->setUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		cubeMat->setUniform("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		cubeMat->setUniform("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+		cubeMat->setUniform("dirLight.specular", glm::vec3(0.4f, 0.4f, 0.4f));
+		// point light
+		cubeMat->setUniform("pointLight.position", glm::vec3(0.0f, 0.0f, 0.0f));
+		cubeMat->setUniform("pointLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+		cubeMat->setUniform("pointLight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		cubeMat->setUniform("pointLight.specular", glm::vec3(0.8f, 0.8f, 0.8f));
+		cubeMat->setUniform("pointLight.constant", 1.0f);
+		cubeMat->setUniform("pointLight.linear", 0.022f);
+		cubeMat->setUniform("pointLight.quadratic", 0.0019f);
+		// spot light
+		cubeMat->setUniform("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+		cubeMat->setUniform("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+		cubeMat->setUniform("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		cubeMat->setUniform("spotLight.constant", 1.0f);
+		cubeMat->setUniform("spotLight.linear", 0.09f);
+		cubeMat->setUniform("spotLight.quadratic", 0.032f);
+		cubeMat->setUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeMat->setUniform("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
-		// create cube material
-	    material = std::make_shared<Material>(shaderPaths, texturePaths);
+		// create cube mesh
+		std::shared_ptr<Mesh> cubeTemplate = Mesh::createWithData("cube_template", vertices, {});
+		cubeTemplate->setDrawType(Mesh::DrawType::ARRAYS);
+		cubeTemplate->setMaterial(cubeMat);
 
 		for (unsigned int i = 0; i < cubePositions.size(); i++)
 		{
-			Mesh* cube = Mesh::createWithData(vertices, {}, material, Mesh::DrawType::ARRAYS);
+			std::shared_ptr<Mesh> cube = Mesh::clone("cube_" + std::to_string(i), cubeTemplate.get());
 			cube->setPosition(cubePositions[i]);
 			cube->setRotation(glm::vec3(20.0f * i, 12.0f * i, 7.0f * i));
 			cube->setScale(glm::vec3(0.7f));
@@ -130,36 +157,12 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		material->setVector3("viewPos", camera->getPosition());
-		material->setFloat("shininess", 32.0f);
-		// directional light
-		material->setVector3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		material->setVector3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-		material->setVector3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-		material->setVector3("dirLight.specular", glm::vec3(0.4f, 0.4f, 0.4f));
-		// point light
-		material->setVector3("pointLight.position", glm::vec3(0.0f, 0.0f, 0.0f));
-		material->setVector3("pointLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
-		material->setVector3("pointLight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-		material->setVector3("pointLight.specular", glm::vec3(0.8f, 0.8f, 0.8f));
-		material->setFloat("pointLight.constant", 1.0f);
-		material->setFloat("pointLight.linear", 0.022f);
-		material->setFloat("pointLight.quadratic", 0.0019f);
-		// spot light
-		material->setVector3("spotLight.position", camera->getPosition());
-		material->setVector3("spotLight.direction", camera->getFrontVector());
-		material->setVector3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-		material->setVector3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-		material->setVector3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-		material->setFloat("spotLight.constant", 1.0f);
-		material->setFloat("spotLight.linear", 0.09f);
-		material->setFloat("spotLight.quadratic", 0.032f);
-		material->setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		material->setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+		cubeMat->setUniform("spotLight.position", mMainCamera->getPosition());
+		cubeMat->setUniform("spotLight.direction", mMainCamera->getForward());
 
 		for (unsigned int i = 0; i < cubes.size(); i++)
 		{
-			cubes[i]->render(deltaTime);
+			cubes[i]->render();
 		}
 	}
 };

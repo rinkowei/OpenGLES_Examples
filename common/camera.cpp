@@ -91,6 +91,11 @@ namespace es
 	{
 		return true;
 	}
+	const glm::vec3& Camera::getPosition() const
+	{
+		return mPosition;
+	}
+
 
 	const glm::vec3& Camera::getForward() const
 	{

@@ -87,7 +87,7 @@ namespace es
 
 		if (idx == GL_INVALID_INDEX)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "OPENGL: Failed to get Uniform Block Index for Uniform Buffer : %s", name.c_str());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "OPENGL: Failed to get Uniform Block Index for Uniform Buffer : %s", name.c_str());
 		}
 		else
 		{
@@ -326,7 +326,7 @@ namespace es
 			std::string logError = "OpenGL ES : failed to link shader program : ";
 			logError += std::string(log);
 
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, logError.c_str());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, logError.c_str());
 
 			return;
 		}

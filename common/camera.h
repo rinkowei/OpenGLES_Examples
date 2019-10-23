@@ -31,6 +31,8 @@ namespace es
 
 		bool aabbInsidePlane(Plane plane, glm::vec3 maxV, glm::vec3 minV);
 
+		const glm::vec3& getPosition() const;
+
 		const glm::vec3& getForward() const;
 
 		const glm::vec3& getRight() const;
