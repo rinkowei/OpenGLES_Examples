@@ -34,7 +34,7 @@ public:
 
 		// setup camera
 		mMainCamera->setMoveSensitivity(20.0f);
-		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 40.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 35.0f));
 		mMainCamera->setRotation(glm::vec3(-60.0f, 0.0f, 0.0f));
 
 		std::vector<float> vertexAttribs = {
@@ -60,7 +60,7 @@ public:
 		}
 
 		model = Model::createFromFile("model",
-			modelsDirectory + "/construction-site-rawscan/site.obj",
+			modelsDirectory + "/devils-slide-bunker/HW1_Bunker.obj",
 			{
 				shadersDirectory + "construction.vert",
 				shadersDirectory + "construction.frag"
