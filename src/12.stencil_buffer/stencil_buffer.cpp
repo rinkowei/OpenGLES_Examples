@@ -14,13 +14,13 @@ public:
 
 	Example()
 	{
-		title = "object outlining";
+		title = "stencil buffer";
 		settings.vsync = true;
 		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/12.object_outlining/";
-		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/12.object_outlining/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/12.stencil_buffer/";
+		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/12.stencil_buffer/";
 	}
 	~Example()
 	{

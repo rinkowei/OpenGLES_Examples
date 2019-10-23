@@ -1,36 +1,31 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <mesh.h>
+#include <material.h>
+#include <map>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	std::vector<Mesh*> quads;
+	std::vector<std::shared_ptr<Mesh>> quads;
 
 	Example()
 	{
 		title = "blending";
-		settings.vsync = false;
+		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/14.blending/";
 	}
 	~Example()
 	{
-		for (unsigned int i = 0; i < quads.size(); i++)
-		{
-			delete(quads[i]);
-		}
-		quads.swap(std::vector<Mesh*>());
+
 	}
 public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
-
-		// setup camera
-		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -54,11 +49,11 @@ public:
 		std::map<float, glm::vec3> sortedMap;
 		for (unsigned int i = 0; i < quadPositions.size(); i++)
 		{
-			float distance = glm::length(camera->getPosition() - quadPositions[i]);
+			float distance = glm::length(mMainCamera->getPosition() - quadPositions[i]);
 			sortedMap[distance] = quadPositions[i];
 		}
 
-		std::vector<GLfloat> vertexAttrs = {
+		std::vector<float> vertexAttribs = {
 			// positions         // texture coordinates
 			0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
 			0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
@@ -70,31 +65,32 @@ public:
 		};
 
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 8); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 8); i++)
 		{
 			Vertex vertex;
-			vertex.Position = glm::vec3(vertexAttrs[i * 5], vertexAttrs[i * 5 + 1], vertexAttrs[i * 5 + 2]);
-			vertex.TexCoords = glm::vec2(vertexAttrs[i * 5 + 3], vertexAttrs[i * 5 + 4]);
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 5], vertexAttribs[i * 5 + 1], vertexAttribs[i * 5 + 2]);
+			vertex.vTexcoord = glm::vec2(vertexAttribs[i * 5 + 3], vertexAttribs[i * 5 + 4]);
 			vertices.push_back(vertex);
 		}
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "quad.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "quad.frag" }
-		};
+		std::shared_ptr<Material> mat = Material::createFromFiles("mat",
+			{
+				shadersDirectory + "quad.vert",
+				shadersDirectory + "quad.frag"
+			},
+			{
 
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
-		{
+			}
+		);
 
-		};
+		std::shared_ptr<Mesh> quadTemplate = Mesh::createWithData("quad_template", vertices, {});
+		quadTemplate->setDrawType(Mesh::DrawType::ARRAYS);
+		quadTemplate->setMaterial(mat);
 
-		// create quad material
-		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
-
+		uint8_t i = 0;
 		for (auto iter = sortedMap.rbegin(); iter != sortedMap.rend(); iter++)
 		{
-			Mesh* quad = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, material);
+			std::shared_ptr<Mesh> quad = Mesh::clone("quad_" + std::to_string(i++), quadTemplate.get());
 			quad->setPosition(iter->second);
 			quads.push_back(quad);
 		}
@@ -102,14 +98,14 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		for (unsigned int i = 0; i < quads.size(); i++)
+		for (std::size_t i = 0; i < quads.size(); i++)
 		{
-			quads[i]->render(deltaTime);
+			quads[i]->render();
 		}
 	}
 };
@@ -119,7 +115,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
