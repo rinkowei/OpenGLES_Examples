@@ -33,9 +33,7 @@ public:
 		glEnable(GL_DEPTH_TEST);
 
 		// setup camera
-		mMainCamera->setMoveSensitivity(20.0f);
-		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 35.0f));
-		mMainCamera->setRotation(glm::vec3(-60.0f, 0.0f, 0.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 10.0f, 35.0f));
 
 		std::vector<float> vertexAttribs = {
 			 // positions       // texture coordinates
@@ -45,7 +43,7 @@ public:
 			-0.4f, 1.0f, 0.0f,  0.0f, 1.0f
 		};
 
-		std::vector<GLuint> indices = {
+		std::vector<uint32_t> indices = {
 			0, 1, 3,
 			1, 2, 3
 		};
@@ -67,19 +65,24 @@ public:
 			}
 		);
 		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
-		/*
+		
 		// create offscreenQuad material
-		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
+		std::shared_ptr<Material> screenMat = Material::createFromFiles("screen_mat",
+			{
+				shadersDirectory + "screen.vert",
+				shadersDirectory + "screen.frag"
+			},
+			{
+
+			}
+		);
 
 		// create offscreenQuad mesh
-		offscreenQuad = Mesh::createWithData(vertices, indices, material, Mesh::DrawType::ELEMENTS);
-		
-		model = Model::createWithFile(modelsDirectory + "/construction-site-rawscan/site.obj", 
-		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "construction.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "construction.frag" }
-		});
+		offscreenQuad = Mesh::createWithData("offscreen_quad", vertices, indices);
+		offscreenQuad->setDrawType(Mesh::DrawType::ELEMENTS);
+		offscreenQuad->setMaterial(screenMat);
 
+		/*
 		// configure framebuffer
 		glGenFramebuffers(1, &framebuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
