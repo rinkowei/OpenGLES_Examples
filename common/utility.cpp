@@ -49,7 +49,7 @@ namespace es
 		struct stat info;
 		if (stat(path.c_str(), &info) != 0)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to locate file in %s", path.c_str());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to locate file in %s", path.c_str());
 			return false;
 		}
 
@@ -66,7 +66,7 @@ namespace es
 		}
 		catch (std::ifstream::failure e)
 		{
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to read file in %s", path.c_str());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "failed to read file in %s", path.c_str());
 			return false;
 		}
 
