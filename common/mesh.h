@@ -114,17 +114,22 @@ namespace es
 		void setUniform(const std::string& name, const T& value)
 		{
 			ProgramUniform proUni;
+			ProgramUniform defaultProUni;
 			proUni.typeName = typeid(T).name();
+			defaultProUni.typeName = typeid(T).name();
 		
 			if (proUni.typeName == "int")
 			{
 				proUni.uniformValue.intValue = value;
+				defaultProUni.uniformValue.intValue = 1;
 			}
 			else if (proUni.typeName == "float")
 			{
 				proUni.uniformValue.floatValue = value;
+				defaultProUni.uniformValue.floatValue = 1.0f;
 			}
 			mProgramUniformMap.insert(std::make_pair(name, proUni));
+			mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
 		}
 	private:
 		std::vector<Vertex> mVertices;
@@ -141,6 +146,9 @@ namespace es
 		std::optional<uint32_t> mInstanceCount = std::nullopt;
 		
 		std::shared_ptr<Material> mMaterial = nullptr;
+
+		// storage default value in unordered_map
+		std::shared_ptr<std::unordered_map<std::string, ProgramUniform>> mDefaultProgramUniformMap;
 
 		std::unordered_map<std::string, ProgramUniform> mProgramUniformMap;
 

@@ -7,6 +7,8 @@ namespace es
 		mVertices.assign(vertices.begin(), vertices.end());
 		mIndices.assign(indices.begin(), indices.end());
 
+		mDefaultProgramUniformMap = std::make_shared<std::unordered_map<std::string, ProgramUniform>>();
+
 		mDrawType = DrawType::ELEMENTS;
 
 		mVBO = VertexBuffer::createWithData(GL_STATIC_DRAW, sizeof(Vertex) * mVertices.size(), (void*)mVertices.data());
@@ -75,6 +77,8 @@ namespace es
 		mInstanceCount = mesh->mInstanceCount;
 
 		mMaterial = mesh->mMaterial;
+		
+		mDefaultProgramUniformMap = mesh->mDefaultProgramUniformMap;
 
 		mDrawType = mesh->mDrawType;
 	}
@@ -135,7 +139,21 @@ namespace es
 			mMaterial->setUniform("model", mModelMatrix);
 			mMaterial->setUniform("view", camera->getView());
 			mMaterial->setUniform("projection", camera->getProjection());
+
+			// firstly, set default uniform value to program
+			for (auto iter = mDefaultProgramUniformMap->begin(); iter != mDefaultProgramUniformMap->end(); iter++)
+			{
+				if (iter->second.typeName == "int")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.intValue);
+				}
+				else if (iter->second.typeName == "float")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.floatValue);
+				}
+			}
 			
+			// secondly, if needed, set newer uniform value to program
 			for (auto iter = mProgramUniformMap.begin(); iter != mProgramUniformMap.end(); iter++)
 			{
 				if (iter->second.typeName == "int")
