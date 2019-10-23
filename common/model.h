@@ -46,8 +46,10 @@ namespace es
 		std::shared_ptr<Material> handleMaterial(aiMesh* mesh, const aiScene* scene);
 
 		std::string mDirectory;
+
 		std::vector<std::string> mShaderFiles;
 		std::shared_ptr<Material> mMaterial;
+
 		std::map<std::string, std::shared_ptr<Mesh>> mMeshes;
 
 		static std::array<std::string, 11> kTextureTypeStrings;
