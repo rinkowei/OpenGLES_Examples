@@ -138,7 +138,7 @@ namespace es
 
 	void ExampleBase::prepare()
 	{
-		World::getWorld()->createMainCamera(45.0f, 0.1f, 100.0f, (float)defaultWindowWidth / (float)defaultWindowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+		World::getWorld()->createMainCamera(45.0f, 0.1f, 1000.0f, (float)defaultWindowWidth / (float)defaultWindowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 		mMainCamera = World::getWorld()->getMainCamera();
 	}
 
@@ -331,13 +331,13 @@ namespace es
 		// mouse left button down
 		if (ImGui::IsMouseDown(0))
 		{
-			mMainCamera->setRotationDelta(glm::vec3((float)(deltaY * 0.08f),
+			mMainCamera->setRotation(glm::vec3((float)(deltaY * 0.08f),
 				(float)(deltaX * 0.08f),
 				(float)(0.0f)));
 		}
 		else
 		{
-			mMainCamera->setRotationDelta(glm::vec3(0.0f, 0.0f, 0.0f));
+			mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 		}
 
 		// mouse right button down

@@ -42,9 +42,16 @@ namespace es
 
 	void Camera::setRotationDelta(glm::vec3 angle)
 	{
-		mYaw = glm::radians(angle.y);
-		mPitch = glm::radians(angle.x);
-		mRoll = glm::radians(angle.z);
+		mYaw += glm::radians(angle.y);
+		mPitch += glm::radians(angle.x);
+		mRoll += glm::radians(angle.z);
+	}
+
+	void Camera::setRotation(glm::vec3 rotation)
+	{
+		mYaw = glm::radians(rotation.y);
+		mPitch = glm::radians(rotation.x);
+		mRoll = glm::radians(rotation.z);
 	}
 
 	void Camera::setPosition(glm::vec3 position)

@@ -1,18 +1,20 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <model.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	Model* model;
-	Mesh* offscreenQuad;
+	std::shared_ptr<Model> model;
+	std::shared_ptr<Mesh> offscreenQuad;
 	GLuint framebuffer, colorAttachment, renderbuffer;
 
 	Example()
 	{
 		title = "offscreen rendering";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -20,25 +22,22 @@ public:
 	}
 	~Example()
 	{
-		delete(model);
-		delete(offscreenQuad);
-		glDeleteFramebuffers(1, &framebuffer);
+
 	}
 public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
 
-		// setup camera
-		camera->movementSpeed = 20.0f;
-		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
-		//camera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		std::vector<GLfloat> vertexAttrs = {
+		// setup camera
+		mMainCamera->setMoveSensitivity(20.0f);
+		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 40.0f));
+		mMainCamera->setRotation(glm::vec3(-60.0f, 0.0f, 0.0f));
+
+		std::vector<float> vertexAttribs = {
 			 // positions       // texture coordinates
 			 0.4f, 1.0f, 0.0f,  1.0f, 1.0f,
 			 0.4f, 0.2f, 0.0f,  1.0f, 0.0f,
@@ -52,25 +51,23 @@ public:
 		};
 
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 5); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 5); i++)
 		{
 			Vertex vertex;
-			vertex.Position = glm::vec3(vertexAttrs[i * 5], vertexAttrs[i * 5 + 1], vertexAttrs[i * 5 + 2]);
-			vertex.TexCoords = glm::vec2(vertexAttrs[i * 5 + 3], vertexAttrs[i * 5 + 4]);
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 5], vertexAttribs[i * 5 + 1], vertexAttribs[i * 5 + 2]);
+			vertex.vTexcoord = glm::vec2(vertexAttribs[i * 5 + 3], vertexAttribs[i * 5 + 4]);
 			vertices.push_back(vertex);
 		}
 
-		std::unordered_map<Material::ShaderType, std::string> shaderPaths =
-		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "screen.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "screen.frag" }
-		};
-
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
-		{
-
-		};
-
+		model = Model::createFromFile("model",
+			modelsDirectory + "/construction-site-rawscan/site.obj",
+			{
+				shadersDirectory + "construction.vert",
+				shadersDirectory + "construction.frag"
+			}
+		);
+		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+		/*
 		// create offscreenQuad material
 		std::shared_ptr<Material> material = std::make_shared<Material>(shaderPaths, texturePaths);
 
@@ -100,15 +97,17 @@ public:
 		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
+		*/
 	}
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+		/*
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		// clear color and depth buffer
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -127,6 +126,8 @@ public:
 		glBindTexture(GL_TEXTURE_2D, colorAttachment);
 		offscreenQuad->getMaterial()->setInteger("screenTexture", 0);
 		offscreenQuad->render(deltaTime);
+		*/
+		model->render();
 	}
 };
 
@@ -135,7 +136,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{

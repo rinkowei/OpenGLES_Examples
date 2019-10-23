@@ -21,6 +21,7 @@ namespace es
 
 		void setTranslationDelta(glm::vec3 direction, float amount);
 		void setRotationDelta(glm::vec3 angle);
+		void setRotation(glm::vec3 rotation);
 		void setPosition(glm::vec3 position);
 
 		void update();
