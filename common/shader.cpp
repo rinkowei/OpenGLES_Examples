@@ -32,7 +32,7 @@ namespace es
 			std::string logError = "OpenGL ES : shader compilation failed: ";
 			logError += std::string(log);
 
-			SDL_LogError(SDL_LOG_CATEGORY_ERROR, logError.c_str());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, logError.c_str());
 			mCompiled = false;
 		}
 		else
