@@ -1,17 +1,17 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <mesh.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	std::vector<Mesh*> cubes;
-	std::shared_ptr<Material> material;
+	std::vector<std::shared_ptr<Mesh>> cubes;
 
 	Example()
 	{
 		title = "blinn phong lighting";
-		settings.vsync = false;
+		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/13.blinn_phong_lighting/";
@@ -19,20 +19,12 @@ public:
 	}
 	~Example()
 	{
-		for (unsigned int i = 0; i < cubes.size(); i++)
-		{
-			delete(cubes[i]);
-		}
-		cubes.swap(std::vector<Mesh*>());
+
 	}
 public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
-
-		// setup camera
-		camera->rotationSpeed = 0.5f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -51,7 +43,7 @@ public:
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 		};
 
-		std::vector<GLfloat> vertexAttrs = {
+		std::vector<float> vertexAttribs = {
 			// positions          // normals           // texture coordinates
 			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
@@ -97,12 +89,12 @@ public:
 		};
 
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 8); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 8); i++)
 		{
 			Vertex vertex;
-			vertex.Position = glm::vec3(vertexAttrs[i * 8], vertexAttrs[i * 8 + 1], vertexAttrs[i * 8 + 2]);
-			vertex.TexCoords = glm::vec2(vertexAttrs[i * 8 + 6], vertexAttrs[i * 8 + 7]);
-			vertex.Normal = glm::vec3(vertexAttrs[i * 8 + 3], vertexAttrs[i * 8 + 4], vertexAttrs[i * 8 + 5]);
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 8], vertexAttribs[i * 8 + 1], vertexAttribs[i * 8 + 2]);
+			vertex.vTexcoord = glm::vec2(vertexAttribs[i * 8 + 6], vertexAttribs[i * 8 + 7]);
+			vertex.vNormal = glm::vec3(vertexAttribs[i * 8 + 3], vertexAttribs[i * 8 + 4], vertexAttribs[i * 8 + 5]);
 			vertices.push_back(vertex);
 		}
 
@@ -133,10 +125,10 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		material->setVector3("viewPos", camera->getPosition());
 		material->setFloat("shininess", 32.0f);
@@ -177,7 +169,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
