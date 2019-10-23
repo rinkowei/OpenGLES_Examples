@@ -71,7 +71,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [12 - object_outlining](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/12.object_outlining>)
+#### [12 - stencil_buffer](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/12.stencil_buffer>)
 
 
 

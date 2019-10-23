@@ -45,7 +45,7 @@ set(EXAMPLES
     09.transformations
     10.model_loading
     11.cull_face
-    12.object_outlining
+    12.stencil_buffer
     13.blinn_phong_lighting
     14.blending
     15.offscreen_rendering
