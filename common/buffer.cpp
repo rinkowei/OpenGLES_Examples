@@ -262,18 +262,20 @@ namespace es
 		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 		bind();
 
+		GLenum buf = GL_COLOR_ATTACHMENT0 + attachment;
+
 		if (texture->getArraySize() > 1)
 		{
-			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture->getID(), mipLevel, layer));
+			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, buf, texture->getID(), mipLevel, layer));
 		}
 		else
 		{
-			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture->getTarget(), texture->getID(), mipLevel));
+			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, buf, texture->getTarget(), texture->getID(), mipLevel));
 		}
-
+		
 		if (draw)
 		{
-			GLES_CHECK_ERROR(glDrawBuffers(1, &GL_COLOR_ATTACHMENT0));
+			GLES_CHECK_ERROR(glDrawBuffers(1, &buf));
 		}
 		else
 		{
@@ -282,7 +284,7 @@ namespace es
 
 		if (read)
 		{
-			GLES_CHECK_ERROR(glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment));
+			GLES_CHECK_ERROR(glReadBuffer(buf));
 		}
 		else
 		{
