@@ -64,6 +64,8 @@ namespace es
 		float mPitch;
 		float mRoll;
 
+		bool mIsDirty;
+
 		glm::mat4 mModel;
 		glm::mat4 mView;
 		glm::mat4 mProjection;

@@ -12,7 +12,6 @@ public:
 	{
 		title = "normal mapping";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -30,7 +29,8 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		mMainCamera->setPosition(glm::vec3(0.0f, 5.0f, -5.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 15.0f));
+		mMainCamera->setRotation(glm::vec3(45.0f, 0.0f, 0.0f));
 
 		std::shared_ptr<Material> mat = Material::createFromFiles("mat",
 			{
@@ -52,7 +52,7 @@ public:
 		);
 
 		planeModel->setMaterial(mat);
-		planeModel->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+		planeModel->setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -62,7 +62,7 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		planeModel->setUniform("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 5.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
+		planeModel->setUniform("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 8.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
 		planeModel->setUniform("viewPos", mMainCamera->getPosition());
 		planeModel->render();
 	}

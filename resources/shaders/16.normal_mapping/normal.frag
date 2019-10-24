@@ -14,7 +14,7 @@ void main()
 {
     vec3 V = normalize(fTangentViewPos - fTangentFragPos);
     vec3 N = normalize(texture(normalMap_0, fTexcoord).rgb * 2.0f - 1.0f);
-    vec3 L = normalize(fTangentLightPos - fTangentFragPos);
+    vec3 L = normalize(-fTangentLightPos - fTangentFragPos);
     vec3 H = normalize(L + V);
 
     vec3 ambient = 0.2f * texture(diffuseMap_0, fTexcoord).rgb;

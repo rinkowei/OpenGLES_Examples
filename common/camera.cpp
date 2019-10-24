@@ -7,7 +7,8 @@ namespace es
 		 mFar(far),
 		 mAspectRatio(aspectRatio),
 		 mMoveSensitivity(10.0f),
-		 mPosition(position)
+		 mPosition(position),
+		 mIsDirty(true)
 	{
 		mForward = glm::normalize(forward);
 		mWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -38,6 +39,7 @@ namespace es
 	void Camera::setTranslationDelta(glm::vec3 direction, float rate)
 	{
 		mPosition += direction * rate * mMoveSensitivity;
+		mIsDirty = true;
 	}
 
 	void Camera::setRotationDelta(glm::vec3 angle)
@@ -45,6 +47,7 @@ namespace es
 		mYaw += glm::radians(angle.y);
 		mPitch += glm::radians(angle.x);
 		mRoll += glm::radians(angle.z);
+		mIsDirty = true;
 	}
 
 	void Camera::setRotation(glm::vec3 rotation)
@@ -52,36 +55,43 @@ namespace es
 		mYaw = glm::radians(rotation.y);
 		mPitch = glm::radians(rotation.x);
 		mRoll = glm::radians(rotation.z);
+		mIsDirty = true;
 	}
 
 	void Camera::setPosition(glm::vec3 position)
 	{
 		mPosition = position;
+		mIsDirty = true;
 	}
 
 	void Camera::update()
 	{
-		glm::quat qPitch = glm::angleAxis(mPitch, glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::quat qYaw = glm::angleAxis(mYaw, glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::quat qRoll = glm::angleAxis(mRoll, glm::vec3(0.0f, 0.0f, 1.0f));
+		if (mIsDirty)
+		{
+			glm::quat qPitch = glm::angleAxis(mPitch, glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::quat qYaw = glm::angleAxis(mYaw, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::quat qRoll = glm::angleAxis(mRoll, glm::vec3(0.0f, 0.0f, 1.0f));
 
-		mOrientation = qPitch * mOrientation;
-		mOrientation = mOrientation * qYaw;
-		mOrientation = qRoll * mOrientation;
-		mOrientation = glm::normalize(mOrientation);
+			mOrientation = qPitch * mOrientation;
+			mOrientation = mOrientation * qYaw;
+			mOrientation = qRoll * mOrientation;
+			mOrientation = glm::normalize(mOrientation);
 
-		mRotate = glm::mat4_cast(mOrientation);
-		mForward = glm::conjugate(mOrientation) * glm::vec3(0.0f, 0.0f, -1.0f);
+			mRotate = glm::mat4_cast(mOrientation);
+			mForward = glm::conjugate(mOrientation) * glm::vec3(0.0f, 0.0f, -1.0f);
 
-		mRight = glm::normalize(glm::cross(mForward, mWorldUp));
-		mUp = glm::normalize(glm::cross(mRight, mForward));
+			mRight = glm::normalize(glm::cross(mForward, mWorldUp));
+			mUp = glm::normalize(glm::cross(mRight, mForward));
 
-		mTranslate = glm::translate(glm::mat4(1.0f), -mPosition);
-		mView = mRotate * mTranslate;
-		mPrevViewProjection = mViewProjection;
-		mViewProjection = mProjection * mView;
+			mTranslate = glm::translate(glm::mat4(1.0f), -mPosition);
+			mView = mRotate * mTranslate;
+			mPrevViewProjection = mViewProjection;
+			mViewProjection = mProjection * mView;
 
-		frustumFromMatrix(mFrustum, mViewProjection);
+			frustumFromMatrix(mFrustum, mViewProjection);
+
+			mIsDirty = false;
+		}
 	}
 
 	void Camera::updateProjection(float fov, float near, float far, float aspectRatio)

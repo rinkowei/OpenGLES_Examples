@@ -242,8 +242,8 @@ namespace es
 		defaultProUni.typeName = "int";
 		defaultProUni.uniformValue.intValue = 1;
 
-		mProgramUniformMap.insert(std::make_pair(name, proUni));
-		mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
+		mProgramUniformMap[name] = proUni;
+		(*mDefaultProgramUniformMap)[name] = defaultProUni;
 	}
 
 	void Mesh::setUniform(const std::string& name, const float& value)
@@ -257,8 +257,8 @@ namespace es
 		defaultProUni.typeName = "float";
 		defaultProUni.uniformValue.floatValue = 1;
 
-		mProgramUniformMap.insert(std::make_pair(name, proUni));
-		mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
+		mProgramUniformMap[name] = proUni;
+		(*mDefaultProgramUniformMap)[name] = defaultProUni;
 	}
 
 	void Mesh::setUniform(const std::string& name, const glm::vec3& value)
@@ -272,7 +272,7 @@ namespace es
 		defaultProUni.typeName = "glm::vec3";
 		defaultProUni.uniformValue.vec3Value = glm::vec3(0.0f);
 
-		mProgramUniformMap.insert(std::make_pair(name, proUni));
-		mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
+		mProgramUniformMap[name] = proUni;
+		(*mDefaultProgramUniformMap)[name] = defaultProUni;
 	}
 }

@@ -335,10 +335,6 @@ namespace es
 				(float)(deltaX * 0.08f),
 				(float)(0.0f)));
 		}
-		else
-		{
-			mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-		}
 
 		// mouse right button down
 		if (ImGui::IsMouseDown(1))
