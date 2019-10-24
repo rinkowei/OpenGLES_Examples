@@ -31,10 +31,13 @@ namespace es
 		};
 	public:
 		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
+		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures);
 		Material(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles);
 		~Material();
 
 		static std::shared_ptr<Material> createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
+
+		static std::shared_ptr<Material> createFromData(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures);
 
 		static std::shared_ptr<Material> createFromProgram(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles);
 

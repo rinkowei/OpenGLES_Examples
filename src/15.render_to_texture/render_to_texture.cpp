@@ -11,7 +11,6 @@ public:
 	std::shared_ptr<Mesh> offscreenQuad;
 
 	std::unique_ptr<Framebuffer> framebuffer;
-	std::shared_ptr<Texture2D> renderTexture;
 
 	Example()
 	{
@@ -68,14 +67,18 @@ public:
 		);
 		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		
+		std::shared_ptr<Texture2D> renderTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		renderTexture->setMinFilter(GL_LINEAR);
+		renderTexture->setMagFilter(GL_LINEAR);
+
 		// create offscreenQuad material
-		std::shared_ptr<Material> screenMat = Material::createFromFiles("screen_mat",
+		std::shared_ptr<Material> screenMat = Material::createFromData("screen_mat",
 			{
 				shadersDirectory + "screen.vert",
 				shadersDirectory + "screen.frag"
 			},
 			{
-
+				{ "diffuseMap_0", renderTexture }
 			}
 		);
 
@@ -86,10 +89,6 @@ public:
 
 		// configure framebuffer
 		framebuffer = Framebuffer::create();
-		renderTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
-		renderTexture->setMinFilter(GL_LINEAR);
-		renderTexture->setMagFilter(GL_LINEAR);
-	
 		framebuffer->attachRenderTarget(0, renderTexture.get(), 0, 0);
 	}
 
@@ -113,9 +112,6 @@ public:
 
 		// diable depth test for render quad in front of scene
 		glDisable(GL_DEPTH_TEST);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, renderTexture->getID());
-		offscreenQuad->setUniform("diffuseMap_0", 0);
 		offscreenQuad->render();
 		glEnable(GL_DEPTH_TEST);
 	}

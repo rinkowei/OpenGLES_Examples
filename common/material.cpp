@@ -30,6 +30,30 @@ namespace es
 		mProgram->unapply();
 	}
 
+	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures)
+	{
+		mName = name;
+		mProgram = Program::createFromFiles(name, shaderFiles);
+		mProgram->apply();
+
+		int location = 0;
+		const std::unordered_map<std::string, GLuint>& uniformMap = mProgram->getUniformLocationMap();
+		for (auto iter = textures.begin(); iter != textures.end(); iter++)
+		{
+			for (auto uniform = uniformMap.begin(); uniform != uniformMap.end(); uniform++)
+			{
+				if (iter->first == uniform->first)
+				{
+					mProgram->setUniform(iter->first, location);
+					mTextureMap[std::make_pair(iter->first, location)] = iter->second;
+					location++;
+				}
+			}
+		}
+
+		mProgram->unapply();
+	}
+
 	Material::Material(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles)
 	{
 		mName = name;
@@ -77,6 +101,20 @@ namespace es
 		if (mMaterialCache.find(name) == mMaterialCache.end())
 		{
 			std::shared_ptr<Material> mat = std::make_shared<Material>(name, shaderFiles, textureFiles);
+			mMaterialCache[name] = mat;
+			return mat;
+		}
+		else
+		{
+			return mMaterialCache[name];
+		}
+	}
+
+	std::shared_ptr<Material> Material::createFromData(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures)
+	{
+		if (mMaterialCache.find(name) == mMaterialCache.end())
+		{
+			std::shared_ptr<Material> mat = std::make_shared<Material>(name, shaderFiles, textures);
 			mMaterialCache[name] = mat;
 			return mat;
 		}
