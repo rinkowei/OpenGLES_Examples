@@ -1,11 +1,11 @@
-#version 320 es
+#version 310 es
 layout(location = 0) in vec3 vPos;
-layout(location = 1) in vec2 vTexCoord;
+layout(location = 1) in vec2 vTexcoord;
 
-out vec2 fTexCoord;
+out vec2 fTexcoord;
 
 void main()
 {
-	fTexCoord = vTexCoord;
+	fTexcoord = vTexcoord;
 	gl_Position = vec4(vPos, 1.0f);
 }
