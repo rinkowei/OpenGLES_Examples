@@ -228,4 +228,103 @@ namespace es
 	{
 		return mVertexAttribCount;
 	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
+	Framebuffer::Framebuffer()
+	{
+		mRenderTargetCount = 0;
+		GLES_CHECK_ERROR(glGenFramebuffers(1, &mID));
+	}
+
+	Framebuffer::~Framebuffer()
+	{
+		GLES_CHECK_ERROR(glDeleteFramebuffers(1, &mID));
+	}
+
+	std::unique_ptr<Framebuffer> Framebuffer::create()
+	{
+		return std::make_unique<Framebuffer>();
+	}
+
+	void Framebuffer::bind()
+	{
+		GLES_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, mID));
+	}
+
+	void Framebuffer::unbind()
+	{
+		GLES_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+	}
+
+	void Framebuffer::attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true)
+	{
+		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
+		bind();
+
+		if (texture->getArraySize() > 1)
+		{
+			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture->getID(), mipLevel, layer));
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture->getTarget(), texture->getID(), mipLevel));
+		}
+
+		if (draw)
+		{
+			GLES_CHECK_ERROR(glDrawBuffers(1, &GL_COLOR_ATTACHMENT0));
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));
+		}
+
+		if (read)
+		{
+			GLES_CHECK_ERROR(glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment));
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glReadBuffer(GL_NONE));
+		}
+
+		checkStatus();
+
+		unbind();
+		glBindTexture(texture->getTarget(), 0);
+	}
+
+	void Framebuffer::checkStatus()
+	{
+		GLenum status = GLES_CHECK_ERROR(glCheckFramebufferStatus(GL_FRAMEBUFFER));
+
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			std::string error = "Framebuffer incomplete : ";
+
+			switch (status)
+			{
+				case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+				{
+					error += "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+					break;
+				}
+				case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+				{
+					error += "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+					break;
+				}
+				case GL_FRAMEBUFFER_UNSUPPORTED:
+				{
+					error += "GL_FRAMEBUFFER_UNSUPPORTED";
+					break;
+				}
+				default:
+					break;
+			}
+
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, error.c_str());
+		}
+	}
 }

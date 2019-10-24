@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ogles.h>
+#include <texture.h>
 #include <vector>
 #include <memory>
 
@@ -102,5 +103,25 @@ namespace es
 	private:
 		GLuint mID;
 		GLuint mVertexAttribCount;
+	};
+
+	class Framebuffer
+	{
+	public:
+		Framebuffer();
+		~Framebuffer();
+
+		static std::unique_ptr<Framebuffer> create();
+
+		void bind();
+		void unbind();
+
+		void attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true);
+	private:
+		void checkStatus();
+
+		uint32_t mRenderTargetCount;
+		std::array<GLuint, 16> mAttachments;
+		GLuint mID;
 	};
 }
