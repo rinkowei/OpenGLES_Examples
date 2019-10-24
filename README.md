@@ -83,7 +83,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [15 - offscreen_rendering](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/15.offscreen_rendering>)
+#### [15 - render_to_texture](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/15.render_to_texture>)
 
 
 

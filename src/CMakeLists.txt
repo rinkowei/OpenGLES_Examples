@@ -48,7 +48,7 @@ set(EXAMPLES
     12.stencil_buffer
     13.blinn_phong_lighting
     14.blending
-    15.offscreen_rendering
+    15.render_to_texture
     16.normal_mapping
     17.dear_imgui
     18.uniform_buffer_object

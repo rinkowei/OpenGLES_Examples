@@ -15,13 +15,12 @@ public:
 
 	Example()
 	{
-		title = "offscreen rendering";
+		title = "render to texture";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/15.offscreen_rendering/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/15.render_to_texture/";
 	}
 	~Example()
 	{
@@ -104,7 +103,7 @@ public:
 		framebuffer->bind();
 		// clear color and depth buffer
 		glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT  | GL_STENCIL_BUFFER_BIT);
 		model->render();
 		
 		framebuffer->unbind();
