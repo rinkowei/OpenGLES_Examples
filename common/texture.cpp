@@ -419,6 +419,8 @@ namespace es
 		setWrapping(GL_REPEAT, GL_REPEAT, GL_REPEAT);
 		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 		setMagFilter(GL_LINEAR);
+
+		generateMipmaps();
 	}
 
 	uint32_t Texture2D::getWidth()

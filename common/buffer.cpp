@@ -259,8 +259,8 @@ namespace es
 
 	void Framebuffer::attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw, bool read)
 	{
-		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 		bind();
+		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 
 		GLenum buf = GL_COLOR_ATTACHMENT0 + attachment;
 
@@ -293,8 +293,9 @@ namespace es
 
 		checkStatus();
 
-		unbind();
 		glBindTexture(texture->getTarget(), 0);
+
+	    unbind();
 	}
 
 	void Framebuffer::checkStatus()
