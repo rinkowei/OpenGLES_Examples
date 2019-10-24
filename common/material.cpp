@@ -18,7 +18,7 @@ namespace es
 			{
 				if (iter->first == uniform->first)
 				{
-					std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 0, false);
+					std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 1, false);
 
 					mProgram->setUniform(iter->first, location);
 					mTextureMap[std::make_pair(iter->first, location)] = tex2d;
@@ -44,7 +44,7 @@ namespace es
 			{
 				if (iter->first == uniform->first)
 				{
-					std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 0, false);
+					std::shared_ptr<Texture2D> tex2d = Texture2D::createFromFile(iter->second, 1, false);
 
 					mProgram->setUniform(iter->first, location);
 					mTextureMap[std::make_pair(iter->first, location)] = tex2d;

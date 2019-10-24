@@ -257,7 +257,7 @@ namespace es
 		GLES_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
-	void Framebuffer::attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true)
+	void Framebuffer::attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw, bool read)
 	{
 		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 		bind();

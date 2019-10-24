@@ -55,23 +55,13 @@ namespace es
 	class Texture2D : public Texture
 	{
 	public:
-		Texture2D(std::string path, int mipLevels = -1, bool srgb = true);
+		Texture2D(std::string path, int mipLevels = 1, bool srgb = true);
+		Texture2D(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
 		~Texture2D();
 
-		template<typename... T>
-		static std::shared_ptr<Texture2D> createFromFile(std::string path, T&&... args)
-		{
-			if (mTexture2DCache.find(path) == mTexture2DCache.end())
-			{
-				std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, std::forward<T>(args)...);
-				mTexture2DCache[path] = tex2d;
-				return tex2d;
-			}
-			else
-			{
-				return mTexture2DCache[path];
-			}
-		}
+		static std::shared_ptr<Texture2D> createFromFile(std::string path, int mipLevels = 1, bool srgb = true);
+
+		static std::shared_ptr<Texture2D> createFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
 
 		void setData(int arrayIndex, int mipLevel, void* data);
 
@@ -81,6 +71,7 @@ namespace es
 		uint32_t getNumSamples();
 	private:
 		void initFromFile(std::string path, int mipLevels, bool srgb);
+		void initFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
 
 		uint32_t mWidth;
 		uint32_t mHeight;
@@ -96,7 +87,7 @@ namespace es
 		TextureCube();
 		~TextureCube();
 
-		static TextureCube* createFromFiles(std::vector<std::string> paths, int mipLevels = -1, bool srgb = true);
+		static TextureCube* createFromFiles(std::vector<std::string> paths, int mipLevels = 1, bool srgb = true);
 
 		void setData(int faceIndex, int layerIndex, int mipLevel, void* data);
 

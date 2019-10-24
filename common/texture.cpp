@@ -133,9 +133,33 @@ namespace es
 		initFromFile(path, mipLevels, srgb);
 	}
 
+	Texture2D::Texture2D(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type) : Texture()
+	{
+		initFromData(w, h, arraySize, mipLevels, numSamples, internalFormat, format, type);
+	}
+
 	Texture2D::~Texture2D()
 	{
 
+	}
+
+	std::shared_ptr<Texture2D> Texture2D::createFromFile(std::string path, int mipLevels, bool srgb)
+	{
+		if (mTexture2DCache.find(path) == mTexture2DCache.end())
+		{
+			std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, mipLevels, srgb);
+			mTexture2DCache[path] = tex2d;
+			return tex2d;
+		}
+		else
+		{
+			return mTexture2DCache[path];
+		}
+	}
+
+	std::shared_ptr<Texture2D> Texture2D::createFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type)
+	{
+		return std::make_shared<Texture2D>(w, h, arraySize, mipLevels, numSamples, internalFormat, format, type);
 	}
 
 	void Texture2D::setData(int arrayIndex, int mipLevel, void* data)
@@ -299,7 +323,7 @@ namespace es
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 		}
-		
+	
 		setWrapping(GL_REPEAT, GL_REPEAT, GL_REPEAT);
 		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 		setMagFilter(GL_LINEAR);
@@ -308,6 +332,93 @@ namespace es
 		generateMipmaps();
 
 		stbi_image_free(data);
+	}
+
+	void Texture2D::initFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type)
+	{
+		mArraySize = arraySize;
+		mInternalFormat = internalFormat;
+		mFormat = format;
+		mType = type;
+		mWidth = w;
+		mHeight = h;
+		mNumSamples = numSamples;
+
+		if (mipLevels == -1)
+		{
+			mMipLevels = 1;
+
+			int width = mWidth;
+			int height = mHeight;
+
+			while (width > 1 && height > 1)
+			{
+				width = std::max(1, (width / 2));
+				height = std::max(1, (height / 2));
+				mMipLevels++;
+			}
+		}
+		else
+		{
+			mMipLevels = mipLevels;
+		}
+
+		if (arraySize > 1)
+		{
+			mTarget = GL_TEXTURE_2D_ARRAY;
+
+			int width = mWidth;
+			int height = mHeight;
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+
+			for (int i = 0; i < mMipLevels; i++)
+			{
+				GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mArraySize, 0, mFormat, mType, nullptr));
+
+				width = std::max(1, (width / 2));
+				height = std::max(1, (height / 2));
+			}
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+		}
+		else
+		{
+			if (mNumSamples > 1)
+			{
+				mTarget = GL_TEXTURE_2D_MULTISAMPLE;
+			}
+			else
+			{
+				mTarget = GL_TEXTURE_2D;
+			}
+
+			int width = mWidth;
+			int height = mHeight;
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+
+			if (mNumSamples > 1)
+			{
+
+			}
+			else
+			{
+				for (int i = 0; i < mMipLevels; i++)
+				{
+					GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
+					
+					width = std::max(1, (width / 2));
+					height = std::max(1, (height / 2));
+				}
+			}
+
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+		}
+
+		setWrapping(GL_REPEAT, GL_REPEAT, GL_REPEAT);
+		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		setMagFilter(GL_LINEAR);
 	}
 
 	uint32_t Texture2D::getWidth()
