@@ -72,10 +72,6 @@ namespace es
 
 	void Model::setMaterial(std::shared_ptr<Material> mMat)
 	{
-		if (mMaterial != nullptr)
-		{
-			mMaterial.reset();
-		}
 		mMaterial = mMat;
 
 		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)

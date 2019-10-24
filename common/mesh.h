@@ -110,27 +110,9 @@ namespace es
 
 		std::shared_ptr<Material> getMaterial() const;
 
-		template<typename T>
-		void setUniform(const std::string& name, const T& value)
-		{
-			ProgramUniform proUni;
-			ProgramUniform defaultProUni;
-			proUni.typeName = typeid(T).name();
-			defaultProUni.typeName = typeid(T).name();
-		
-			if (proUni.typeName == "int")
-			{
-				proUni.uniformValue.intValue = value;
-				defaultProUni.uniformValue.intValue = 1;
-			}
-			else if (proUni.typeName == "float")
-			{
-				proUni.uniformValue.floatValue = value;
-				defaultProUni.uniformValue.floatValue = 1.0f;
-			}
-			mProgramUniformMap.insert(std::make_pair(name, proUni));
-			mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
-		}
+		void setUniform(const std::string& name, const int& value);
+		void setUniform(const std::string& name, const float& value);
+		void setUniform(const std::string& name, const glm::vec3& value);
 	private:
 		std::vector<Vertex> mVertices;
 		std::vector<uint32_t> mIndices;

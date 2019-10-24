@@ -78,7 +78,7 @@ public:
 				shadersDirectory + "screen.frag"
 			},
 			{
-				{ "diffuseMap_0", renderTexture }
+				{ "renderTexture", renderTexture }
 			}
 		);
 

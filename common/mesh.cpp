@@ -151,6 +151,10 @@ namespace es
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.floatValue);
 				}
+				else if (iter->second.typeName == "glm::vec3")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.vec3Value);
+				}
 			}
 			
 			// secondly, if needed, set newer uniform value to program
@@ -163,6 +167,10 @@ namespace es
 				else if (iter->second.typeName == "float")
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.floatValue);
+				}
+				else if (iter->second.typeName == "glm::vec3")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.vec3Value);
 				}
 			}
 		}
@@ -221,5 +229,50 @@ namespace es
 	std::shared_ptr<Material> Mesh::getMaterial() const
 	{
 		return mMaterial;
+	}
+
+	void Mesh::setUniform(const std::string& name, const int& value)
+	{
+		ProgramUniform proUni;
+		ProgramUniform defaultProUni;
+
+		proUni.typeName = "int";
+		proUni.uniformValue.intValue = value;
+
+		defaultProUni.typeName = "int";
+		defaultProUni.uniformValue.intValue = 1;
+
+		mProgramUniformMap.insert(std::make_pair(name, proUni));
+		mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
+	}
+
+	void Mesh::setUniform(const std::string& name, const float& value)
+	{
+		ProgramUniform proUni;
+		ProgramUniform defaultProUni;
+
+		proUni.typeName = "float";
+		proUni.uniformValue.floatValue = value;
+
+		defaultProUni.typeName = "float";
+		defaultProUni.uniformValue.floatValue = 1;
+
+		mProgramUniformMap.insert(std::make_pair(name, proUni));
+		mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
+	}
+
+	void Mesh::setUniform(const std::string& name, const glm::vec3& value)
+	{
+		ProgramUniform proUni;
+		ProgramUniform defaultProUni;
+
+		proUni.typeName = "glm::vec3";
+		proUni.uniformValue.vec3Value = value;
+
+		defaultProUni.typeName = "glm::vec3";
+		defaultProUni.uniformValue.vec3Value = glm::vec3(0.0f);
+
+		mProgramUniformMap.insert(std::make_pair(name, proUni));
+		mDefaultProgramUniformMap->insert(std::make_pair(name, defaultProUni));
 	}
 }

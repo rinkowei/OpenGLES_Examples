@@ -4,9 +4,9 @@ layout(location = 0) out vec4 fragColor;
 
 in vec2 fTexcoord;
 
-uniform sampler2D diffuseMap_0;
+uniform sampler2D renderTexture;
 
 void main()
 {
-    fragColor = vec4(texture(diffuseMap_0, fTexcoord).rgb, 1.0f);
+    fragColor = vec4(texture(renderTexture, fTexcoord).rgb, 1.0f);
 }
