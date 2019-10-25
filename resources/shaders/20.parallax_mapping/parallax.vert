@@ -19,7 +19,7 @@ out vec3 fTangentViewPos;
 void main()
 {
 	fTexcoord = vTexcoord;
-	
+
 	vec3 T = normalize(mat3(model) * vTangent);
 	vec3 B = normalize(mat3(model) * vBitangent);
 	vec3 N = normalize(mat3(model) * vNormal);
