@@ -1,14 +1,11 @@
-#version 320 es
+#version 310 es
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-in VS_OUT
-{
-	vec2 fTexCoord;
-	vec3 tangentFragPos;
-	vec3 tangentLightPos;
-	vec3 tangentViewPos;
-}fs_in;
+in vec2 fTexcoord;
+in vec3 fTangentFragPos;
+in vec3 fTangentLightPos;
+in vec3 fTangentViewPos;
 
 uniform float numLayers;
 uniform float heightScale;
@@ -65,8 +62,8 @@ vec2 parallaxOcclusionMapping(vec2 uv, vec3 viewDir)
 
 void main()
 {
-    vec3 V = normalize(fs_in.tangentViewPos - fs_in.tangentFragPos);
-	vec2 uv = parallaxOcclusionMapping(fs_in.fTexCoord, V);
+    vec3 V = normalize(fTangentViewPos - fTangentFragPos);
+	vec2 uv = parallaxOcclusionMapping(fTexcoord, V);
 
 	// Discard fragments at texture border
 	if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
@@ -74,7 +71,7 @@ void main()
 	}
 
     vec3 N = normalize(textureLod(normalMap_0, uv, 0.0).rgb * 2.0f - 1.0f);
-    vec3 L = normalize(fs_in.tangentLightPos - fs_in.tangentFragPos);
+    vec3 L = normalize(fTangentLightPos - fTangentFragPos);
     vec3 H = normalize(L + V);
 
 	vec3 color = texture(diffuseMap_0, uv).rgb;
