@@ -37,6 +37,28 @@ namespace es
 		handleNode(scene->mRootNode, scene, isLoadMaterials);
 	}
 
+	Model::Model(const std::string& name, const Model* duplicateModel) : Object(name)
+	{
+		mPosition = duplicateModel->mPosition;
+		mRotation = duplicateModel->mRotation;
+		mScaling = duplicateModel->mScaling;
+		mModelMatrix = duplicateModel->mModelMatrix;
+		mAutoUpdated = duplicateModel->mAutoUpdated;
+		mTransformUpdated = duplicateModel->mTransformUpdated;
+		mIsDirty = duplicateModel->mIsDirty;
+
+		mDirectory = duplicateModel->mDirectory;
+
+		mShaderFiles.assign(duplicateModel->mShaderFiles.begin(), duplicateModel->mShaderFiles.end());
+
+		mMaterial = duplicateModel->mMaterial;
+
+		for (auto iter = duplicateModel->mMeshes.begin(); iter != duplicateModel->mMeshes.end(); iter++)
+		{
+			mMeshes.insert(std::make_pair(iter->first, Mesh::clone(iter->first, iter->second.get())));
+		}
+	}
+
 	Model::~Model()
 	{
 		if (mMaterial != nullptr)
@@ -61,6 +83,20 @@ namespace es
 		if (mModelCache.find(name) == mModelCache.end())
 		{
 			std::shared_ptr<Model> model = std::make_shared<Model>(name, path, shaderFiles, isLoadMaterials);
+			mModelCache[name] = model;
+			return model;
+		}
+		else
+		{
+			return mModelCache[name];
+		}
+	}
+
+	std::shared_ptr<Model> Model::clone(const std::string& name, const Model* duplicateModel)
+	{
+		if (mModelCache.find(name) == mModelCache.end())
+		{
+			std::shared_ptr<Model> model = std::make_shared<Model>(name, duplicateModel);
 			mModelCache[name] = model;
 			return model;
 		}

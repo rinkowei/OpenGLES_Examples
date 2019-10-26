@@ -55,15 +55,17 @@ public:
 		std::default_random_engine e(time(0));
 		std::uniform_real_distribution<double> u(0.0, 1.0);
 
+		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",
+			{
+				shadersDirectory + "hdr.vert",
+				shadersDirectory + "hdr.frag"
+			},
+			true
+		);
+		
 		for (size_t i = 0; i < spheres.size(); i++)
 		{
-			std::shared_ptr<Model> sphere = Model::createFromFile("sphere_" + std::to_string(i), modelsDirectory + "/sphere/sphere.obj", 
-				{
-					shadersDirectory + "hdr.vert",
-					shadersDirectory + "hdr.frag"
-				},
-				true
-			);
+			std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(i), sphereTemplate.get());
 
 			glm::vec3 randomColor = glm::vec3(u(e), u(e), u(e));
 			sphere->setUniform("randomColor", randomColor);
@@ -73,6 +75,7 @@ public:
 			sphere->setScale(glm::vec3(0.02f));
 			spheres[i] = sphere;
 		}
+		
 	}
 
 	virtual void render(float deltaTime) override

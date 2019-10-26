@@ -24,9 +24,12 @@ namespace es
 	{
 	public:
 		Model(const std::string& name, const std::string& path, const std::vector<std::string>& shaderFiles, bool isLoadMaterials = true);
+		Model(const std::string& name, const Model* duplicateModel);
 		~Model();
 
 		static std::shared_ptr<Model> createFromFile(const std::string& name, const std::string& path, const std::vector<std::string>& shaderFiles, bool isLoadMaterials = true);
+
+		static std::shared_ptr<Model> clone(const std::string& name, const Model* duplicateModel);
 
 		void setMaterial(std::shared_ptr<Material> mMat);
 
