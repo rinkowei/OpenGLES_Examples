@@ -53,6 +53,7 @@ public:
 		);
 
 		std::default_random_engine e(time(0));
+		std::uniform_real_distribution<double> u(0.0, 1.0);
 
 		for (size_t i = 0; i < spheres.size(); i++)
 		{
@@ -63,15 +64,8 @@ public:
 				},
 				true
 			);
-			//sphere->setUniform("randomColor", glm::vec3(1.0f, 0.0f, 0.0f));
-			
-			//std::default_random_engine e(SDL_GetTicks());
-			std::uniform_real_distribution<double> u(0.0, 1.0);
-			float x = u(e);
-			float y = u(e);
-			float z = u(e);
-			u.reset();
-			glm::vec3 randomColor = glm::vec3(x, y, z);
+
+			glm::vec3 randomColor = glm::vec3(u(e), u(e), u(e));
 			sphere->setUniform("randomColor", randomColor);
 			
 			glm::vec3 pos = glm::vec3(sin(glm::radians(i * (360.0f / spheres.size()))), cos(glm::radians(i * (360.0f / spheres.size()))), 0.0f) * 3.5f;
