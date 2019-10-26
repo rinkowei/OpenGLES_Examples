@@ -1,19 +1,21 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <model.h>
+#include <material.h>
 #include <random>
+#include <ctime>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	std::array<Model*, 16> spheres;
+	std::array<std::shared_ptr<Model>, 16> spheres;
 
 	glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
 
 	Example()
 	{
 		title = "bloom with hdr";
-		settings.vsync = false;
+		settings.vsync = true;
 		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -23,10 +25,7 @@ public:
 
 	~Example()
 	{
-		for (size_t i = 0; i < spheres.size(); i++)
-		{
-			delete(spheres[i]);
-		}
+		spheres.swap(std::array<std::shared_ptr<Model>, 16>());
 	}
 public:
 	virtual void prepare() override
@@ -34,45 +33,47 @@ public:
 		ExampleBase::prepare();
 
 		// setup camera
-		camera->movementSpeed = 2.0f;
-		camera->rotationSpeed = 1.0f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
-		camera->rotate(glm::vec3(0.0f, 0.0f, 0.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
 		// enable cull face
 		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
 
-		std::unordered_map<Material::ShaderType, std::string> hdrShaderPaths =
-		{
-			{ Material::ShaderType::VERTEX, shadersDirectory + "hdr.vert" },
-			{ Material::ShaderType::FRAGMENT, shadersDirectory + "hdr.frag" }
-		};
+		std::shared_ptr<Material> mat = Material::createFromFiles("mat",
+			{
+				shadersDirectory + "hdr.vert",
+				shadersDirectory + "hdr.frag"
+			},
+			{
+	
+			}
+		);
 
-		std::vector<std::pair<Texture::Type, std::string>> hdrTexturePaths =
-		{
-
-		};
-
-		std::shared_ptr<Material> sphereMat = std::make_shared<Material>(hdrShaderPaths, hdrTexturePaths);
+		std::default_random_engine e(time(0));
 
 		for (size_t i = 0; i < spheres.size(); i++)
 		{
-			Model* sphere = Model::createWithFile(modelsDirectory + "/sphere/sphere.obj", sphereMat);
-
-			default_random_engine e(glfwGetTime());
-			uniform_real_distribution<double> u(0.0, 1.0);
+			std::shared_ptr<Model> sphere = Model::createFromFile("sphere_" + std::to_string(i), modelsDirectory + "/sphere/sphere.obj", 
+				{
+					shadersDirectory + "hdr.vert",
+					shadersDirectory + "hdr.frag"
+				},
+				true
+			);
+			//sphere->setUniform("randomColor", glm::vec3(1.0f, 0.0f, 0.0f));
+			
+			//std::default_random_engine e(SDL_GetTicks());
+			std::uniform_real_distribution<double> u(0.0, 1.0);
 			float x = u(e);
 			float y = u(e);
 			float z = u(e);
 			u.reset();
 			glm::vec3 randomColor = glm::vec3(x, y, z);
-			sphere->setVector3("randomColor", randomColor);
-
+			sphere->setUniform("randomColor", randomColor);
+			
 			glm::vec3 pos = glm::vec3(sin(glm::radians(i * (360.0f / spheres.size()))), cos(glm::radians(i * (360.0f / spheres.size()))), 0.0f) * 3.5f;
 			sphere->setPosition(pos);
 			sphere->setScale(glm::vec3(0.02f));
@@ -82,14 +83,14 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		for (size_t i = 0; i < spheres.size(); i++)
 		{
-			spheres[i]->render(deltaTime);
+			spheres[i]->render();
 		}
 	}
 };
@@ -99,7 +100,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
