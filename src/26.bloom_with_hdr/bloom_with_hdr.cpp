@@ -12,11 +12,11 @@ public:
 	std::array<std::shared_ptr<Model>, 16> spheres;
 
 	std::unique_ptr<Framebuffer> hdrFBO;
-	std::array<std::unique_ptr<Framebuffer>, 2> pingpongFBO;
-	std::array<std::shared_ptr<Texture2D>, 2> pingpongBuffer;
-
 	std::shared_ptr<Texture2D> fragColorTexture;
 	std::shared_ptr<Texture2D> brightColorTexture;
+
+	std::array<std::unique_ptr<Framebuffer>, 2> pingpongFBO;
+	std::array<std::shared_ptr<Texture2D>, 2> pingpongBuffer;
 
 	std::shared_ptr<Mesh> blurQuad;
 	std::shared_ptr<Mesh> hdrQuad;

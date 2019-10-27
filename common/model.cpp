@@ -51,8 +51,6 @@ namespace es
 
 		mShaderFiles.assign(duplicateModel->mShaderFiles.begin(), duplicateModel->mShaderFiles.end());
 
-		mMaterial = duplicateModel->mMaterial;
-
 		for (auto iter = duplicateModel->mMeshes.begin(); iter != duplicateModel->mMeshes.end(); iter++)
 		{
 			mMeshes.insert(std::make_pair(iter->first, Mesh::clone(iter->first, iter->second.get())));
@@ -61,12 +59,6 @@ namespace es
 
 	Model::~Model()
 	{
-		if (mMaterial != nullptr)
-		{
-			mMaterial.reset();
-			mMaterial = nullptr;
-		}
-
 		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
 		{
 			if (iter->second != nullptr)
@@ -108,8 +100,6 @@ namespace es
 
 	void Model::setMaterial(std::shared_ptr<Material> mMat)
 	{
-		mMaterial = mMat;
-
 		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
 		{
 			iter->second->setMaterial(mMat);
@@ -127,6 +117,14 @@ namespace es
 		{
 			iter->second->setModelMatrix(mModelMatrix);
 			iter->second->render(isUseLocalMaterial);
+		}
+	}
+
+	void Model::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+	{
+		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
+		{
+			iter->second->setTexture(name, texture);
 		}
 	}
 
@@ -235,7 +233,7 @@ namespace es
 			}
 			texType = static_cast<aiTextureType>(texType + 1);
 		}
-
+		
 		std::shared_ptr<Program> singleProgram = Program::createFromFiles(mName + "_program", mShaderFiles);
 		std::shared_ptr<Material> subMaterial = Material::createFromProgram(mName + "_" + std::string(mesh->mName.C_Str()) + "_mat", singleProgram, textureFiles);
 		return subMaterial;

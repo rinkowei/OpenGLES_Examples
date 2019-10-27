@@ -166,12 +166,19 @@ namespace es
 
 	void Material::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
 	{
+		bool isExists = false;
 		for (auto& iter = mTextureMap.begin(); iter != mTextureMap.end(); iter++)
 		{
 			if (iter->first.first == name)
 			{
 				iter->second = texture;
+				isExists = true;
 			}
+		}
+
+		if (!isExists)
+		{
+			mTextureMap[std::make_pair(name, static_cast<int>(mTextureMap.size()))] = texture;
 		}
 	}
 }

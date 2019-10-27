@@ -43,6 +43,8 @@ namespace es
 				iter->second->setUniform(name, value);
 			}
 		}
+
+		void setTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
 	private:
 		void handleNode(aiNode* node, const aiScene* scene, bool isLoadMaterials);
 		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene, bool isLoadMaterials);
@@ -51,7 +53,6 @@ namespace es
 		std::string mDirectory;
 
 		std::vector<std::string> mShaderFiles;
-		std::shared_ptr<Material> mMaterial;
 
 		std::map<std::string, std::shared_ptr<Mesh>> mMeshes;
 
