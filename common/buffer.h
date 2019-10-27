@@ -117,6 +117,8 @@ namespace es
 		void unbind();
 
 		void attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true);
+
+		void attachDepthStencilTarget();
 	private:
 		void checkStatus();
 

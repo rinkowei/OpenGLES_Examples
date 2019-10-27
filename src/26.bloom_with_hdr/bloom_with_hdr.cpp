@@ -10,8 +10,16 @@ class Example final : public ExampleBase
 {
 public:
 	std::array<std::shared_ptr<Model>, 16> spheres;
-	std::shared_ptr<Mesh> blurQuad;
+
 	std::unique_ptr<Framebuffer> hdrFBO;
+	std::array<std::unique_ptr<Framebuffer>, 2> pingpongFBO;
+	std::array<std::shared_ptr<Texture2D>, 2> pingpongBuffer;
+
+	std::shared_ptr<Texture2D> fragColorTexture;
+	std::shared_ptr<Texture2D> brightColorTexture;
+
+	std::shared_ptr<Mesh> blurQuad;
+	std::shared_ptr<Mesh> hdrQuad;
 
 	Example()
 	{
@@ -39,24 +47,33 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		// enable cull face
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
-
 		hdrFBO = Framebuffer::create();
 
-		std::shared_ptr<Texture2D> fragColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		fragColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 		fragColorTexture->setMinFilter(GL_LINEAR);
 		fragColorTexture->setMagFilter(GL_LINEAR);
 		fragColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		std::shared_ptr<Texture2D> brightColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		brightColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 		brightColorTexture->setMinFilter(GL_LINEAR);
 		brightColorTexture->setMagFilter(GL_LINEAR);
 		brightColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
 		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
+		hdrFBO->attachDepthStencilTarget();
+
+		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
+		{
+			pingpongFBO[i] = Framebuffer::create();
+			pingpongBuffer[i] = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+			pingpongBuffer[i]->setMinFilter(GL_LINEAR);
+			pingpongBuffer[i]->setMagFilter(GL_LINEAR);
+			pingpongBuffer[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+			pingpongFBO[i]->attachRenderTarget(0, pingpongBuffer[i].get(), 0, 0);
+			pingpongFBO[i]->attachDepthStencilTarget();
+		}
 
 		std::vector<float> vertexAttribs = {
 			// positions       // texture coordinates
@@ -90,15 +107,30 @@ public:
 			}
 		);
 
-		blurQuad = Mesh::createWithData("blur_quad", vertices, indices);
+		std::shared_ptr<Material> hdrMat = Material::createFromData("hdr_mat",
+			{
+				shadersDirectory + "hdr.vert",
+				shadersDirectory + "hdr.frag"
+			},
+			{
+				{ "scene", fragColorTexture },
+				{ "bloomBlur", pingpongBuffer[1] }
+			}
+		);
+
+		blurQuad = Mesh::createWithData("hdr_quad", vertices, indices);
 		blurQuad->setDrawType(Mesh::DrawType::ELEMENTS);
 		blurQuad->setMaterial(blurMat);
 		blurQuad->setUniform("blurScale", 2.0f);
-		blurQuad->setUniform("blurStrength", 1.5f);
-		blurQuad->setUniform("horizontal", 1);
+		blurQuad->setUniform("blurStrength", 1.0f);
+
+		hdrQuad = Mesh::createWithData("blur_quad", vertices, indices);
+		hdrQuad->setDrawType(Mesh::DrawType::ELEMENTS);
+		hdrQuad->setMaterial(hdrMat);
+		hdrQuad->setUniform("exposure", 1.0f);
 
 		std::default_random_engine e(time(0));
-		std::uniform_real_distribution<double> u(0.5f, 2.0f);
+		std::uniform_real_distribution<double> u(0.3f, 2.0f);
 
 		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",
 			{
@@ -140,9 +172,27 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		//glDisable(GL_DEPTH_TEST);
-		blurQuad->render();
-		//glEnable(GL_DEPTH_TEST);
+		bool horizontal = true;
+		bool firstIteration = true;
+		
+		uint8_t amount = 10;
+		for (uint8_t i = 0; i < amount; i++)
+		{
+			pingpongFBO[(int)horizontal]->bind();
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+			blurQuad->setUniform("horizontal", horizontal);
+			blurQuad->setTexture("image", firstIteration ? brightColorTexture : pingpongBuffer[!horizontal]);
+			blurQuad->render();
+			horizontal = !horizontal;
+			if (firstIteration)
+				firstIteration = false;
+		}
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		hdrQuad->render();
 	}
 };
 

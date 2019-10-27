@@ -8,7 +8,7 @@ uniform sampler2D image;
 
 uniform float blurScale;
 uniform float blurStrength;
-uniform int horizontal;
+uniform bool horizontal;
 
 void main()
 {
@@ -16,7 +16,7 @@ void main()
 	 ivec2 texSize = textureSize(image, 0); // gets size of single texel
 	 vec2 texOffset = vec2(1.0f / float(texSize.x), 1.0f / float(texSize.y)) * blurScale;
      vec3 result = texture(image, fTexcoord).rgb * weight[0];
-     if (horizontal == 1)
+     if (horizontal)
      {
          for(int i = 1; i < 5; ++i)
          {

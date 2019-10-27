@@ -151,6 +151,10 @@ namespace es
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.floatValue);
 				}
+				else if (iter->second.typeName == "bool")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.boolValue);
+				}
 				else if (iter->second.typeName == "glm::vec3")
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.vec3Value);
@@ -167,6 +171,10 @@ namespace es
 				else if (iter->second.typeName == "float")
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.floatValue);
+				}
+				else if (iter->second.typeName == "bool")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.boolValue);
 				}
 				else if (iter->second.typeName == "glm::vec3")
 				{
@@ -261,6 +269,21 @@ namespace es
 		(*mDefaultProgramUniformMap)[name] = defaultProUni;
 	}
 
+	void Mesh::setUniform(const std::string& name, const bool& value)
+	{
+		ProgramUniform proUni;
+		ProgramUniform defaultProUni;
+
+		proUni.typeName = "bool";
+		proUni.uniformValue.boolValue = value;
+
+		defaultProUni.typeName = "bool";
+		defaultProUni.uniformValue.boolValue = false;
+
+		mProgramUniformMap[name] = proUni;
+		(*mDefaultProgramUniformMap)[name] = defaultProUni;
+	}
+
 	void Mesh::setUniform(const std::string& name, const glm::vec3& value)
 	{
 		ProgramUniform proUni;
@@ -274,5 +297,13 @@ namespace es
 
 		mProgramUniformMap[name] = proUni;
 		(*mDefaultProgramUniformMap)[name] = defaultProUni;
+	}
+
+	void Mesh::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+	{
+		if (mMaterial != nullptr)
+		{
+			mMaterial->setTexture(name, texture);
+		}
 	}
 }

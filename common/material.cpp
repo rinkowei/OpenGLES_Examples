@@ -163,4 +163,15 @@ namespace es
 			}
 		}
 	}
+
+	void Material::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+	{
+		for (auto& iter = mTextureMap.begin(); iter != mTextureMap.end(); iter++)
+		{
+			if (iter->first.first == name)
+			{
+				iter->second = texture;
+			}
+		}
+	}
 }

@@ -52,6 +52,8 @@ namespace es
 				mProgram->setUniform(name, value);
 			}
 		}
+
+		void setTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
 	

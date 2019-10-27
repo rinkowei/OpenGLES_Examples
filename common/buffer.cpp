@@ -273,7 +273,7 @@ namespace es
 		{
 			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, buf, texture->getTarget(), texture->getID(), mipLevel));
 		}
-	
+		
 		if (draw)
 		{
 			GLES_CHECK_ERROR(glDrawBuffers(mAttachments.size(), mAttachments.data()));
@@ -297,6 +297,18 @@ namespace es
 		glBindTexture(texture->getTarget(), 0);
 
 	    unbind();
+	}
+
+	void Framebuffer::attachDepthStencilTarget()
+	{
+		bind();
+		GLuint rbo;
+		GLES_CHECK_ERROR(glGenRenderbuffers(1, &rbo));
+		GLES_CHECK_ERROR(glBindRenderbuffer(GL_RENDERBUFFER, rbo));
+		GLES_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 720)); // use a single renderbuffer object for both a depth AND stencil buffer.
+		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo)); // now actually attach it
+		checkStatus();
+		unbind();
 	}
 
 	void Framebuffer::checkStatus()
