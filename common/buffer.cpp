@@ -233,6 +233,7 @@ namespace es
 
 	Framebuffer::Framebuffer()
 	{
+		mRenderBuffer = 0;
 		GLES_CHECK_ERROR(glGenFramebuffers(1, &mID));
 	}
 
@@ -299,16 +300,22 @@ namespace es
 	    unbind();
 	}
 
-	void Framebuffer::attachDepthStencilTarget()
+	void Framebuffer::attachDepthStencilTarget(uint32_t w, uint32_t h)
 	{
 		bind();
-		GLuint rbo;
-		GLES_CHECK_ERROR(glGenRenderbuffers(1, &rbo));
-		GLES_CHECK_ERROR(glBindRenderbuffer(GL_RENDERBUFFER, rbo));
-		GLES_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 720)); // use a single renderbuffer object for both a depth AND stencil buffer.
-		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo)); // now actually attach it
+	
+		GLES_CHECK_ERROR(glGenRenderbuffers(1, &mRenderBuffer));
+		GLES_CHECK_ERROR(glBindRenderbuffer(GL_RENDERBUFFER, mRenderBuffer));
+		GLES_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h)); 
+		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRenderBuffer));
+
 		checkStatus();
 		unbind();
+	}
+
+	GLuint Framebuffer::getRenderBuffer() const
+	{
+		return mRenderBuffer;
 	}
 
 	void Framebuffer::checkStatus()

@@ -61,7 +61,7 @@ public:
 
 		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
 		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
-		hdrFBO->attachDepthStencilTarget();
+		hdrFBO->attachDepthStencilTarget(defaultWindowWidth, defaultWindowHeight);
 
 		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
 		{
@@ -72,7 +72,7 @@ public:
 			pingpongBuffer[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 			pingpongFBO[i]->attachRenderTarget(0, pingpongBuffer[i].get(), 0, 0);
-			pingpongFBO[i]->attachDepthStencilTarget();
+			pingpongFBO[i]->attachDepthStencilTarget(defaultWindowWidth, defaultWindowHeight);
 		}
 
 		std::vector<float> vertexAttribs = {
@@ -174,11 +174,10 @@ public:
 
 		bool horizontal = true;
 		bool firstIteration = true;
-		
 		uint8_t amount = 10;
 		for (uint8_t i = 0; i < amount; i++)
 		{
-			pingpongFBO[(int)horizontal]->bind();
+			pingpongFBO[horizontal]->bind();
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			blurQuad->setUniform("horizontal", horizontal);

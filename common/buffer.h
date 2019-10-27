@@ -3,6 +3,7 @@
 #include <ogles.h>
 #include <texture.h>
 #include <vector>
+#include <optional>
 #include <memory>
 
 namespace es
@@ -118,11 +119,16 @@ namespace es
 
 		void attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true);
 
-		void attachDepthStencilTarget();
+		void attachDepthStencilTarget(uint32_t w, uint32_t h);
+
+		GLuint getRenderBuffer() const;
 	private:
 		void checkStatus();
 
 		std::vector<GLenum> mAttachments;
+
+		GLuint mRenderBuffer;
+
 		GLuint mID;
 	};
 }
