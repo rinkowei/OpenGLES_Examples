@@ -6,5 +6,7 @@ uniform vec3 randomColor;
 
 void main()
 {
-    fragColor = vec4(randomColor, 1.0f);
+	vec3 color = vec3(1.0f) - exp(-randomColor * 1.0f);
+	//color = pow(color, vec3(1.0f / 2.2f));
+    fragColor = vec4(color, 1.0f);
 }

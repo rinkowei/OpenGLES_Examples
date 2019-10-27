@@ -1,6 +1,7 @@
 ﻿#include <examplebase.h>
 #include <model.h>
 #include <material.h>
+#include <buffer.h>
 #include <random>
 #include <ctime>
 using namespace es;
@@ -9,8 +10,7 @@ class Example final : public ExampleBase
 {
 public:
 	std::array<std::shared_ptr<Model>, 16> spheres;
-
-	glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
+	std::unique_ptr<Framebuffer> hdrFBO;
 
 	Example()
 	{
@@ -53,7 +53,7 @@ public:
 		);
 
 		std::default_random_engine e(time(0));
-		std::uniform_real_distribution<double> u(0.0, 1.0);
+		std::uniform_real_distribution<double> u(1.5f, 15.0f);
 
 		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",
 			{
@@ -76,6 +76,20 @@ public:
 			spheres[i] = sphere;
 		}
 		
+		hdrFBO = Framebuffer::create();
+
+		std::shared_ptr<Texture2D> fragColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		fragColorTexture->setMinFilter(GL_LINEAR);
+		fragColorTexture->setMagFilter(GL_LINEAR);
+		fragColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		std::shared_ptr<Texture2D> brightColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		brightColorTexture->setMinFilter(GL_LINEAR);
+		brightColorTexture->setMagFilter(GL_LINEAR);
+		brightColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
+		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
 	}
 
 	virtual void render(float deltaTime) override

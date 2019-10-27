@@ -120,8 +120,7 @@ namespace es
 	private:
 		void checkStatus();
 
-		uint32_t mRenderTargetCount;
-		std::array<GLuint, 16> mAttachments;
+		std::vector<GLenum> mAttachments;
 		GLuint mID;
 	};
 }

@@ -233,7 +233,6 @@ namespace es
 
 	Framebuffer::Framebuffer()
 	{
-		mRenderTargetCount = 0;
 		GLES_CHECK_ERROR(glGenFramebuffers(1, &mID));
 	}
 
@@ -264,6 +263,8 @@ namespace es
 
 		GLenum buf = GL_COLOR_ATTACHMENT0 + attachment;
 
+		mAttachments.push_back(buf);
+
 		if (texture->getArraySize() > 1)
 		{
 			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, buf, texture->getID(), mipLevel, layer));
@@ -272,10 +273,10 @@ namespace es
 		{
 			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, buf, texture->getTarget(), texture->getID(), mipLevel));
 		}
-		
+	
 		if (draw)
 		{
-			GLES_CHECK_ERROR(glDrawBuffers(1, &buf));
+			GLES_CHECK_ERROR(glDrawBuffers(mAttachments.size(), mAttachments.data()));
 		}
 		else
 		{
