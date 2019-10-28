@@ -52,6 +52,7 @@ set(EXAMPLES
     16.normal_mapping
     17.dear_imgui
     18.uniform_buffer_object
+    19.skybox_reflect
     20.parallax_mapping
     21.shadow_mapping_directional_light
     22.shadow_mapping_point_light
