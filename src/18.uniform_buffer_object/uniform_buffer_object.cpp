@@ -1,44 +1,38 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <mesh.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
-	Mesh* cubeBlue;
-	Mesh* cubeGreen;
-	Mesh* cubeRed;
-	Mesh* cubeYellow;
+	std::shared_ptr<Mesh> cubeBlue;
+	std::shared_ptr<Mesh> cubeGreen;
+	std::shared_ptr<Mesh> cubeRed;
+	std::shared_ptr<Mesh> cubeYellow;
 
 	Example()
 	{
 		title = "uniform buffer object";
-		settings.vsync = false;
+		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/18.uniform_buffer_object/";
 	}
 	~Example()
 	{
-		delete(cubeBlue);
-		delete(cubeGreen);
-		delete(cubeRed);
-		delete(cubeYellow);
+
 	}
 public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
 
-		// setup camera
-		camera->movementSpeed = 2.0f;
-		camera->rotationSpeed = 1.0f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
-
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		std::vector<GLfloat> vertexAttrs = {
+		std::vector<float> vertexAttribs = {
 			// positions         
 			-0.5f, -0.5f, -0.5f,
 			 0.5f, -0.5f, -0.5f,
@@ -84,53 +78,44 @@ public:
 		};
 
 		std::vector<Vertex> vertices = {};
-		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttrs.size() / 3); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(vertexAttribs.size() / 3); i++)
 		{
 			Vertex vertex;
-			vertex.Position = glm::vec3(vertexAttrs[i * 3], vertexAttrs[i * 3 + 1], vertexAttrs[i * 3 + 2]);
+			vertex.vPosition = glm::vec3(vertexAttribs[i * 3], vertexAttribs[i * 3 + 1], vertexAttribs[i * 3 + 2]);
 			vertices.push_back(vertex);
 		}
 
-		std::unordered_map<Material::ShaderType, std::string> blueShaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "ubo.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "blue.frag" }
-		};
+		std::shared_ptr<Material> blueMat = Material::createFromFiles("blue_mat",
+			{
+				shadersDirectory + "ubo.vert",
+				shadersDirectory + "blue.frag"
+			},
+			{}
+		);
 
-		std::unordered_map<Material::ShaderType, std::string> greenShaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "ubo.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "green.frag" }
-		};
+		std::shared_ptr<Material> greenMat = Material::createFromFiles("green_mat",
+			{
+				shadersDirectory + "ubo.vert",
+				shadersDirectory + "green.frag"
+			},
+			{}
+		);
 
-		std::unordered_map<Material::ShaderType, std::string> redShaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "ubo.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "red.frag" }
-		};
+		std::shared_ptr<Material> redMat = Material::createFromFiles("red_mat",
+			{
+				shadersDirectory + "ubo.vert",
+				shadersDirectory + "red.frag"
+			},
+			{}
+		);
 
-		std::unordered_map<Material::ShaderType, std::string> yellowShaderPaths =
-		{
-			{ Material::ShaderType::Vertex, shadersDirectory + "ubo.vert" },
-			{ Material::ShaderType::Fragment, shadersDirectory + "yellow.frag" }
-		};
-
-		std::vector<std::pair<Texture::Type, std::string>> texturePaths =
-		{
-			
-		};
-
-		// create cubeBlue material
-		std::shared_ptr<Material> blueMaterial = std::make_shared<Material>(blueShaderPaths, texturePaths);
-
-		// create cubeGreen material
-		std::shared_ptr<Material> greenMaterial = std::make_shared<Material>(greenShaderPaths, texturePaths);
-
-		// create cubeRed material
-		std::shared_ptr<Material> redMaterial = std::make_shared<Material>(redShaderPaths, texturePaths);
-
-		// create cubeYellow material
-		std::shared_ptr<Material> yellowMaterial = std::make_shared<Material>(yellowShaderPaths, texturePaths);
+		std::shared_ptr<Material> yellowMat = Material::createFromFiles("yellow_mat",
+			{
+				shadersDirectory + "ubo.vert",
+				shadersDirectory + "yellow.frag"
+			},
+			{}
+		);
 		
 		// because all the uniform block index in shaders are same, so we just need to get it once
 		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMaterial->getProgramID(), "mixColor");
@@ -183,15 +168,15 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
-		cubeBlue->render(deltaTime);
-		cubeGreen->render(deltaTime);
-		cubeRed->render(deltaTime);
-		cubeYellow->render(deltaTime);
+		cubeBlue->render();
+		cubeGreen->render();
+		cubeRed->render();
+		cubeYellow->render();
 	}
 };
 
@@ -200,7 +185,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
