@@ -1,5 +1,6 @@
-﻿
-#include <common.h>
+﻿#include <examplebase.h>
+#include <model.h>
+#include <material.h>
 using namespace es;
 
 class Example final : public ExampleBase
@@ -27,11 +28,6 @@ public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
-
-		// setup camera
-		camera->movementSpeed = 2.0f;
-		camera->rotationSpeed = 1.0f;
-		camera->setPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -66,17 +62,17 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+		SDL_GetWindowSize(window, &destWidth, &destHeight);
+		glViewport(0, 0, destWidth, destHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
-		sphere->render(deltaTime);
+		sphere->render();
 
 		// change depth function so depth test passes when depth values are equal to content of depth buffer
 		glDepthFunc(GL_LEQUAL);
 		// render skybox at last
-		skybox->render(deltaTime);
+		skybox->render();
 		// set depth function back to default
 		glDepthFunc(GL_LESS);
 	}
@@ -87,7 +83,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
-	if (!example->setupGLFW() ||
+	if (!example->setupSDL() ||
 		!example->loadGLESFunctions() ||
 		!example->setupImGui())
 	{
