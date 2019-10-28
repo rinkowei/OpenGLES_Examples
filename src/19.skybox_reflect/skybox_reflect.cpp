@@ -33,26 +33,16 @@ public:
 
 		std::shared_ptr<TextureCube> cubemap = TextureCube::createFromFiles({ texturesDirectory + "/skyboxes/sincity/right.tga", texturesDirectory + "/skyboxes/sincity/left.tga",
 															 texturesDirectory + "/skyboxes/sincity/top.tga", texturesDirectory + "/skyboxes/sincity/bottom.tga",
-															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga" });
+															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga" }, 1, false);
 		cubemap->generateMipmaps();
-
-		
-		std::shared_ptr<Material> skyboxMat = Material::createFromData("skybox_mat",
-			{
-				shadersDirectory + "skybox.vert",
-				shadersDirectory + "skybox.frag"
-			},
-			{
-				{ "cubemap", cubemap }
-			}
-		);
-		
 
 		// create a cube model as skybox
 		skybox = Model::createFromFile("skybox", modelsDirectory + "/cube/cube.obj", {
-		
-		}, false);
-		skybox->setMaterial(skyboxMat);
+			shadersDirectory + "skybox.vert",
+			shadersDirectory + "skybox.frag"
+		});
+
+		skybox->setTexture("cubemap", cubemap);
 	}
 
 	virtual void render(float deltaTime) override
