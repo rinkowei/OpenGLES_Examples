@@ -84,10 +84,10 @@ namespace es
 	class TextureCube : public Texture
 	{
 	public:
-		TextureCube();
+		TextureCube(std::vector<std::string> paths, int mipLevels = 1, bool srgb = true);
 		~TextureCube();
 
-		static TextureCube* createFromFiles(std::vector<std::string> paths, int mipLevels = 1, bool srgb = true);
+		static std::shared_ptr<TextureCube> createFromFiles(std::vector<std::string> paths, int mipLevels = 1, bool srgb = true);
 
 		void setData(int faceIndex, int layerIndex, int mipLevel, void* data);
 
@@ -100,6 +100,8 @@ namespace es
 		uint32_t mWidth;
 		uint32_t mHeight;
 		uint32_t mMipLevels;
+
+		static std::unordered_map<std::string, std::shared_ptr<TextureCube>> mTextureCubeCache;
 	};
 	/*
 	class Texture

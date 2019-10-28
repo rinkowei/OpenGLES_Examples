@@ -1,5 +1,6 @@
 #include "texture.h"
 #include <stb_image.h>
+#include <utility.h>
 
 namespace es
 {
@@ -175,8 +176,8 @@ namespace es
 
 			for (int i = 0; i < mipLevel; i++)
 			{
-				width = std::max(1, width / 2);
-				height = std::max(1, height / 2);
+				width = max(1, width / 2);
+				height = max(1, height / 2);
 			}
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
@@ -269,8 +270,8 @@ namespace es
 
 			while (width > 1 && height > 1)
 			{
-				width = std::max(1, (width / 2));
-				height = std::max(1, (height / 2));
+				width = max(1, (width / 2));
+				height = max(1, (height / 2));
 				mMipLevels++;
 			}
 		}
@@ -291,8 +292,8 @@ namespace es
 			{
 				GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mArraySize, 0, mFormat, mType, nullptr));
 
-				width = std::max(1, (width / 2));
-				height = std::max(1, (height / 2));
+				width = max(1, (width / 2));
+				height = max(1, (height / 2));
 			}
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
@@ -317,8 +318,8 @@ namespace es
 			{
 				GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
 
-				width = std::max(1, (width / 2));
-				height = std::max(1, (height / 2));
+				width = max(1, (width / 2));
+				height = max(1, (height / 2));
 			}
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
@@ -353,8 +354,8 @@ namespace es
 
 			while (width > 1 && height > 1)
 			{
-				width = std::max(1, (width / 2));
-				height = std::max(1, (height / 2));
+				width = max(1, (width / 2));
+				height = max(1, (height / 2));
 				mMipLevels++;
 			}
 		}
@@ -376,8 +377,8 @@ namespace es
 			{
 				GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mArraySize, 0, mFormat, mType, nullptr));
 
-				width = std::max(1, (width / 2));
-				height = std::max(1, (height / 2));
+				width = max(1, (width / 2));
+				height = max(1, (height / 2));
 			}
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
@@ -408,8 +409,8 @@ namespace es
 				{
 					GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
 					
-					width = std::max(1, (width / 2));
-					height = std::max(1, (height / 2));
+					width = max(1, (width / 2));
+					height = max(1, (height / 2));
 				}
 			}
 
@@ -445,9 +446,11 @@ namespace es
 
 	// -------------------------------------------------------------------------------------------------------------------------------------------------
 
-	TextureCube::TextureCube() : Texture()
-	{
+	std::unordered_map<std::string, std::shared_ptr<TextureCube>> TextureCube::mTextureCubeCache;
 
+	TextureCube::TextureCube(std::vector<std::string> paths, int mipLevels, bool srgb) : Texture()
+	{
+		initFromFiles(paths, mipLevels, srgb);
 	}
 
 	TextureCube::~TextureCube()
@@ -455,25 +458,132 @@ namespace es
 
 	}
 
-	TextureCube* TextureCube::createFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb)
+	std::shared_ptr<TextureCube> TextureCube::createFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb)
 	{
-		TextureCube* texture = new (std::nothrow) TextureCube();
-		if (texture && texture->initFromFiles(paths, mipLevels, srgb))
+		std::string directory = Utility::pathWithoutFile(paths.at(0));
+
+		if (mTextureCubeCache.find(directory) == mTextureCubeCache.end())
 		{
-			return texture;
+			std::shared_ptr<TextureCube> texCube = std::make_shared<TextureCube>(paths, mipLevels, srgb);
+			mTextureCubeCache[directory] = texCube;
+			return texCube;
 		}
-		delete(texture);
-		return nullptr;
+		else
+		{
+			return mTextureCubeCache[directory];
+		}
 	}
 
 	void TextureCube::setData(int faceIndex, int layerIndex, int mipLevel, void* data)
 	{
+		int width = mWidth;
+		int height = mHeight;
 
+		for (int i = 0; i < mipLevel; i++)
+		{
+			width = max(1, (width / 2));
+			height = max(1, (height / 2));
+		}
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, mipLevel, mInternalFormat, width, height, 0, mFormat, mType, data));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 	}
 
 	bool TextureCube::initFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb)
 	{
-		return false;
+		int width;
+		int height;
+		int components;
+		void* data;
+
+		bool ishdr = false;
+		if (Utility::fileExtension(paths.at(0)) == "hdr")
+		{
+			ishdr = true;
+			mType = GL_FLOAT;
+		}
+		else
+		{
+			ishdr = false;
+			mType = GL_UNSIGNED_BYTE;
+		}
+
+		mTarget = GL_TEXTURE_CUBE_MAP;
+	
+		for (std::size_t i = 0; i < paths.size(); i++)
+		{
+			if (ishdr)
+			{
+				data = (void*)stbi_loadf(paths.at(i).c_str(), &width, &height, &components, 0);
+				if (components == 1)
+				{
+					mInternalFormat = GL_R32F;
+					mFormat = GL_RED;
+				}
+				else if (components == 2)
+				{
+					mInternalFormat = GL_RG32F;
+					mFormat = GL_RG;
+				}
+				else if (components == 3)
+				{
+					mInternalFormat = GL_RGB32F;
+					mFormat = GL_RGB;
+				}
+				else if (components == 4)
+				{
+					mInternalFormat = GL_RGBA32F;
+					mFormat = GL_RGBA;
+				}
+			}
+			else
+			{
+				data = (void*)stbi_load(paths.at(i).c_str(), &width, &height, &components, 0);
+				if (components == 1)
+				{
+					mInternalFormat = GL_R8;
+					mFormat = GL_RED;
+				}
+				else if (components == 2)
+				{
+					mInternalFormat = GL_RG8;
+					mFormat = GL_RG;
+				}
+				else if (components == 3)
+				{
+					if (srgb)
+						mInternalFormat = GL_SRGB8;
+					else
+						mInternalFormat = GL_RGB8;
+					mFormat = GL_RGB;
+				}
+				else if (components == 4)
+				{
+					if (srgb)
+						mInternalFormat = GL_SRGB8_ALPHA8;
+					else
+						mInternalFormat = GL_RGBA8;
+					mFormat = GL_RGBA;
+				}
+			}
+
+			if (!data)
+			{
+				stbi_image_free(data);
+				return nullptr;
+			}
+			
+			mWidth = width;
+			mHeight = height;
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, width, height, 0, mFormat, mType, data);
+		}
+
+		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		setMagFilter(GL_LINEAR);
+		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		return true;
 	}
 
 	uint32_t TextureCube::getWidth()
@@ -492,132 +602,6 @@ namespace es
 	}
 
 	/*
-	Texture::Texture()
-	{
-
-	}
-
-	Texture::~Texture()
-	{
-		glDeleteTextures(1, &ID);
-	}
-
-	Texture* Texture::createWithFile(const std::string& path, Type type)
-	{
-		Texture* texture = new (std::nothrow) Texture();
-		if (texture && texture->initWithFile(path, type))
-		{
-			return texture;
-		}
-		delete(texture);
-		return nullptr;
-	}
-
-	GLuint Texture::getID() const
-	{
-		return ID;
-	}
-
-	glm::vec2 Texture::getSize() const
-	{
-		return glm::vec2(width, height);
-	}
-
-	GLint Texture::getChannelCount() const
-	{
-		return channelCount;
-	}
-
-	GLenum Texture::getFormat() const
-	{
-		return format;
-	}
-
-	std::string Texture::getFilePath() const
-	{
-		return filePath;
-	}
-
-	Texture::Type Texture::getType() const
-	{
-		return type;
-	}
-
-	GLboolean Texture::initWithFile(const std::string& path, Texture::Type type)
-	{
-		this->filePath = path;
-		this->type = type;
-
-		glGenTextures(1, &ID);
-		stbi_set_flip_vertically_on_load(true);
-		unsigned char* data = stbi_load(path.c_str(), &width, &height, &channelCount, 0);
-		if (data)
-		{
-			switch (channelCount)
-			{
-			case 1:
-			{
-				format = GL_RED;
-				break;
-			}
-			case 3:
-			{
-				format = GL_RGB;
-				break;
-			}
-			case 4:
-			{
-				format = GL_RGBA;
-				break;
-			}
-			}
-
-			glBindTexture(GL_TEXTURE_2D, ID);
-			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "failed to load texture at path: " + path << std::endl;
-			stbi_image_free(data);
-			return false;
-		}
-
-		return true;
-	}
-
-	TextureCube::TextureCube()
-	{
-
-	}
-
-	TextureCube::~TextureCube()
-	{
-		glDeleteTextures(1, &ID);
-	}
-
-	TextureCube* TextureCube::createWithFiles(const std::vector<std::string>& filePaths)
-	{
-		TextureCube* textureCube = new (std::nothrow) TextureCube();
-		if (textureCube && textureCube->initWithFiles(filePaths))
-		{
-			return textureCube;
-		}
-		delete(textureCube);
-		return nullptr;
-	}
-
-	GLuint TextureCube::getID() const
-	{
-		return ID;
-	}
 
 	GLboolean TextureCube::initWithFiles(const std::vector<std::string>& filePaths)
 	{
