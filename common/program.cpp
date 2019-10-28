@@ -364,6 +364,11 @@ namespace es
 		}
 	}
 
+	GLuint Program::getID() const
+	{
+		return mID;
+	}
+
 	const std::unordered_map<std::string, GLuint>& Program::getAttribLocationMap() const
 	{
 		return mAttribLocationMap;

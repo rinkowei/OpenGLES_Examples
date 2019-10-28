@@ -48,6 +48,8 @@ namespace es
 
 		const std::unordered_map<std::string, GLuint>& getAttribLocationMap() const;
 		const std::unordered_map<std::string, GLuint>& getUniformLocationMap() const;
+
+		GLuint getID() const;
 	private:
 		void initFromShaders(const std::vector<Shader*>& shaders);
 

@@ -164,6 +164,11 @@ namespace es
 		}
 	}
 
+	std::shared_ptr<Program> Material::getProgram() const
+	{
+		return mProgram;
+	}
+
 	void Material::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
 	{
 		bool isExists = false;

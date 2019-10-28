@@ -44,6 +44,8 @@ namespace es
 		void apply();
 		void unapply();
 
+		std::shared_ptr<Program> getProgram() const;
+
 		template<typename T>
 		void setUniform(const std::string& name, const T& value)
 		{

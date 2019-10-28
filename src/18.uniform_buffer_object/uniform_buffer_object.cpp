@@ -118,7 +118,7 @@ public:
 		);
 		
 		// because all the uniform block index in shaders are same, so we just need to get it once
-		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMaterial->getProgramID(), "mixColor");
+		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMat->getProgram()->getID(), "mixColor");
 
 		// create the MixColor ubo, use default shared memory layout
 		GLuint uboMixColor;
@@ -126,7 +126,7 @@ public:
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
 		GLint blockSize;
 		// get the needed size of uniform block
-		glGetActiveUniformBlockiv(blueMaterial->getProgramID(), uniformBlockIndexBlue, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+		glGetActiveUniformBlockiv(blueMat->getProgram()->getID(), uniformBlockIndexBlue, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
 		// pre-allocate memory
 		glBufferData(GL_UNIFORM_BUFFER, blockSize, nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -138,9 +138,9 @@ public:
 			"mixValue"
 		};
 		GLuint indices[2];
-		glGetUniformIndices(blueMaterial->getProgramID(), 2, names, indices);
+		glGetUniformIndices(blueMat->getProgram()->getID(), 2, names, indices);
 		GLint offsets[2];
-		glGetActiveUniformsiv(blueMaterial->getProgramID(), 2, indices, GL_UNIFORM_OFFSET, offsets);
+		glGetActiveUniformsiv(blueMat->getProgram()->getID(), 2, indices, GL_UNIFORM_OFFSET, offsets);
 		glm::vec4 additionalColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		GLfloat mixValue = 0.5f;
 		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
@@ -156,15 +156,21 @@ public:
 		cubeBlue->setPosition(glm::vec3(-0.75f, 0.75f, 0.0f));
 
 		// create cubeGreen mesh
-		cubeGreen = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, greenMaterial);
+		cubeGreen = Mesh::createWithData("cube_green", vertices, {});
+		cubeGreen->setDrawType(Mesh::DrawType::ARRAYS);
+		cubeGreen->setMaterial(greenMat);
 		cubeGreen->setPosition(glm::vec3(0.75f, 0.75f, 0.0f));
 
 		// create cubeRed mesh
-		cubeRed = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, redMaterial);
+		cubeRed = Mesh::createWithData("cube_red", vertices, {});
+		cubeRed->setDrawType(Mesh::DrawType::ARRAYS);
+		cubeRed->setMaterial(redMat);
 		cubeRed->setPosition(glm::vec3(-0.75f, -0.75f, 0.0f));
 
 		// create cubeYellow mesh
-		cubeYellow = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, yellowMaterial);
+		cubeYellow = Mesh::createWithData("cube_yellow", vertices, {});
+		cubeYellow->setDrawType(Mesh::DrawType::ARRAYS);
+		cubeYellow->setMaterial(yellowMat);
 		cubeYellow->setPosition(glm::vec3(0.75f, -0.75f, 0.0f));
 	}
 
