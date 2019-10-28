@@ -299,7 +299,7 @@ namespace es
 		(*mDefaultProgramUniformMap)[name] = defaultProUni;
 	}
 
-	void Mesh::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+	void Mesh::setTexture(const std::string& name, std::shared_ptr<Texture> texture)
 	{
 		if (mMaterial != nullptr)
 		{

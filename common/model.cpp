@@ -120,7 +120,7 @@ namespace es
 		}
 	}
 
-	void Model::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+	void Model::setTexture(const std::string& name, std::shared_ptr<Texture> texture)
 	{
 		for (auto iter = mMeshes.begin(); iter != mMeshes.end(); iter++)
 		{

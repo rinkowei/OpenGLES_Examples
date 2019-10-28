@@ -115,7 +115,7 @@ namespace es
 		void setUniform(const std::string& name, const bool& value);
 		void setUniform(const std::string& name, const glm::vec3& value);
 
-		void setTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
+		void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
 	private:
 		std::vector<Vertex> mVertices;
 		std::vector<uint32_t> mIndices;

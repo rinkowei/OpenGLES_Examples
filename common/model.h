@@ -44,7 +44,7 @@ namespace es
 			}
 		}
 
-		void setTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
+		void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
 	private:
 		void handleNode(aiNode* node, const aiScene* scene, bool isLoadMaterials);
 		std::shared_ptr<Mesh> handleMesh(aiMesh* mesh, const aiScene* scene, bool isLoadMaterials);

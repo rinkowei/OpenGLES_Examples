@@ -510,7 +510,7 @@ namespace es
 		}
 
 		mTarget = GL_TEXTURE_CUBE_MAP;
-	
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
 		for (std::size_t i = 0; i < paths.size(); i++)
 		{
 			if (ishdr)
@@ -576,10 +576,13 @@ namespace es
 			
 			mWidth = width;
 			mHeight = height;
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, width, height, 0, mFormat, mType, data);
-		}
 
-		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, width, height, 0, mFormat, mType, data);
+			stbi_image_free(data);
+		}
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+
+		setMinFilter(GL_LINEAR);
 		setMagFilter(GL_LINEAR);
 		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
