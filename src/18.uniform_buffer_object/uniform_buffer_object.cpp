@@ -150,7 +150,9 @@ public:
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		
 		// create cubeBlue mesh
-		cubeBlue = Mesh::createWithData(vertices, {}, Mesh::DrawType::Arrays, blueMaterial);
+		cubeBlue = Mesh::createWithData("cube_blue", vertices, {});
+		cubeBlue->setDrawType(Mesh::DrawType::ARRAYS);
+		cubeBlue->setMaterial(blueMat);
 		cubeBlue->setPosition(glm::vec3(-0.75f, 0.75f, 0.0f));
 
 		// create cubeGreen mesh
