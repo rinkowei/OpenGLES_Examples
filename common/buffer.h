@@ -2,6 +2,7 @@
 
 #include <ogles.h>
 #include <texture.h>
+#include <program.h>
 #include <vector>
 #include <optional>
 #include <memory>
@@ -11,20 +12,23 @@ namespace es
 	class Buffer
 	{
 	public:
+		Buffer(GLenum type);
 		Buffer(GLenum type, GLenum usage, std::size_t size, void* data);
 		virtual ~Buffer();
 
 		static std::shared_ptr<Buffer> createWithData(GLenum type, GLenum usage, std::size_t size, void* data);
 
 		void bind();
-		void bindBase(int index);
+		void bindBase(GLuint index);
 		void bindRange(int index, std::size_t offset, std::size_t size);
 		void unbind();
 
 		void* mapRange(GLenum access, std::size_t offset, std::size_t size);
 		void unMap();
 
-		void setData(std::size_t offset, std::size_t size, void* data);
+		void setData(GLintptr offset, GLsizeiptr size, void* data);
+
+		GLuint getID() const;
 	protected:
 		GLenum mType;
 		GLuint mID;
@@ -61,10 +65,13 @@ namespace es
 	class UniformBuffer : public Buffer
 	{
 	public:
-		static UniformBuffer* createWithData(GLenum usage, std::size_t size, void* data = nullptr);
-	private:
-		UniformBuffer(GLenum usage, std::size_t size, void* data);
+		UniformBuffer(GLenum usage, std::size_t size, void* data = nullptr);
+		UniformBuffer(GLenum usage, Program* program, const std::string& uniformBlockName, GLuint bindingPoint);
 		~UniformBuffer();
+
+		static std::unique_ptr<UniformBuffer> createWithData(GLenum usage, std::size_t size, void* data = nullptr);
+
+		static std::unique_ptr<UniformBuffer> createWithData(GLenum usage, Program* program, const std::string& uniformBlockName, GLuint bindingPoint);
 	};
 
 	class ShaderStorageBuffer : public Buffer

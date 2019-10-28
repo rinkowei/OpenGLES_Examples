@@ -11,6 +11,8 @@ public:
 	std::shared_ptr<Mesh> cubeRed;
 	std::shared_ptr<Mesh> cubeYellow;
 
+	std::unique_ptr<UniformBuffer> uniformBuffer;
+
 	Example()
 	{
 		title = "uniform buffer object";
@@ -117,6 +119,7 @@ public:
 			{}
 		);
 		
+		/*
 		// because all the uniform block index in shaders are same, so we just need to get it once
 		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMat->getProgram()->getID(), "mixColor");
 
@@ -132,22 +135,25 @@ public:
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		// set binding point to 0
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMixColor);
-
+		*/
 		const GLchar* const names[] = {
 			"additionalColor",
 			"mixValue"
 		};
-		GLuint indices[2];
-		glGetUniformIndices(blueMat->getProgram()->getID(), 2, names, indices);
-		GLint offsets[2];
-		glGetActiveUniformsiv(blueMat->getProgram()->getID(), 2, indices, GL_UNIFORM_OFFSET, offsets);
+		std::array<GLuint, 2> indices;
+		glGetUniformIndices(blueMat->getProgram()->getID(), 2, names, indices.data());
+		std::array<GLint, 2> offsets;
+		glGetActiveUniformsiv(blueMat->getProgram()->getID(), 2, indices.data(), GL_UNIFORM_OFFSET, offsets.data());
 		glm::vec4 additionalColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		GLfloat mixValue = 0.5f;
-		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
+		GLfloat mixValue = 0.8f;
+	
+		
+		uniformBuffer = UniformBuffer::createWithData(GL_DYNAMIC_DRAW, blueMat->getProgram().get(), "mixColor", 0);
+		uniformBuffer->setData(offsets[0], sizeof(glm::vec4), glm::value_ptr(additionalColor));
+		uniformBuffer->setData(offsets[1], sizeof(GLfloat), &mixValue);
 		// fill the data
-		glBufferSubData(GL_UNIFORM_BUFFER, offsets[0], sizeof(glm::vec4), &additionalColor[0]);
-		glBufferSubData(GL_UNIFORM_BUFFER, offsets[1], sizeof(GLfloat), &mixValue);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		//glBufferSubData(GL_UNIFORM_BUFFER, offsets[0], sizeof(glm::vec4), glm::value_ptr(additionalColor));
+		//glBufferSubData(GL_UNIFORM_BUFFER, offsets[1], sizeof(GLfloat), &mixValue);
 		
 		// create cubeBlue mesh
 		cubeBlue = Mesh::createWithData("cube_blue", vertices, {});

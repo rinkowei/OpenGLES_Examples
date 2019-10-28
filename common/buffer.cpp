@@ -2,6 +2,15 @@
 
 namespace es
 {
+	Buffer::Buffer(GLenum type)
+		:mType(type),
+		 mSize(0)
+	{
+		GLES_CHECK_ERROR(glGenBuffers(1, &mID));
+		GLES_CHECK_ERROR(glBindBuffer(type, mID));
+		GLES_CHECK_ERROR(glBindBuffer(type, 0));
+	}
+
 	Buffer::Buffer(GLenum type, GLenum usage, std::size_t size, void* data)
 		:mType(type),
 		 mSize(size)
@@ -27,7 +36,7 @@ namespace es
 		GLES_CHECK_ERROR(glBindBuffer(mType, mID));
 	}
 
-	void Buffer::bindBase(int index)
+	void Buffer::bindBase(GLuint index)
 	{
 		GLES_CHECK_ERROR(glBindBufferBase(mType, index, mID));
 	}
@@ -57,11 +66,16 @@ namespace es
 		GLES_CHECK_ERROR(glBindBuffer(mType, 0));
 	}
 
-	void Buffer::setData(std::size_t offset, std::size_t size, void* data)
+	void Buffer::setData(GLintptr offset, GLsizeiptr size, void* data)
 	{
 		GLES_CHECK_ERROR(glBindBuffer(mType, mID));
 		GLES_CHECK_ERROR(glBufferSubData(mType, offset, size, data));
 		GLES_CHECK_ERROR(glBindBuffer(mType, 0));
+	}
+
+	GLuint Buffer::getID() const
+	{
+		return mID;
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
@@ -122,20 +136,32 @@ namespace es
 
 	}
 
+	UniformBuffer::UniformBuffer(GLenum usage, Program* program, const std::string& uniformBlockName, GLuint bindingPoint) : Buffer(GL_UNIFORM_BUFFER)
+	{
+		GLuint blockIndex = GLES_CHECK_ERROR(glGetUniformBlockIndex(program->getID(), uniformBlockName.c_str()));
+		GLint blockSize;
+		GLES_CHECK_ERROR(glGetActiveUniformBlockiv(program->getID(), blockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize));
+		mSize = blockSize;
+
+		bind();
+		GLES_CHECK_ERROR(glBufferData(mType, blockSize, nullptr, usage));
+		unbind();
+		bindBase(bindingPoint);
+	}
+
 	UniformBuffer::~UniformBuffer()
 	{
 
 	}
 
-	UniformBuffer* UniformBuffer::createWithData(GLenum usage, std::size_t size, void* data)
+	std::unique_ptr<UniformBuffer> UniformBuffer::createWithData(GLenum usage, std::size_t size, void* data)
 	{
-		UniformBuffer* buffer = new (std::nothrow) UniformBuffer(usage, size, data);
-		if (buffer)
-		{
-			return buffer;
-		}
-		delete(buffer);
-		return nullptr;
+		return std::make_unique<UniformBuffer>(usage, size, data);
+	}
+
+	std::unique_ptr<UniformBuffer> UniformBuffer::createWithData(GLenum usage, Program* program, const std::string& uniformBlockName, GLuint bindingPoint)
+	{
+		return std::make_unique<UniformBuffer>(usage, program, uniformBlockName, bindingPoint);
 	}
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
