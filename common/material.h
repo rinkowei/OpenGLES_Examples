@@ -31,13 +31,13 @@ namespace es
 		};
 	public:
 		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
-		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures);
+		Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture>>& textures);
 		Material(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles);
 		~Material();
 
 		static std::shared_ptr<Material> createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles);
 
-		static std::shared_ptr<Material> createFromData(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures);
+		static std::shared_ptr<Material> createFromData(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture>>& textures);
 
 		static std::shared_ptr<Material> createFromProgram(const std::string& name, std::shared_ptr<Program> program, const std::unordered_map<std::string, std::string>& textureFiles);
 
@@ -55,14 +55,14 @@ namespace es
 			}
 		}
 
-		void setTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
+		void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Material>> mMaterialCache;
 	
 		std::string mName;
 
 		std::shared_ptr<Program> mProgram;
-		std::unordered_map<std::pair<std::string, GLuint>, std::shared_ptr<Texture2D>, PairHash> mTextureMap;
+		std::unordered_map<std::pair<std::string, GLuint>, std::shared_ptr<Texture>, PairHash> mTextureMap;
 	};
 }
 

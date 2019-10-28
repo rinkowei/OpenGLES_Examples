@@ -30,7 +30,7 @@ namespace es
 		mProgram->unapply();
 	}
 
-	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures)
+	Material::Material(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture>>& textures)
 	{
 		mName = name;
 		mProgram = Program::createFromFiles(name, shaderFiles);
@@ -93,7 +93,7 @@ namespace es
 			iter->second.reset();
 			iter->second = nullptr;
 		}
-		mTextureMap.swap(std::unordered_map<std::pair<std::string, GLuint>, std::shared_ptr<Texture2D>, PairHash>());
+		mTextureMap.swap(std::unordered_map<std::pair<std::string, GLuint>, std::shared_ptr<Texture>, PairHash>());
 	}
 
 	std::shared_ptr<Material> Material::createFromFiles(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::string>& textureFiles)
@@ -110,7 +110,7 @@ namespace es
 		}
 	}
 
-	std::shared_ptr<Material> Material::createFromData(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture2D>>& textures)
+	std::shared_ptr<Material> Material::createFromData(const std::string& name, const std::vector<std::string>& shaderFiles, const std::unordered_map<std::string, std::shared_ptr<Texture>>& textures)
 	{
 		if (mMaterialCache.find(name) == mMaterialCache.end())
 		{
@@ -169,7 +169,7 @@ namespace es
 		return mProgram;
 	}
 
-	void Material::setTexture(const std::string& name, std::shared_ptr<Texture2D> texture)
+	void Material::setTexture(const std::string& name, std::shared_ptr<Texture> texture)
 	{
 		bool isExists = false;
 		for (auto& iter = mTextureMap.begin(); iter != mTextureMap.end(); iter++)
