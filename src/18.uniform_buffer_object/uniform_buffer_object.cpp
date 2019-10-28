@@ -17,7 +17,6 @@ public:
 	{
 		title = "uniform buffer object";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/18.uniform_buffer_object/";
@@ -119,41 +118,22 @@ public:
 			{}
 		);
 		
-		/*
-		// because all the uniform block index in shaders are same, so we just need to get it once
-		GLuint uniformBlockIndexBlue = glGetUniformBlockIndex(blueMat->getProgram()->getID(), "mixColor");
-
-		// create the MixColor ubo, use default shared memory layout
-		GLuint uboMixColor;
-		glGenBuffers(1, &uboMixColor);
-		glBindBuffer(GL_UNIFORM_BUFFER, uboMixColor);
-		GLint blockSize;
-		// get the needed size of uniform block
-		glGetActiveUniformBlockiv(blueMat->getProgram()->getID(), uniformBlockIndexBlue, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
-		// pre-allocate memory
-		glBufferData(GL_UNIFORM_BUFFER, blockSize, nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		// set binding point to 0
-		glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboMixColor);
-		*/
-		const GLchar* const names[] = {
+		std::array<const char* const, 2> names = {
 			"additionalColor",
 			"mixValue"
 		};
+
 		std::array<GLuint, 2> indices;
-		glGetUniformIndices(blueMat->getProgram()->getID(), 2, names, indices.data());
+		GLES_CHECK_ERROR(glGetUniformIndices(blueMat->getProgram()->getID(), 2, names.data(), indices.data()));
 		std::array<GLint, 2> offsets;
-		glGetActiveUniformsiv(blueMat->getProgram()->getID(), 2, indices.data(), GL_UNIFORM_OFFSET, offsets.data());
+		GLES_CHECK_ERROR(glGetActiveUniformsiv(blueMat->getProgram()->getID(), 2, indices.data(), GL_UNIFORM_OFFSET, offsets.data()));
+
 		glm::vec4 additionalColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		GLfloat mixValue = 0.8f;
-	
+		float mixValue = 0.5f;
 		
 		uniformBuffer = UniformBuffer::createWithData(GL_DYNAMIC_DRAW, blueMat->getProgram().get(), "mixColor", 0);
 		uniformBuffer->setData(offsets[0], sizeof(glm::vec4), glm::value_ptr(additionalColor));
-		uniformBuffer->setData(offsets[1], sizeof(GLfloat), &mixValue);
-		// fill the data
-		//glBufferSubData(GL_UNIFORM_BUFFER, offsets[0], sizeof(glm::vec4), glm::value_ptr(additionalColor));
-		//glBufferSubData(GL_UNIFORM_BUFFER, offsets[1], sizeof(GLfloat), &mixValue);
+		uniformBuffer->setData(offsets[1], sizeof(float), &mixValue);
 		
 		// create cubeBlue mesh
 		cubeBlue = Mesh::createWithData("cube_blue", vertices, {});
