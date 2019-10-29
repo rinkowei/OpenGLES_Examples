@@ -326,6 +326,31 @@ namespace es
 	    unbind();
 	}
 
+	void Framebuffer::attachDepthRenderTarget(Texture* texture, uint32_t layer, uint32_t mipLevel)
+	{
+		bind();
+		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
+
+		if (texture->getArraySize() > 1)
+		{
+			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getID(), mipLevel, layer));
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getTarget(), texture->getID(), mipLevel));
+		}
+
+		GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));
+
+		GLES_CHECK_ERROR(glReadBuffer(GL_NONE));
+
+		checkStatus();
+
+		glBindTexture(texture->getTarget(), 0);
+
+		unbind();
+	}
+
 	void Framebuffer::attachDepthStencilTarget(uint32_t w, uint32_t h)
 	{
 		bind();
