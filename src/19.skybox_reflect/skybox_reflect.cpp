@@ -7,6 +7,7 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Model> skybox;
+	std::shared_ptr<Model> sphere;
 
 	Example()
 	{
@@ -43,6 +44,14 @@ public:
 		});
 
 		skybox->setTexture("cubemap", cubemap);
+
+		sphere = Model::createFromFile("sphere", modelsDirectory + "/sphere/sphere.obj", {
+			shadersDirectory + "reflect.vert",
+			shadersDirectory + "reflect.frag"
+		});
+
+		sphere->setTexture("skybox", cubemap);
+		sphere->setScale(glm::vec3(0.02f));
 	}
 
 	virtual void render(float deltaTime) override
@@ -52,6 +61,7 @@ public:
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
+		sphere->render();
 
 		// change depth function so depth test passes when depth values are equal to content of depth buffer
 		glDepthFunc(GL_LEQUAL);
