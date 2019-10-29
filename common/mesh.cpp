@@ -159,6 +159,10 @@ namespace es
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.vec3Value);
 				}
+				else if (iter->second.typeName == "glm::mat4")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.mat4Value);
+				}
 			}
 			
 			// secondly, if needed, set newer uniform value to program
@@ -179,6 +183,10 @@ namespace es
 				else if (iter->second.typeName == "glm::vec3")
 				{
 					mMaterial->setUniform(iter->first, iter->second.uniformValue.vec3Value);
+				}
+				else if (iter->second.typeName == "glm::mat4")
+				{
+					mMaterial->setUniform(iter->first, iter->second.uniformValue.mat4Value);
 				}
 			}
 		}
@@ -294,6 +302,21 @@ namespace es
 
 		defaultProUni.typeName = "glm::vec3";
 		defaultProUni.uniformValue.vec3Value = glm::vec3(0.0f);
+
+		mProgramUniformMap[name] = proUni;
+		(*mDefaultProgramUniformMap)[name] = defaultProUni;
+	}
+
+	void Mesh::setUniform(const std::string& name, const glm::mat4& value)
+	{
+		ProgramUniform proUni;
+		ProgramUniform defaultProUni;
+
+		proUni.typeName = "glm::mat4";
+		proUni.uniformValue.mat4Value = value;
+
+		defaultProUni.typeName = "glm::mat4";
+		defaultProUni.uniformValue.mat4Value = glm::mat4(1.0f);
 
 		mProgramUniformMap[name] = proUni;
 		(*mDefaultProgramUniformMap)[name] = defaultProUni;

@@ -114,6 +114,7 @@ namespace es
 		void setUniform(const std::string& name, const float& value);
 		void setUniform(const std::string& name, const bool& value);
 		void setUniform(const std::string& name, const glm::vec3& value);
+		void setUniform(const std::string& name, const glm::mat4& value);
 
 		void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
 	private:
