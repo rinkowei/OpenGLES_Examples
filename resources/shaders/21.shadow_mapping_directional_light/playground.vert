@@ -1,4 +1,4 @@
-#version 320 es
+#version 310 es
 layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec2 vTexcoord;
 layout(location = 2) in vec3 vNormal;
@@ -11,20 +11,17 @@ uniform mat4 projection;
 uniform mat4 lightSpaceMatrix;
 uniform mat4 biasMatrix;
 
-out VS_OUT
-{
-	vec2 fTexcoord;
-	vec3 fNormal;
-	vec3 fFragPos;
-	vec4 fFragPosLightSpace;
-}vs_out;
+out vec2 fTexcoord;
+out vec3 fNormal;
+out vec3 fFragPos;
+out vec4 fFragPosLightSpace;
 
 void main()
 {
-	vs_out.fTexcoord = vTexcoord;
-	vs_out.fNormal = transpose(inverse(mat3(model))) * vNormal;
-	vs_out.fFragPos = vec3(model * vec4(vPos, 1.0f));
-	vs_out.fFragPosLightSpace = (biasMatrix * lightSpaceMatrix * model) * vec4(vPos, 1.0f);
+	fTexcoord = vTexcoord;
+	fNormal = transpose(inverse(mat3(model))) * vNormal;
+	fFragPos = vec3(model * vec4(vPos, 1.0f));
+	fFragPosLightSpace = (biasMatrix * lightSpaceMatrix * model) * vec4(vPos, 1.0f);
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }

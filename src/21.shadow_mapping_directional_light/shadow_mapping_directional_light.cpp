@@ -6,10 +6,11 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
+	std::shared_ptr<Model> playgroundShadow;
 	std::shared_ptr<Model> playground;
 
-	const uint16_t lightMapWidth = 2048;
-	const uint16_t lightMapHeight = 2048;
+	const uint32_t lightMapWidth = 2048;
+	const uint32_t lightMapHeight = 2048;
 	std::unique_ptr<Framebuffer> lightMapFBO;
 
 	glm::vec3 lightPos = glm::vec3(-2.0f, 5.0f, 0.0f);
@@ -46,26 +47,37 @@ public:
 
 		// enable cull face
 		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CW);
-		glCullFace(GL_BACK);
-
 		
-		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_FLOAT);
+		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT);
 		lightMap->setMinFilter(GL_NEAREST);
 		lightMap->setMagFilter(GL_NEAREST);
 		lightMap->setWrapping(GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV);
 		lightMap->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		lightMapFBO = Framebuffer::create();
-		//lightMapFBO->attachDepthRenderTarget(lightMap.get(), 0, 0);
+		lightMapFBO->attachRenderTarget(0, lightMap.get(), 0, 0);
 		lightMapFBO->attachDepthStencilTarget(lightMapWidth, lightMapHeight);
 		
-		playground = Model::createFromFile("playground_shadow", modelsDirectory + "/playground/Playground.obj",
+		playgroundShadow = Model::createFromFile("playground_shadow", modelsDirectory + "/playground/Playground.obj",
 			{
 				shadersDirectory + "depth_map.vert",
 				shadersDirectory + "depth_map.frag"
 			}
 		);
+
+		playground = Model::clone("playground", playgroundShadow.get());
+		std::shared_ptr<Material> mat = Material::createFromData("mat",
+			{
+				shadersDirectory + "playground.vert",
+				shadersDirectory + "playground.frag"
+			},
+			{
+				{ "depthMap", lightMap },
+			}
+		);
+		playground->setMaterial(mat);
+		playground->setUniform("biasMatrix", biasMatrix);
+
 		/*
 		std::unordered_map<Material::ShaderType, std::string> depthShaderPaths =
 		{
@@ -104,7 +116,7 @@ public:
 		glGenFramebuffers(1, &depthMapFBO);
 		glGenTextures(1, &depthTexture);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, lightMapWidth, lightMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, lightMapWidth, lightMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER_NV);
@@ -112,7 +124,7 @@ public:
 		std::array<float, 4> borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR_NV, borderColor.data());
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapFBO, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 		glDrawBuffers(0, GL_NONE);
 		glReadBuffer(GL_NONE);
 
@@ -146,7 +158,7 @@ public:
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, error.c_str());
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		*/
+		*/////
 	}
 
 	virtual void render(float deltaTime) override
@@ -157,13 +169,29 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
 		// change light position over time
-		lightPos = glm::vec3(sin(SDL_GetTicks()) * 2.0f, 5.0f + cos(SDL_GetTicks()) * 1.0f, cos(SDL_GetTicks()) * 1.0f);
-		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
+		lightPos = glm::vec3(sin(timePassed) * 2.0f, 5.0f + cos(timePassed) * 1.0f, cos(timePassed) * 1.0f);
+		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 100.0f);
 		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceMatrix = lightProj * lightView;
 
+		glViewport(0, 0, lightMapWidth, lightMapHeight);
+		lightMapFBO->bind();
+		///glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		playgroundShadow->setUniform("lightSpaceMatrix", lightSpaceMatrix);
+		glCullFace(GL_FRONT);
+		playgroundShadow->render();
+		glCullFace(GL_BACK);
+
+		
+		glViewport(0, 0, defaultWindowWidth, defaultWindowHeight);
+		lightMapFBO->unbind();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		playground->setUniform("lightPos", lightPos);
+		playground->setUniform("viewPos", mMainCamera->getPosition());
 		playground->setUniform("lightSpaceMatrix", lightSpaceMatrix);
 		playground->render();
+		
 		/*
 		World::getWorld()->enableGlobalMaterial(depthMapMat);
 

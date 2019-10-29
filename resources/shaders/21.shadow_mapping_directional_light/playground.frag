@@ -1,14 +1,12 @@
-#version 320 es
+#version 310 es
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-in VS_OUT
-{
-	vec2 fTexcoord;
-	vec3 fNormal;
-	vec3 fFragPos;
-	vec4 fFragPosLightSpace;
-}fs_in;
+in vec2 fTexcoord;
+in vec3 fNormal;
+in vec3 fFragPos;
+in vec4 fFragPosLightSpace;
+
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -44,30 +42,30 @@ float random(vec3 seed, int i)
 void main()
 {
 	vec3 color = vec3(0.8f, 0.8f, 0.8f);
-	vec3 normal = normalize(fs_in.fNormal);
+	vec3 normal = normalize(fNormal);
 	vec3 lightColor = vec3(0.6f);
 
 	// ambient
 	vec3 ambient = 0.3f * color;
 
 	// diffuse
-	vec3 lightDir = normalize(lightPos - fs_in.fFragPos);
+	vec3 lightDir = normalize(lightPos - fFragPos);
 	float diff = max(dot(lightDir, normal), 0.0f);
 	vec3 diffuse = diff * lightColor;
 
 	// specular
-    vec3 viewDir = normalize(viewPos - fs_in.fFragPos);
+    vec3 viewDir = normalize(viewPos - fFragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * lightColor;    
 
 	float shadow = 1.0f;
-	float bias = 0.005f * tan(acos(clamp(dot(fs_in.fNormal, lightDir), 0.0f, 1.0f)));
+	float bias = 0.005f * tan(acos(clamp(dot(fNormal, lightDir), 0.0f, 1.0f)));
 	bias = clamp(bias, 0.0f, 0.01f);
 
 	for (int i = 0; i < 16; i++)
 	{
-		shadow -= 0.2f * (1.0f - texture(depthMap, vec2(fs_in.fFragPosLightSpace.xy + poissonDisk[i] / 700.0f)).r);
+		shadow -= 0.2f * (1.0f - texture(depthMap, vec2(fFragPosLightSpace.xy + poissonDisk[i] / 700.0f)).r);
 	}
 
 	shadow = clamp(shadow, 0.0f, 1.0f);
