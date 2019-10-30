@@ -25,7 +25,7 @@ public:
 	Example()
 	{
 		title = "shadow mapping directional light";
-		settings.vsync = false;
+		settings.vsync = true;
 		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -42,6 +42,10 @@ public:
 	{
 		ExampleBase::prepare();
 
+		// setup camera
+		mMainCamera->setPosition(glm::vec3(-2.0f, 4.0f, 5.0f));
+		mMainCamera->setRotation(glm::vec3(45.0f, 0.0f, 0.0f));
+
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
@@ -51,7 +55,7 @@ public:
 		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT);
 		lightMap->setMinFilter(GL_NEAREST);
 		lightMap->setMagFilter(GL_NEAREST);
-		lightMap->setWrapping(GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER);
+		lightMap->setWrapping(GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV);
 		lightMap->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		lightMapFBO = Framebuffer::create();
