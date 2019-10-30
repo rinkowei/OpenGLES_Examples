@@ -1,4 +1,4 @@
-#version 310 es
+#version 320 es
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
@@ -7,39 +7,38 @@ in vec3 fNormal;
 in vec3 fFragPos;
 in vec4 fFragPosLightSpace;
 
-
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 
 uniform sampler2D depthMap;
 
-vec2 poissonDisk[4] = vec2[](
-  vec2( -0.94201624, -0.39906216 ),
-  vec2( 0.94558609, -0.76890725 ),
-  vec2( -0.094184101, -0.92938870 ),
-  vec2( 0.34495938, 0.29387760 )
+vec2 poissonDisk[16] = vec2[]( 
+   vec2( -0.94201624, -0.39906216 ), 
+   vec2( 0.94558609, -0.76890725 ), 
+   vec2( -0.094184101, -0.92938870 ), 
+   vec2( 0.34495938, 0.29387760 ), 
+   vec2( -0.91588581, 0.45771432 ), 
+   vec2( -0.81544232, -0.87912464 ), 
+   vec2( -0.38277543, 0.27676845 ), 
+   vec2( 0.97484398, 0.75648379 ), 
+   vec2( 0.44323325, -0.97511554 ), 
+   vec2( 0.53742981, -0.47373420 ), 
+   vec2( -0.26496911, -0.41893023 ), 
+   vec2( 0.79197514, 0.19090188 ), 
+   vec2( -0.24188840, 0.99706507 ), 
+   vec2( -0.81409955, 0.91437590 ), 
+   vec2( 0.19984126, 0.78641367 ), 
+   vec2( 0.14383161, -0.14100790 ) 
 );
-
-float random(vec3 seed, int i)
-{
-	vec4 seed4 = vec4(seed,i);
-	float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
-	return fract(sin(dot_product) * 43758.5453);
-}
-
-float rgba_to_float(vec4 rgba)
-{
-    return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
-}
 
 void main()
 {
 	vec3 color = vec3(0.8f, 0.8f, 0.8f);
 	vec3 normal = normalize(fNormal);
-	vec3 lightColor = vec3(0.6f);
+	vec3 lightColor = vec3(0.8f);
 
 	// ambient
-	vec3 ambient = 0.3f * color;
+	vec3 ambient = 0.2f * color;
 
 	// diffuse
 	vec3 lightDir = normalize(lightPos - fFragPos);
@@ -54,18 +53,19 @@ void main()
 
 	float shadow = 1.0f;
 	float bias = 0.005f * tan(acos(clamp(dot(fNormal, lightDir), 0.0f, 1.0f)));
-	bias = clamp(bias, 0.0f, 0.01f);
+	bias = clamp(bias, 0.0f, 0.003f);
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 16; i++)
 	{
-		float depth = rgba_to_float(texture(depthMap, vec2(fFragPosLightSpace.xy + poissonDisk[i] / 700.0f)));
-		float closestDepth = fFragPosLightSpace.z * 2.0 - 1.0;
-		if (depth < closestDepth - bias)
+		if (texture(depthMap, vec2(fFragPosLightSpace.xy + poissonDisk[i] / 700.0f)).r < fFragPosLightSpace.z - bias)
 		{
-			shadow -= 0.2f;
+			shadow -= 0.08;
 		}
 	}
+    
+    if(fFragPosLightSpace.z > 1.0)
+        shadow = 0.0;
 
 	shadow = clamp(shadow, 0.0f, 1.0f);
-    fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
+    fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0f);
 }
