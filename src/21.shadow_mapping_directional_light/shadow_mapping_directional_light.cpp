@@ -41,7 +41,7 @@ public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
-
+		
 		// setup camera
 		mMainCamera->setPosition(glm::vec3(-2.0f, 4.0f, 5.0f));
 		mMainCamera->setRotation(glm::vec3(45.0f, 0.0f, 0.0f));
