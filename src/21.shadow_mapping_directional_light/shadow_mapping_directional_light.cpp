@@ -47,6 +47,8 @@ public:
 
 		// enable cull face
 		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CCW);
+		glCullFace(GL_BACK);
 		
 		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT);
 		lightMap->setMinFilter(GL_NEAREST);
