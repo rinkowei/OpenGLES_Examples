@@ -1,14 +1,11 @@
-#version 320 es
+#version 310 es
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-in VS_OUT
-{
-	vec2 fTexcoord;
-	vec3 fNormal;
-	vec3 fFragPos;
-	vec4 fFragPosLightSpace;
-}fs_in;
+in vec2 fTexcoord;
+in vec3 fNormal;
+in vec3 fFragPos;
+in vec4 fFragPosLightSpace;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -47,15 +44,15 @@ float calculateShadow(vec4 fragPosLightSpace)
 
 	float currentDepth = projCoords.z;
 
-	vec3 normal = normalize(fs_in.fNormal);
-	vec3 lightDir = normalize(lightPos - fs_in.fFragPos);
-	float bias = 0.005f * tan(acos(clamp(dot(fs_in.fNormal, lightDir), 0.0f, 1.0f)));
+	vec3 normal = normalize(fNormal);
+	vec3 lightDir = normalize(lightPos - fFragPos);
+	float bias = 0.005f * tan(acos(clamp(dot(fNormal, lightDir), 0.0f, 1.0f)));
 	bias = clamp(bias, 0.0f, 0.01f);
 
 	float shadow = 0.0f;
 	for (int i = 0; i < 16; i++)
 	{
-	    int index = int(16.0f * random(floor(fs_in.fFragPos.xyz * 1000.0f), i)) % 16;
+	    int index = int(16.0f * random(floor(fFragPos.xyz * 1000.0f), i)) % 16;
 		float pcfDepth = texture(depthMap, projCoords.xy + poissonDisk[index] / 500.0f).r; 
         shadow += currentDepth - bias > pcfDepth ? 1.0f : 0.1f;    
 	}
@@ -72,23 +69,23 @@ float calculateShadow(vec4 fragPosLightSpace)
 void main()
 {
 	vec3 color = vec3(0.8f, 0.8f, 0.8f);
-	vec3 normal = normalize(fs_in.fNormal);
+	vec3 normal = normalize(fNormal);
 	vec3 lightColor = vec3(0.5f);
 
 	// ambient
 	vec3 ambient = 0.3f * color;
 
 	// diffuse
-	vec3 lightDir = normalize(lightPos - fs_in.fFragPos);
+	vec3 lightDir = normalize(lightPos - fFragPos);
 	float diff = max(dot(lightDir, normal), 0.0f);
 	vec3 diffuse = diff * lightColor;
 
 	// specular
-    vec3 viewDir = normalize(viewPos - fs_in.fFragPos);
+    vec3 viewDir = normalize(viewPos - fFragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * lightColor;    
-	float shadow = calculateShadow(fs_in.fFragPosLightSpace);
+	float shadow = calculateShadow(fFragPosLightSpace);
 	
     fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
 }

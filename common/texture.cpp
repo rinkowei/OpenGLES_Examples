@@ -576,7 +576,7 @@ namespace es
 			
 			mWidth = width;
 			mHeight = height;
-
+			
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, width, height, 0, mFormat, mType, data);
 			stbi_image_free(data);
 		}
