@@ -128,3 +128,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 #### [26 - bloom_with_hdr](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/26.bloom_with_hdr>)
+
+
+
+#### [27 - basic_pbr](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/27.basic_pbr>)
