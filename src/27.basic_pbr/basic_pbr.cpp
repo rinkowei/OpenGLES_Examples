@@ -13,6 +13,13 @@ public:
 	const int col = 7;
 	std::vector<std::shared_ptr<Model>> spheres;
 
+	struct Light
+	{
+		glm::vec3 color;
+		glm::vec3 position;
+	};
+	std::array<Light, 4> lights;
+
 	Example()
 	{
 		title = "basic pbr";
@@ -53,10 +60,22 @@ public:
 			for (int j = 0; j < col; j++)
 			{
 				std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(i * col + j), sphereTemplate.get());
-
+			
 				glm::vec3 pos = glm::vec3(float(j - (row / 2.0f)) * 2.5f, 0.0f, float(i - (col / 2.0f)) * 2.5f);
 				sphere->setPosition(pos);
 				sphere->setScale(glm::vec3(0.035f));
+				sphere->setUniform("roughness", glm::clamp((float)i / (float)(row - 1), 0.05f, 1.0f));
+				sphere->setUniform("metallic", glm::clamp((float)j / (float)(row - 1), 0.1f, 1.0f));
+
+				for (std::size_t i = 0; i < lights.size(); i++)
+				{
+					lights[i].color = glm::vec3(1.0f, 1.0f, 1.0f);
+					lights[i].position = glm::vec3(sin(glm::radians(i * 360.0f)) * 20.0f, cos(glm::radians(i * 360.0f)) * 20.0f, 0.0f);
+
+					sphere->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
+					sphere->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
+				}
+
 				spheres.push_back(sphere);
 			}
 		}
@@ -71,6 +90,12 @@ public:
 
 		for (std::size_t i = 0; i < spheres.size(); i++)
 		{
+			for (std::size_t j = 0; j < lights.size(); j++)
+			{
+				lights[j].position = glm::vec3(sin(glm::radians(j * 360.0f)) * 20.0f, cos(glm::radians(j * 360.0f)) * 20.0f, 0.0f);
+				spheres[i]->setUniform("lights[" + std::to_string(j) + "].position", lights[j].position);
+			}
+			spheres[i]->setUniform("viewPos", mMainCamera->getPosition());
 			spheres[i]->render();
 		}
 	}
