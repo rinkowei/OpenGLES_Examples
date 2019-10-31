@@ -24,7 +24,6 @@ public:
 	{
 		title = "basic pbr";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -54,6 +53,11 @@ public:
 			},
 			true
 		);
+
+		lights[0].position = glm::vec3(-15.0f, 7.5f, -15.0f);
+		lights[1].position = glm::vec3(-15.0f, 7.5f, 15.0f);
+		lights[2].position = glm::vec3(15.0f, 7.5f, 15.0f);
+		lights[3].position = glm::vec3(15.0f, 7.5f, -15.0f);
 		
 		for (int x = 0; x < row; x++)
 		{
@@ -73,7 +77,6 @@ public:
 				for (std::size_t i = 0; i < lights.size(); i++)
 				{
 					lights[i].color = glm::vec3(1.0f, 1.0f, 1.0f);
-					lights[i].position = glm::vec3(sin(glm::radians(360.0f)) * 20.0f, cos(glm::radians(360.0f)) * 20.0f, 0.0f);
 					sphere->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
 					sphere->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
 				}
