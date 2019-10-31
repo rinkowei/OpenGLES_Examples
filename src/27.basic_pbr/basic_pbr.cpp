@@ -54,9 +54,9 @@ public:
 			{
 				std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(i * col + j), sphereTemplate.get());
 
-				glm::vec3 pos = glm::vec3(float(j - (col / 2.0f)) * 2.5f, 0.0f, float(i - (row / 2.0f)) * 2.5f);
+				glm::vec3 pos = glm::vec3(float(j - (row / 2.0f)) * 2.5f, 0.0f, float(i - (col / 2.0f)) * 2.5f);
 				sphere->setPosition(pos);
-				sphere->setScale(glm::vec3(0.03f));
+				sphere->setScale(glm::vec3(0.035f));
 				spheres.push_back(sphere);
 			}
 		}
