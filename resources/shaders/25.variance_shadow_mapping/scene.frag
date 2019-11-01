@@ -12,58 +12,21 @@ uniform vec3 viewPos;
 
 uniform sampler2D depthMap;
 
-vec2 poissonDisk[16] = vec2[]( 
-   vec2( -0.94201624, -0.39906216 ), 
-   vec2( 0.94558609, -0.76890725 ), 
-   vec2( -0.094184101, -0.92938870 ), 
-   vec2( 0.34495938, 0.29387760 ), 
-   vec2( -0.91588581, 0.45771432 ), 
-   vec2( -0.81544232, -0.87912464 ), 
-   vec2( -0.38277543, 0.27676845 ), 
-   vec2( 0.97484398, 0.75648379 ), 
-   vec2( 0.44323325, -0.97511554 ), 
-   vec2( 0.53742981, -0.47373420 ), 
-   vec2( -0.26496911, -0.41893023 ), 
-   vec2( 0.79197514, 0.19090188 ), 
-   vec2( -0.24188840, 0.99706507 ), 
-   vec2( -0.81409955, 0.91437590 ), 
-   vec2( 0.19984126, 0.78641367 ), 
-   vec2( 0.14383161, -0.14100790 ) 
-);
-
-float random(vec3 seed, int i)
+float chebyshevUpperBound(vec3 shadowCoord)
 {
-	vec4 seed4 = vec4(seed,i);
-	float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
-	return fract(sin(dot_product) * 43758.5453);
-}
-
-float calculateShadow(vec4 fragPosLightSpace)
-{
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-
-	float currentDepth = projCoords.z;
-
-	vec3 normal = normalize(fNormal);
-	vec3 lightDir = normalize(lightPos - fFragPos);
-	float bias = 0.005f * tan(acos(clamp(dot(fNormal, lightDir), 0.0f, 1.0f)));
-	bias = clamp(bias, 0.0f, 0.01f);
-
-	float shadow = 0.0f;
-	for (int i = 0; i < 16; i++)
+	vec2 moments = texture(depthMap, shadowCoord.xy).rg;
+	if (shadowCoord.z <= moments.x)
 	{
-	    int index = int(16.0f * random(floor(fFragPos.xyz * 1000.0f), i)) % 16;
-		float pcfDepth = texture(depthMap, projCoords.xy + poissonDisk[index] / 500.0f).r; 
-        shadow += currentDepth - bias > pcfDepth ? 1.0f : 0.1f;    
+		return 0.0;
 	}
-	shadow /= 16.0f;
-	shadow = clamp(shadow, 0.0f, 1.0f);
-	if (projCoords.z > 1.0f)
-	{
-		shadow = 0.0f;
-	}
-	
-	return shadow;
+
+	float variance = moments.y - (moments.x * moments.x);
+	variance = max(variance, 0.0015);
+
+	float d = shadowCoord.z - moments.x;
+	float pMax = variance / (variance + d * d);
+
+	return pMax;
 }
 
 void main()
@@ -85,7 +48,9 @@ void main()
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * lightColor;    
-	float shadow = calculateShadow(fFragPosLightSpace);
+
+	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
+	float shadow = chebyshevUpperBound(shadowCoord);
 	
     fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
 }

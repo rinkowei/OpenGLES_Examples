@@ -54,14 +54,14 @@ public:
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
 
-		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT);
+		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT);
 		lightMap->setMinFilter(GL_NEAREST);
 		lightMap->setMagFilter(GL_NEAREST);
-		lightMap->setWrapping(GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV);
+		lightMap->setWrapping(GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT);
 		lightMap->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		lightMapFBO = Framebuffer::create();
-		lightMapFBO->attachDepthRenderTarget(lightMap.get(), 0, 0);
+		lightMapFBO->attachRenderTarget(0, lightMap.get(), 0, 0);
 
 		sampleSceneShadow = Model::createFromFile("sampleScene_shadow", modelsDirectory + "/teapots-pillars/samplescene.dae",
 			{
@@ -94,16 +94,16 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		// change light position over time
-		lightPos = glm::vec3(cos(timePassed) * 1.0f, 5.0f + sin(timePassed) * 2.0f, 2.5f + sin(timePassed) * 0.5f);
+		lightPos = glm::vec3(-2.0f + sin(timePassed) * 2.0f, 5.0f + cos(timePassed) * 1.0f, 2.0f + cos(timePassed) * 1.0f);
 		glm::mat4 lightProj = glm::perspective<float>(glm::radians(45.0f), 1.0f, 1.0f, 10.0f);
 		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0));
 		glm::mat4 lightSpaceMatrix = lightProj * lightView;
-
+		
 		glViewport(0, 0, lightMapWidth, lightMapHeight);
 		lightMapFBO->bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		sampleSceneShadow->setUniform("lightSpaceMatrix", lightSpaceMatrix);
-		// fixed peter panning, use cull front face when render scene to depth map
+
 		glCullFace(GL_FRONT);
 		sampleSceneShadow->render();
 		glCullFace(GL_BACK);

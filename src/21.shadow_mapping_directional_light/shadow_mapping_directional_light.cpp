@@ -55,9 +55,9 @@ public:
 		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT);
 		lightMap->setMinFilter(GL_NEAREST);
 		lightMap->setMagFilter(GL_NEAREST);
-		lightMap->setWrapping(GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV, GL_CLAMP_TO_BORDER_NV);
+		lightMap->setWrapping(GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT);
 		lightMap->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
-
+		
 		lightMapFBO = Framebuffer::create();
 		lightMapFBO->attachDepthRenderTarget(lightMap.get(), 0, 0);
 		

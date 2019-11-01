@@ -83,7 +83,7 @@ namespace es
 	{
 		std::array<float, 4> borderColor = { r, g, b, a };
 		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
-		GLES_CHECK_ERROR(glTexParameterfv(mTarget, GL_TEXTURE_BORDER_COLOR_NV, borderColor.data()));
+		GLES_CHECK_ERROR(glTexParameterfv(mTarget, GL_TEXTURE_BORDER_COLOR_EXT, borderColor.data()));
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 	}
 
