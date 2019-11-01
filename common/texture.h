@@ -85,9 +85,11 @@ namespace es
 	{
 	public:
 		TextureCube(std::vector<std::string> paths, int mipLevels = 1, bool srgb = true);
+		TextureCube(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data = nullptr);
 		~TextureCube();
 
 		static std::shared_ptr<TextureCube> createFromFiles(std::vector<std::string> paths, int mipLevels = 1, bool srgb = true);
+		static std::shared_ptr<TextureCube> createFromData(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data = nullptr);
 
 		void setData(int faceIndex, int layerIndex, int mipLevel, void* data);
 
@@ -96,6 +98,9 @@ namespace es
 		uint32_t getMipLevels();
 	private:
 		bool initFromFiles(std::vector<std::string> paths, int mipLevels, bool srgb);
+		bool initFromData(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data);
+
+		std::string mName;
 
 		uint32_t mWidth;
 		uint32_t mHeight;

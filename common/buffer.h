@@ -128,6 +128,8 @@ namespace es
 
 		void attachDepthRenderTarget(Texture* texture, uint32_t layer, uint32_t mipLevel);
 
+		void attachDepthRenderTarget(TextureCube* texture, uint32_t face, uint32_t layer, uint32_t mipLevel);
+
 		void attachDepthStencilTarget(uint32_t w, uint32_t h);
 
 		GLuint getRenderBuffer() const;

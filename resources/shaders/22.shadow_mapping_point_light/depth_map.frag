@@ -1,16 +1,16 @@
-#version 320 es
+#version 310 es
 precision mediump float;
 
-in vec4 fragPos;
+in vec3 fFragPos;
 
 uniform vec3 lightPos;
 uniform float farPlane;
 
 void main()
 {
-	float lightDistance = length(fragPos.xyz - lightPos);
+	float lightDistance = length(fFragPos - lightPos);
 
 	lightDistance = lightDistance / farPlane;
 
-	gl_FragDepth = lightDistance;
+	gl_FragDepth = lightDistance / 2.0;
 }

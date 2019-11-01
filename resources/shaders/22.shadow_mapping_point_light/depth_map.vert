@@ -1,9 +1,13 @@
-#version 320 es
+#version 310 es
 layout(location = 0) in vec3 vPos;
 
+out vec3 fFragPos;
+
 uniform mat4 model;
+uniform mat4 lightMatrix;
 
 void main()
 {
-	gl_Position = model * vec4(vPos, 1.0f);
+	fFragPos = vec3(model * vec4(vPos, 1.0f));
+	gl_Position = lightMatrix * model * vec4(vPos, 1.0f);
 }

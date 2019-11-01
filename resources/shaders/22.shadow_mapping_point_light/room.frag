@@ -1,13 +1,10 @@
-#version 320 es
+#version 310 es
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-in VS_OUT
-{
-	vec2 fTexcoord;
-	vec3 fNormal;
-	vec3 fFragPos;
-}fs_in;
+in vec2 fTexcoord;
+in vec3 fNormal;
+in vec3 fFragPos;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -51,23 +48,24 @@ float calculateShadow(vec3 fragPos)
 void main()
 {
 	vec3 color = vec3(0.8f, 0.8f, 0.8f);
-	vec3 normal = normalize(fs_in.fNormal);
+	vec3 normal = normalize(fNormal);
 	vec3 lightColor = vec3(0.5f);
 
 	// ambient
 	vec3 ambient = 0.3f * color;
 
 	// diffuse
-	vec3 lightDir = normalize(lightPos - fs_in.fFragPos);
+	vec3 lightDir = normalize(lightPos - fFragPos);
 	float diff = max(dot(lightDir, normal), 0.0f);
 	vec3 diffuse = diff * lightColor;
 
 	// specular
-    vec3 viewDir = normalize(viewPos - fs_in.fFragPos);
+    vec3 viewDir = normalize(viewPos - fFragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * lightColor;    
 
-	float shadow = calculateShadow(fs_in.fFragPos);
-    fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
+	float shadow = calculateShadow(fFragPos);
+	fragColor = vec4(texture(depthMap, fFragPos - lightPos).r);
+    //fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
 }

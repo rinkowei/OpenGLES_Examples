@@ -25,6 +25,10 @@ namespace es
 			{
 				shaderType = GL_VERTEX_SHADER;
 			}
+			else if (ext == "geom")
+			{
+				shaderType = GL_EXT_geometry_shader;
+			}
 			else if (ext == "frag")
 			{
 				shaderType = GL_FRAGMENT_SHADER;

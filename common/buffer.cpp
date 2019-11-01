@@ -328,6 +328,7 @@ namespace es
 
 	void Framebuffer::attachDepthRenderTarget(Texture* texture, uint32_t layer, uint32_t mipLevel)
 	{
+
 		bind();
 		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 
@@ -338,6 +339,32 @@ namespace es
 		else
 		{
 			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getTarget(), texture->getID(), mipLevel));
+		}
+
+		GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));
+
+		GLES_CHECK_ERROR(glReadBuffer(GL_NONE));
+
+		checkStatus();
+
+		glBindTexture(texture->getTarget(), 0);
+
+		unbind();
+	}
+
+	void Framebuffer::attachDepthRenderTarget(TextureCube* texture, uint32_t face, uint32_t layer, uint32_t mipLevel)
+	{
+		bind();
+		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
+
+		if (texture->getArraySize() > 1)
+		{
+			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getID(), mipLevel, layer));
+		}
+		else
+		{
+			GLenum target = static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face);
+			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, texture->getID(), mipLevel));
 		}
 
 		GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));

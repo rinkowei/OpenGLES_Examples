@@ -453,6 +453,11 @@ namespace es
 		initFromFiles(paths, mipLevels, srgb);
 	}
 
+	TextureCube::TextureCube(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data) : Texture()
+	{
+		initFromData(name, w, h, mipLevels, internalFormat, format, type, data);
+	}
+
 	TextureCube::~TextureCube()
 	{
 
@@ -471,6 +476,20 @@ namespace es
 		else
 		{
 			return mTextureCubeCache[directory];
+		}
+	}
+
+	std::shared_ptr<TextureCube> TextureCube::createFromData(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data)
+	{
+		if (mTextureCubeCache.find(name) == mTextureCubeCache.end())
+		{
+			std::shared_ptr<TextureCube> texCube = std::make_shared<TextureCube>(name, w, h, mipLevels, internalFormat, format, type, data);
+			mTextureCubeCache[name] = texCube;
+			return texCube;
+		}
+		else
+		{
+			return mTextureCubeCache[name];
 		}
 	}
 
@@ -585,6 +604,33 @@ namespace es
 		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 		setMagFilter(GL_LINEAR);
 		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		return true;
+	}
+
+	bool TextureCube::initFromData(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data)
+	{
+		mName = name;
+		mTarget = GL_TEXTURE_CUBE_MAP;
+		mInternalFormat = internalFormat;
+		mFormat = format;
+		mType = type;
+		mWidth = w;
+		mHeight = h;
+		mMipLevels = mipLevels;
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		for (GLuint i = 0; i < 6; i++)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, w, h, 0, mFormat, mType, data);
+		}
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+
+		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		setMagFilter(GL_LINEAR);
+		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		generateMipmaps();
 
 		return true;
 	}
