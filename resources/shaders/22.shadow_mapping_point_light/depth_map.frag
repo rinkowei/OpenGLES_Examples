@@ -12,5 +12,5 @@ void main()
 
 	lightDistance = lightDistance / farPlane;
 
-	gl_FragDepth = lightDistance / 2.0;
+	gl_FragDepth = lightDistance;
 }
