@@ -27,7 +27,7 @@ namespace es
 			}
 			else if (ext == "geom")
 			{
-				shaderType = GL_EXT_geometry_shader;
+				shaderType = GL_GEOMETRY_SHADER_EXT;
 			}
 			else if (ext == "frag")
 			{
