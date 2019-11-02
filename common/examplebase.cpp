@@ -68,7 +68,7 @@ namespace es
 
 		window = SDL_CreateWindow(title.c_str(),
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			defaultWindowWidth, defaultWindowHeight,
+			windowWidth, windowHeight,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 		if (!window)
 		{
@@ -76,6 +76,7 @@ namespace es
 				"failed to create the main window.", nullptr);
 			return false;
 		}
+		SDL_SetWindowResizable(window, SDL_TRUE);
 
 		context = SDL_GL_CreateContext(window);
 		if (!context)
@@ -96,7 +97,7 @@ namespace es
 		{
 			SDL_GL_SetSwapInterval(0);
 		}
-
+		
 		return true;
 	}
 
@@ -139,7 +140,7 @@ namespace es
 
 	void ExampleBase::prepare()
 	{
-		World::getWorld()->createMainCamera(45.0f, 0.1f, 1000.0f, (float)defaultWindowWidth / (float)defaultWindowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+		World::getWorld()->createMainCamera(45.0f, 0.1f, 1000.0f, (float)windowWidth / (float)windowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 		mMainCamera = World::getWorld()->getMainCamera();
 	}
 
@@ -229,7 +230,7 @@ namespace es
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		io.DisplaySize = ImVec2((float)defaultWindowWidth, (float)defaultWindowHeight);
+		io.DisplaySize = ImVec2((float)windowWidth, (float)windowHeight);
 		io.DeltaTime = frameTimer;
 	}
 

@@ -99,11 +99,8 @@ namespace es
 		Camera* mMainCamera;
 	public:
 		bool prepared = false;
-		GLint defaultWindowWidth = 1280;
-		GLint defaultWindowHeight = 720;
-
-		GLint destWidth;
-		GLint destHeight;
+		GLint windowWidth = 1280;
+		GLint windowHeight = 720;
 
 		es::UIOverlay uiOverlay;
 
