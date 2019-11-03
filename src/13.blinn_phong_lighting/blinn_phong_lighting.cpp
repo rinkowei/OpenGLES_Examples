@@ -13,7 +13,6 @@ public:
 	{
 		title = "blinn phong lighting";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/13.blinn_phong_lighting/";
@@ -152,8 +151,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &destWidth, &destHeight);
-		glViewport(0, 0, destWidth, destHeight);
+		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
