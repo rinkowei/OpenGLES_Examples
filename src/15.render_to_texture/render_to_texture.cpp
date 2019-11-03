@@ -67,7 +67,7 @@ public:
 		);
 		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		
-		std::shared_ptr<Texture2D> renderTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		std::shared_ptr<Texture2D> renderTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 		renderTexture->setMinFilter(GL_LINEAR);
 		renderTexture->setMagFilter(GL_LINEAR);
 
@@ -94,8 +94,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &destWidth, &destHeight);
-		glViewport(0, 0, destWidth, destHeight);
+		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
