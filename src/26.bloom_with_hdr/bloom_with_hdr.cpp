@@ -25,7 +25,6 @@ public:
 	{
 		title = "bloom with hdr";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -49,30 +48,30 @@ public:
 
 		hdrFBO = Framebuffer::create();
 
-		fragColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		fragColorTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 		fragColorTexture->setMinFilter(GL_LINEAR);
 		fragColorTexture->setMagFilter(GL_LINEAR);
 		fragColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		brightColorTexture = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		brightColorTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 		brightColorTexture->setMinFilter(GL_LINEAR);
 		brightColorTexture->setMagFilter(GL_LINEAR);
 		brightColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
 		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
-		hdrFBO->attachDepthStencilTarget(defaultWindowWidth, defaultWindowHeight);
+		hdrFBO->attachDepthStencilTarget(windowWidth, windowHeight);
 
 		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
 		{
 			pingpongFBO[i] = Framebuffer::create();
-			pingpongBuffer[i] = Texture2D::createFromData(defaultWindowWidth, defaultWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+			pingpongBuffer[i] = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 			pingpongBuffer[i]->setMinFilter(GL_LINEAR);
 			pingpongBuffer[i]->setMagFilter(GL_LINEAR);
 			pingpongBuffer[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 			pingpongFBO[i]->attachRenderTarget(0, pingpongBuffer[i].get(), 0, 0);
-			pingpongFBO[i]->attachDepthStencilTarget(defaultWindowWidth, defaultWindowHeight);
+			pingpongFBO[i]->attachDepthStencilTarget(windowWidth, windowHeight);
 		}
 
 		std::vector<float> vertexAttribs = {
@@ -156,8 +155,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &destWidth, &destHeight);
-		glViewport(0, 0, destWidth, destHeight);
+		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
