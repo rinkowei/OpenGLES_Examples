@@ -13,7 +13,6 @@ public:
 	{
 		title = "skybox reflect";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -56,8 +55,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &destWidth, &destHeight);
-		glViewport(0, 0, destWidth, destHeight);
+		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
