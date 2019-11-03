@@ -644,7 +644,12 @@ namespace es
 
 	void TextureCube::resize(uint32_t mipLevel, uint32_t w, uint32_t h)
 	{
-
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		for (GLuint i = 0; i < 6; i++)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr);
+		}
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 	}
 
 	uint32_t TextureCube::getWidth()
