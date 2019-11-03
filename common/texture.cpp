@@ -424,6 +424,13 @@ namespace es
 		generateMipmaps();
 	}
 
+	void Texture2D::resize(uint32_t mipLevel, uint32_t w, uint32_t h)
+	{
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr));
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
 	uint32_t Texture2D::getWidth()
 	{
 		return mWidth;
@@ -633,6 +640,11 @@ namespace es
 		generateMipmaps();
 
 		return true;
+	}
+
+	void TextureCube::resize(uint32_t mipLevel, uint32_t w, uint32_t h)
+	{
+
 	}
 
 	uint32_t TextureCube::getWidth()

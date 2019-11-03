@@ -11,11 +11,13 @@ public:
 	std::shared_ptr<Mesh> offscreenQuad;
 
 	std::unique_ptr<Framebuffer> framebuffer;
+	std::shared_ptr<Texture2D> renderTexture;
 
 	Example()
 	{
 		title = "render to texture";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -29,6 +31,9 @@ public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
+
+		// viewport conversion
+		glViewport(0, 0, windowWidth, windowHeight);
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -67,7 +72,7 @@ public:
 		);
 		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		
-		std::shared_ptr<Texture2D> renderTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		renderTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 		renderTexture->setMinFilter(GL_LINEAR);
 		renderTexture->setMagFilter(GL_LINEAR);
 
@@ -94,8 +99,16 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
+		int width, height;
+		SDL_GetWindowSize(window, &width, &height);
+		if (width != windowWidth || height != windowHeight)
+		{
+			windowWidth = width;
+			windowHeight = height;
+			glViewport(0, 0, windowWidth, windowHeight);
+
+			renderTexture->resize(0, windowWidth, windowHeight);
+		}
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		

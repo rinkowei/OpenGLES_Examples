@@ -22,12 +22,12 @@ public:
 
 	Example()
 	{
-		title = "basic pbr";
+		title = "image based lighting pbr";
 		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/27.basic_pbr/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/28.image_based_lighting_pbr/";
 	}
 
 	~Example()

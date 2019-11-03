@@ -42,6 +42,7 @@ namespace es
 		void setCompareMode(GLenum mode);
 		void setCompareFunc(GLenum func);
 
+		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h) = 0;
 	protected:
 		GLuint mID;
 		GLenum mTarget;
@@ -64,6 +65,8 @@ namespace es
 		static std::shared_ptr<Texture2D> createFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
 
 		void setData(int arrayIndex, int mipLevel, void* data);
+
+		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
 
 		uint32_t getWidth();
 		uint32_t getHeight();
@@ -92,6 +95,8 @@ namespace es
 		static std::shared_ptr<TextureCube> createFromData(const std::string& name, uint32_t w, uint32_t h, int32_t mipLevels, GLenum internalFormat, GLenum format, GLenum type, void* data = nullptr);
 
 		void setData(int faceIndex, int layerIndex, int mipLevel, void* data);
+
+		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
 
 		uint32_t getWidth();
 		uint32_t getHeight();
