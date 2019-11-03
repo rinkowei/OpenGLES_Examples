@@ -43,6 +43,9 @@ public:
 		// setup camera
 		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 
+		// viewport conversion
+		glViewport(0, 0, windowWidth, windowHeight);
+
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
@@ -60,7 +63,6 @@ public:
 
 		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
 		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
-		hdrFBO->attachDepthStencilTarget(windowWidth, windowHeight);
 
 		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
 		{
@@ -71,7 +73,6 @@ public:
 			pingpongBuffer[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 			pingpongFBO[i]->attachRenderTarget(0, pingpongBuffer[i].get(), 0, 0);
-			pingpongFBO[i]->attachDepthStencilTarget(windowWidth, windowHeight);
 		}
 
 		std::vector<float> vertexAttribs = {
@@ -155,8 +156,21 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
+		int width, height;
+		SDL_GetWindowSize(window, &width, &height);
+		if (width != windowWidth || height != windowHeight)
+		{
+			windowWidth = width;
+			windowHeight = height;
+			glViewport(0, 0, windowWidth, windowHeight);
+
+			fragColorTexture->resize(0, windowWidth, windowHeight);
+			brightColorTexture->resize(0, windowWidth, windowHeight);
+			for (std::size_t i = 0; i < pingpongBuffer.size(); i++)
+			{
+				pingpongBuffer[i]->resize(0, windowWidth, windowHeight);
+			}
+		}
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
