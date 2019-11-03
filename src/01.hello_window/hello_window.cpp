@@ -23,8 +23,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &destWidth, &destHeight);
-		glViewport(0, 0, destWidth, destHeight);
+		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 	}
 };
 

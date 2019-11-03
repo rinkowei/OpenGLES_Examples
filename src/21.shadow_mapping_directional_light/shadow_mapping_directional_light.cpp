@@ -85,8 +85,8 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &destWidth, &destHeight);
-		glViewport(0, 0, destWidth, destHeight);
+		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		
@@ -107,7 +107,7 @@ public:
 		glCullFace(GL_BACK);
 		
 		lightMapFBO->unbind();
-		glViewport(0, 0, defaultWindowWidth, defaultWindowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		playground->setUniform("lightPos", lightPos);

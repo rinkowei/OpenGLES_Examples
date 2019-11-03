@@ -58,7 +58,7 @@ public:
 		lightMap->setMinFilter(GL_NEAREST);
 		lightMap->setMagFilter(GL_NEAREST);
 		lightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-		
+	
 		for (std::size_t i = 0; i < lightMapFBOs.size(); i++)
 		{
 			lightMapFBOs[i] = Framebuffer::create();
@@ -82,6 +82,7 @@ public:
 				{ "depthMap", lightMap },
 			}
 		);
+
 		room->setMaterial(mat);
 	}
 
