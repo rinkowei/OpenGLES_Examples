@@ -87,11 +87,6 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		// change light position over time
 		lightPos = glm::vec3(-2.0f + sin(timePassed) * 2.0f, 5.0f + cos(timePassed) * 1.0f, 2.0f + cos(timePassed) * 1.0f);
 		glm::mat4 lightProj = glm::perspective<float>(glm::radians(45.0f), 1.0f, 1.0f, 10.0f);
@@ -108,13 +103,18 @@ public:
 		glCullFace(GL_BACK);
 
 		lightMapFBO->unbind();
-		glViewport(0, 0, windowWidth, windowHeight);
+		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		sampleScene->setUniform("lightPos", lightPos);
 		sampleScene->setUniform("viewPos", mMainCamera->getPosition());
 		sampleScene->setUniform("lightSpaceMatrix", lightSpaceMatrix);
 		sampleScene->render();
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
 	}
 };
 
