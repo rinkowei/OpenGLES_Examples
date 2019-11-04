@@ -14,9 +14,11 @@ public:
 	std::unique_ptr<Framebuffer> hdrFBO;
 	std::shared_ptr<Texture2D> fragColorTexture;
 	std::shared_ptr<Texture2D> brightColorTexture;
+	std::unique_ptr<Renderbuffer> hdrRBO;
 
 	std::array<std::unique_ptr<Framebuffer>, 2> pingpongFBO;
 	std::array<std::shared_ptr<Texture2D>, 2> pingpongBuffer;
+	std::array<std::unique_ptr<Renderbuffer>, 2> pingpongRBO;
 
 	std::shared_ptr<Mesh> blurQuad;
 	std::shared_ptr<Mesh> hdrQuad;
@@ -43,20 +45,17 @@ public:
 		// setup camera
 		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 
-		// viewport conversion
-		glViewport(0, 0, windowWidth, windowHeight);
-
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
 		hdrFBO = Framebuffer::create();
 
-		fragColorTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		fragColorTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 		fragColorTexture->setMinFilter(GL_LINEAR);
 		fragColorTexture->setMagFilter(GL_LINEAR);
 		fragColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		brightColorTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		brightColorTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 		brightColorTexture->setMinFilter(GL_LINEAR);
 		brightColorTexture->setMagFilter(GL_LINEAR);
 		brightColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -64,15 +63,21 @@ public:
 		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
 		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
 
+		hdrRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
+		hdrFBO->attachRenderBufferTarget(hdrRBO.get());
+
 		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
 		{
 			pingpongFBO[i] = Framebuffer::create();
-			pingpongBuffer[i] = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+			pingpongBuffer[i] = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
 			pingpongBuffer[i]->setMinFilter(GL_LINEAR);
 			pingpongBuffer[i]->setMagFilter(GL_LINEAR);
 			pingpongBuffer[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 			pingpongFBO[i]->attachRenderTarget(0, pingpongBuffer[i].get(), 0, 0);
+
+			pingpongRBO[i] = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
+			pingpongFBO[i]->attachRenderBufferTarget(pingpongRBO[i].get());
 		}
 
 		std::vector<float> vertexAttribs = {
@@ -156,21 +161,6 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		int width, height;
-		SDL_GetWindowSize(window, &width, &height);
-		if (width != windowWidth || height != windowHeight)
-		{
-			windowWidth = width;
-			windowHeight = height;
-			glViewport(0, 0, windowWidth, windowHeight);
-
-			fragColorTexture->resize(0, windowWidth, windowHeight);
-			brightColorTexture->resize(0, windowWidth, windowHeight);
-			for (std::size_t i = 0; i < pingpongBuffer.size(); i++)
-			{
-				pingpongBuffer[i]->resize(0, windowWidth, windowHeight);
-			}
-		}
 		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -205,6 +195,24 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		hdrQuad->render();
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
+
+		fragColorTexture->resize(0, mWindowWidth, mWindowHeight);
+		brightColorTexture->resize(0, mWindowWidth, mWindowHeight);
+		hdrRBO->resize(mWindowWidth, mWindowHeight);
+
+		for (std::size_t i = 0; i < pingpongBuffer.size(); i++)
+		{
+			pingpongBuffer[i]->resize(0, mWindowWidth, mWindowHeight);
+		}
+		for (std::size_t i = 0; i < pingpongRBO.size(); i++)
+		{
+			pingpongRBO[i]->resize(mWindowWidth, mWindowHeight);
+		}
 	}
 };
 
