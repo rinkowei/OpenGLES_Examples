@@ -150,7 +150,9 @@ namespace es
 		void bind();
 		void unbind();
 
-		void attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true);
+		void attachRenderTarget(uint32_t attachment, Texture2D* texture, uint32_t layer, uint32_t mipLevel, bool draw = true, bool read = true);
+
+		void attachRenderTarget(uint32_t attachment, TextureCube* texture, uint32_t face, uint32_t mipLevel, bool draw = true, bool read = true);
 
 		void attachDepthRenderTarget(Texture* texture, uint32_t layer, uint32_t mipLevel);
 

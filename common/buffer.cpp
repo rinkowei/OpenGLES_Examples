@@ -332,14 +332,26 @@ namespace es
 		GLES_CHECK_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 	}
 
-	void Framebuffer::attachRenderTarget(uint32_t attachment, Texture* texture, uint32_t layer, uint32_t mipLevel, bool draw, bool read)
+	void Framebuffer::attachRenderTarget(uint32_t attachment, Texture2D* texture, uint32_t layer, uint32_t mipLevel, bool draw, bool read)
 	{
 		bind();
 		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 
 		GLenum buf = GL_COLOR_ATTACHMENT0 + attachment;
 
-		mAttachments.push_back(buf);
+		bool isExists = false;
+		for (std::size_t i = 0; i < mAttachments.size(); i++)
+		{
+			if (mAttachments[i] == buf)
+			{
+				isExists = true;
+				break;
+			}
+		}
+		if (!isExists)
+		{
+			mAttachments.push_back(buf);
+		}
 
 		if (texture->getArraySize() > 1)
 		{
@@ -375,9 +387,53 @@ namespace es
 	    unbind();
 	}
 
+	void Framebuffer::attachRenderTarget(uint32_t attachment, TextureCube* texture, uint32_t face, uint32_t mipLevel, bool draw, bool read)
+	{
+		bind();
+		GLenum buf = GL_COLOR_ATTACHMENT0 + attachment;
+		GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + face;
+
+		bool isExists = false;
+		for (std::size_t i = 0; i < mAttachments.size(); i++)
+		{
+			if (mAttachments[i] == buf)
+			{
+				isExists = true;
+				break;
+			}
+		}
+		if (!isExists)
+		{
+			mAttachments.push_back(buf);
+		}
+
+		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, buf, target, texture->getID(), mipLevel));
+
+		if (draw)
+		{
+			GLES_CHECK_ERROR(glDrawBuffers(mAttachments.size(), mAttachments.data()));
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));
+		}
+
+		if (read)
+		{
+			GLES_CHECK_ERROR(glReadBuffer(buf));
+		}
+		else
+		{
+			GLES_CHECK_ERROR(glReadBuffer(GL_NONE));
+		}
+
+		checkStatus();
+
+		unbind();
+	}
+
 	void Framebuffer::attachDepthRenderTarget(Texture* texture, uint32_t layer, uint32_t mipLevel)
 	{
-
 		bind();
 		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 
