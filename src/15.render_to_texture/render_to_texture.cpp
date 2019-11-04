@@ -10,8 +10,9 @@ public:
 	std::shared_ptr<Model> model;
 	std::shared_ptr<Mesh> offscreenQuad;
 
-	std::unique_ptr<Framebuffer> framebuffer;
+	std::unique_ptr<Framebuffer> frameBuffer;
 	std::shared_ptr<Texture2D> renderTexture;
+	std::unique_ptr<Renderbuffer> renderBuffer;
 
 	Example()
 	{
@@ -31,9 +32,6 @@ public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
-
-		// viewport conversion
-		glViewport(0, 0, windowWidth, windowHeight);
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -72,7 +70,7 @@ public:
 		);
 		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		
-		renderTexture = Texture2D::createFromData(windowWidth, windowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		renderTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
 		renderTexture->setMinFilter(GL_LINEAR);
 		renderTexture->setMagFilter(GL_LINEAR);
 
@@ -93,32 +91,22 @@ public:
 		offscreenQuad->setMaterial(screenMat);
 
 		// configure framebuffer
-		framebuffer = Framebuffer::create();
-		framebuffer->attachRenderTarget(0, renderTexture.get(), 0, 0);
+		frameBuffer = Framebuffer::create();
+		frameBuffer->attachRenderTarget(0, renderTexture.get(), 0, 0);
+
+		renderBuffer = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
+		frameBuffer->attachRenderBufferTarget(renderBuffer.get());
 	}
 
 	virtual void render(float deltaTime) override
 	{
-		int width, height;
-		SDL_GetWindowSize(window, &width, &height);
-		if (width != windowWidth || height != windowHeight)
-		{
-			windowWidth = width;
-			windowHeight = height;
-			glViewport(0, 0, windowWidth, windowHeight);
-
-			renderTexture->resize(0, windowWidth, windowHeight);
-		}
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		
-		framebuffer->bind();
+		frameBuffer->bind();
 		// clear color and depth buffer
 		glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT  | GL_STENCIL_BUFFER_BIT);
 		model->render();
 		
-		framebuffer->unbind();
+		frameBuffer->unbind();
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		model->render();
@@ -127,6 +115,14 @@ public:
 		glDisable(GL_DEPTH_TEST);
 		offscreenQuad->render();
 		glEnable(GL_DEPTH_TEST);
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
+
+		renderTexture->resize(0, mWindowWidth, mWindowHeight);
+		renderBuffer->resize(mWindowWidth, mWindowHeight);
 	}
 };
 

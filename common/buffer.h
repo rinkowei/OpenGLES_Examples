@@ -113,6 +113,32 @@ namespace es
 		GLuint mVertexAttribCount;
 	};
 
+	class Renderbuffer
+	{
+	public:
+		friend class Framebuffer;
+
+		Renderbuffer(GLenum internalFormat, uint32_t w, uint32_t h);
+		~Renderbuffer();
+
+		static std::unique_ptr<Renderbuffer> create(GLenum internalFormat, uint32_t w, uint32_t h);
+
+		void bind();
+		void unbind();
+
+		void resize(uint32_t w, uint32_t h);
+
+		GLuint getID() const;
+	private:
+		GLenum mTarget;
+		GLenum mInternalFormat;
+
+		uint32_t mWidth;
+		uint32_t mHeight;
+
+		GLuint mID;
+	};
+
 	class Framebuffer
 	{
 	public:
@@ -130,37 +156,11 @@ namespace es
 
 		void attachDepthRenderTarget(TextureCube* texture, uint32_t face, uint32_t layer, uint32_t mipLevel);
 
-		void attachDepthStencilTarget(uint32_t w, uint32_t h);
-
-		GLuint getRenderBuffer() const;
+		void attachRenderBufferTarget(Renderbuffer* rbo);
 	private:
 		void checkStatus();
 
 		std::vector<GLenum> mAttachments;
-
-		GLuint mRenderBuffer;
-
-		GLuint mID;
-	};
-
-	class Renderbuffer
-	{
-	public:
-		Renderbuffer(GLenum internalFormat, uint32_t w, uint32_t h);
-		~Renderbuffer();
-
-		static std::unique_ptr<Renderbuffer> create(GLenum internalFormat, uint32_t w, uint32_t h);
-
-		void bind();
-		void unbind();
-
-		void resize(uint32_t w, uint32_t h);
-	private:
-		GLenum mTarget;
-		GLenum mInternalFormat;
-
-		uint32_t mWidth;
-		uint32_t mHeight;
 
 		GLuint mID;
 	};

@@ -257,9 +257,58 @@ namespace es
 
 	// -----------------------------------------------------------------------------------------------------------------------------------
 
+	Renderbuffer::Renderbuffer(GLenum internalFormat, uint32_t w, uint32_t h)
+	{
+		mTarget = GL_RENDERBUFFER;
+		mInternalFormat = internalFormat;
+		mWidth = w;
+		mHeight = h;
+
+		GLES_CHECK_ERROR(glGenRenderbuffers(1, &mID));
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, mID));
+		GLES_CHECK_ERROR(glRenderbufferStorage(mTarget, mInternalFormat, mWidth, mHeight));
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
+	}
+
+	Renderbuffer::~Renderbuffer()
+	{
+		GLES_CHECK_ERROR(glDeleteRenderbuffers(1, &mID));
+	}
+
+	std::unique_ptr<Renderbuffer> Renderbuffer::create(GLenum internalFormat, uint32_t w, uint32_t h)
+	{
+		return std::make_unique<Renderbuffer>(internalFormat, w, h);
+	}
+
+	void Renderbuffer::bind()
+	{
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, mID));
+	}
+
+	void Renderbuffer::unbind()
+	{
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
+	}
+
+	void Renderbuffer::resize(uint32_t w, uint32_t h)
+	{
+		mWidth = w;
+		mHeight = h;
+
+		bind();
+		GLES_CHECK_ERROR(glRenderbufferStorage(mTarget, mInternalFormat, mWidth, mHeight));
+		unbind();
+	}
+
+	GLuint Renderbuffer::getID() const
+	{
+		return mID;
+	}
+
+	// -----------------------------------------------------------------------------------------------------------------------------------
+
 	Framebuffer::Framebuffer()
 	{
-		mRenderBuffer = 0;
 		GLES_CHECK_ERROR(glGenFramebuffers(1, &mID));
 	}
 
@@ -374,22 +423,23 @@ namespace es
 		unbind();
 	}
 
-	void Framebuffer::attachDepthStencilTarget(uint32_t w, uint32_t h)
+	void Framebuffer::attachRenderBufferTarget(Renderbuffer* rbo)
 	{
 		bind();
-	
-		GLES_CHECK_ERROR(glGenRenderbuffers(1, &mRenderBuffer));
-		GLES_CHECK_ERROR(glBindRenderbuffer(GL_RENDERBUFFER, mRenderBuffer));
-		GLES_CHECK_ERROR(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h)); 
-		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRenderBuffer));
-
+		GLenum attachment;
+		if (rbo->mInternalFormat == GL_DEPTH24_STENCIL8 || rbo->mInternalFormat == GL_DEPTH32F_STENCIL8)
+		{
+			attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+		}
+		else if (rbo->mInternalFormat == GL_DEPTH_COMPONENT || rbo->mInternalFormat == GL_DEPTH_COMPONENT16 ||
+			rbo->mInternalFormat == GL_DEPTH_COMPONENT24 || rbo->mInternalFormat == GL_DEPTH_COMPONENT32F)
+		{
+			attachment = GL_DEPTH_ATTACHMENT;
+		}
+		
+		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbo->mID));
 		checkStatus();
 		unbind();
-	}
-
-	GLuint Framebuffer::getRenderBuffer() const
-	{
-		return mRenderBuffer;
 	}
 
 	void Framebuffer::checkStatus()
@@ -423,48 +473,5 @@ namespace es
 
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, error.c_str());
 		}
-	}
-
-	Renderbuffer::Renderbuffer(GLenum internalFormat, uint32_t w, uint32_t h)
-	{
-		mTarget = GL_RENDERBUFFER;
-		mInternalFormat = internalFormat;
-		mWidth = w;
-		mHeight = h;
-
-		GLES_CHECK_ERROR(glGenRenderbuffers(1, &mID));
-		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, mID));
-		GLES_CHECK_ERROR(glRenderbufferStorage(mTarget, mInternalFormat, mWidth, mHeight));
-		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
-	}
-
-	Renderbuffer::~Renderbuffer()
-	{
-		GLES_CHECK_ERROR(glDeleteRenderbuffers(1, &mID));
-	}
-
-	std::unique_ptr<Renderbuffer> Renderbuffer::create(GLenum internalFormat, uint32_t w, uint32_t h)
-	{
-		return std::make_unique<Renderbuffer>(internalFormat, w, h);
-	}
-
-	void Renderbuffer::bind()
-	{
-		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, mID));
-	}
-
-	void Renderbuffer::unbind()
-	{
-		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
-	}
-
-	void Renderbuffer::resize(uint32_t w, uint32_t h)
-	{
-		mWidth = w;
-		mHeight = h;
-
-		bind();
-		GLES_CHECK_ERROR(glRenderbufferStorage(mTarget, mInternalFormat, mWidth, mHeight));
-		unbind();
 	}
 }
