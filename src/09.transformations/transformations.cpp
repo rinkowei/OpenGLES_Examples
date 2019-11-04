@@ -102,14 +102,14 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		cube->rotate(glm::vec3(120.0f, 100.0f, 80.0f) * deltaTime);
 		cube->setScale(glm::vec3(glm::max(glm::sin((double)timePassed * 4.0), 0.3)));
 		cube->render();
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
 	}
 };
 
