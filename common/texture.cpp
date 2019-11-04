@@ -198,7 +198,17 @@ namespace es
 	void Texture2D::initFromFile(std::string path, int mipLevels, bool srgb)
 	{
 		int width, height, components;
-		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &components, 0);
+		void* data;
+		bool ishdr = false;
+		if (Utility::fileExtension(path) == "hdr")
+		{
+			ishdr = true;
+			data = (void*)stbi_loadf(path.c_str(), &width, &height, &components, 0);
+		}
+		else
+		{
+			data = (void*)stbi_load(path.c_str(), &width, &height, &components, 0);
+		}
 
 		if (!data)
 		{
@@ -263,6 +273,13 @@ namespace es
 		mWidth = width;
 		mHeight = height;
 		mNumSamples = 1;
+
+		if (ishdr)
+		{
+			mInternalFormat = GL_RGB16F;
+			mFormat = GL_RGB;
+			mType = GL_FLOAT;
+		}
 	    
 		if (mipLevels == -1)
 		{
@@ -325,7 +342,7 @@ namespace es
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 		}
 	
-		setWrapping(GL_REPEAT, GL_REPEAT, GL_REPEAT);
+		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 		setMagFilter(GL_LINEAR);
 
