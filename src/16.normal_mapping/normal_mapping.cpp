@@ -57,14 +57,14 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		planeModel->setUniform("lightPos", glm::vec3(sin(glm::radians(timePassed * 360.0f)) * 1.5f, 8.0f, cos(glm::radians(timePassed * 360.0f)) * 1.5f));
 		planeModel->setUniform("viewPos", mMainCamera->getPosition());
 		planeModel->render();
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
 	}
 };
 

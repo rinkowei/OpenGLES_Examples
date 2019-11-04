@@ -55,11 +55,6 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	
 		sphere->render();
 
 		// change depth function so depth test passes when depth values are equal to content of depth buffer
@@ -68,6 +63,11 @@ public:
 		skybox->render();
 		// set depth function back to default
 		glDepthFunc(GL_LESS);
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
 	}
 };
 
