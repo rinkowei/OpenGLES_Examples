@@ -142,4 +142,24 @@ namespace es
 
 		GLuint mID;
 	};
+
+	class Renderbuffer
+	{
+	public:
+		Renderbuffer(GLenum internalFormat, uint32_t w, uint32_t h);
+		~Renderbuffer();
+
+		static std::unique_ptr<Renderbuffer> create(GLenum internalFormat, uint32_t w, uint32_t h);
+
+		void bind();
+		void unbind();
+	private:
+		GLenum mTarget;
+		GLenum mInternalFormat;
+
+		uint32_t mWidth;
+		uint32_t mHeight;
+
+		GLuint mID;
+	};
 }

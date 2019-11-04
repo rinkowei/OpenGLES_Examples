@@ -424,4 +424,37 @@ namespace es
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, error.c_str());
 		}
 	}
+
+	Renderbuffer::Renderbuffer(GLenum internalFormat, uint32_t w, uint32_t h)
+	{
+		mTarget = GL_RENDERBUFFER;
+		mInternalFormat = internalFormat;
+		mWidth = w;
+		mHeight = h;
+
+		GLES_CHECK_ERROR(glGenRenderbuffers(1, &mID));
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, mID));
+		GLES_CHECK_ERROR(glRenderbufferStorage(mTarget, mInternalFormat, mWidth, mHeight));
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
+	}
+
+	Renderbuffer::~Renderbuffer()
+	{
+		GLES_CHECK_ERROR(glDeleteRenderbuffers(1, &mID));
+	}
+
+	std::unique_ptr<Renderbuffer> create(GLenum internalFormat, uint32_t w, uint32_t h)
+	{
+		return std::make_unique<Renderbuffer>(internalFormat, w, h);
+	}
+
+	void Renderbuffer::bind()
+	{
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, mID));
+	}
+
+	void Renderbuffer::unbind()
+	{
+		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
+	}
 }
