@@ -443,7 +443,7 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteRenderbuffers(1, &mID));
 	}
 
-	std::unique_ptr<Renderbuffer> create(GLenum internalFormat, uint32_t w, uint32_t h)
+	std::unique_ptr<Renderbuffer> Renderbuffer::create(GLenum internalFormat, uint32_t w, uint32_t h)
 	{
 		return std::make_unique<Renderbuffer>(internalFormat, w, h);
 	}
