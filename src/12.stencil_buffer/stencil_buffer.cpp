@@ -133,11 +133,6 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glStencilMask(0xFF);
 	
@@ -153,6 +148,11 @@ public:
 	
 		glStencilMask(0xFF);
 		glEnable(GL_DEPTH_TEST);
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
 	}
 };
 

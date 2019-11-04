@@ -151,11 +151,6 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 		cubeMat->setUniform("spotLight.position", mMainCamera->getPosition());
 		cubeMat->setUniform("spotLight.direction", mMainCamera->getForward());
 
@@ -163,6 +158,11 @@ public:
 		{
 			cubes[i]->render();
 		}
+	}
+
+	virtual void windowResized() override
+	{
+		ExampleBase::windowResized();
 	}
 };
 
