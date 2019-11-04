@@ -457,4 +457,14 @@ namespace es
 	{
 		GLES_CHECK_ERROR(glBindRenderbuffer(mTarget, 0));
 	}
+
+	void Renderbuffer::resize(uint32_t w, uint32_t h)
+	{
+		mWidth = w;
+		mHeight = h;
+
+		bind();
+		GLES_CHECK_ERROR(glRenderbufferStorage(mTarget, mInternalFormat, mWidth, mHeight));
+		unbind();
+	}
 }

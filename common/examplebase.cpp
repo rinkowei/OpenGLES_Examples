@@ -68,7 +68,7 @@ namespace es
 
 		window = SDL_CreateWindow(title.c_str(),
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			windowWidth, windowHeight,
+			mWindowWidth, mWindowHeight,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 		if (!window)
 		{
@@ -140,7 +140,10 @@ namespace es
 
 	void ExampleBase::prepare()
 	{
-		World::getWorld()->createMainCamera(45.0f, 0.1f, 1000.0f, (float)windowWidth / (float)windowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+		// viewport conversion
+		glViewport(0, 0, mWindowWidth, mWindowHeight);
+
+		World::getWorld()->createMainCamera(45.0f, 0.1f, 1000.0f, (float)mWindowWidth / (float)mWindowHeight, glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 		mMainCamera = World::getWorld()->getMainCamera();
 	}
 
@@ -157,6 +160,17 @@ namespace es
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame(window);
 		ImGui::NewFrame();
+
+		int width, height;
+		SDL_GetWindowSize(window, &width, &height);
+		if (width != mWindowWidth || height != mWindowHeight)
+		{
+			mWindowWidth = width;
+			mWindowHeight = height;
+			windowResized();
+		}
+		glClearColor(defaultClearColor.r, defaultClearColor.g, defaultClearColor.b, defaultClearColor.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		// rendering objects
 		render(frameTimer);
@@ -230,7 +244,7 @@ namespace es
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		io.DisplaySize = ImVec2((float)windowWidth, (float)windowHeight);
+		io.DisplaySize = ImVec2((float)mWindowWidth, (float)mWindowHeight);
 		io.DeltaTime = frameTimer;
 	}
 
@@ -273,11 +287,6 @@ namespace es
 #endif
 
 	void ExampleBase::viewChanged()
-	{
-
-	}
-
-	void ExampleBase::windowResize()
 	{
 
 	}
@@ -352,7 +361,8 @@ namespace es
 
 	void ExampleBase::windowResized()
 	{
-
+		glViewport(0, 0, mWindowWidth, mWindowHeight);
+		mMainCamera->updateProjection(45.0f, 0.1f, 1000.0f, (float)mWindowWidth / (float)mWindowHeight);
 	}
 
 	void ExampleBase::onUpdateUIOverlay(es::UIOverlay* overlay)

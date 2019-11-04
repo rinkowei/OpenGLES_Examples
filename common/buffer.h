@@ -153,6 +153,8 @@ namespace es
 
 		void bind();
 		void unbind();
+
+		void resize(uint32_t w, uint32_t h);
 	private:
 		GLenum mTarget;
 		GLenum mInternalFormat;

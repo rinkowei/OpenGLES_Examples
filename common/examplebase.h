@@ -70,7 +70,6 @@ namespace es
 		bool resizing = false;
 		bool mIsApplicationQuit = false;
 
-		void windowResize();
 		void handleKeyboardInput();
 		void handleMouseMove();
 		void handleSDLEvent(const SDL_Event& event);
@@ -99,8 +98,9 @@ namespace es
 		Camera* mMainCamera;
 	public:
 		bool prepared = false;
-		GLint windowWidth = 1280;
-		GLint windowHeight = 720;
+
+		uint32_t mWindowWidth = 1280;
+		uint32_t mWindowHeight = 720;
 
 		es::UIOverlay uiOverlay;
 
