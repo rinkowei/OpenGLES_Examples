@@ -67,6 +67,7 @@ void main()
 {
 	vec3 N = normalize(fNormal);
 	vec3 V = normalize(viewPos - fFragPos);
+	vec3 R = reflect(-V, N);
 
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
@@ -77,7 +78,9 @@ void main()
 	{
 		vec3 L = normalize(lights[i].position - fFragPos);
 		vec3 H = normalize(V + L);
-		vec3 radiance = lights[i].color;
+		float distance = length(lights[i].position - fFragPos);
+		float attenuation = 1.0 / (distance * distance);
+		vec3 radiance = lights[i].color * attenuation;
 
 		float D = distributionGGX(N, H, roughness);
 		float G = geometrySmith(N, V, L, roughness);
@@ -95,8 +98,14 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * max(dot(N, L), 0.0);
 	}
 
-	vec3 ambient = 0.03 * albedo * ao;
+	vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+	vec3 kD = 1.0 - kS;
+	kD *= 1.0 - metallic;
+	vec3 irradiance = texture(irradianceMap, N).rgb;
+	vec3 diffuse = irradiance * albedo;
 
+	vec3 ambient = (kD * diffuse) * ao;
+	//vec3 ambient = 0.03 * albedo * ao;
 	vec3 color = ambient + Lo;
 
 	color = vec3(1.0) - exp(-color * exposure);
