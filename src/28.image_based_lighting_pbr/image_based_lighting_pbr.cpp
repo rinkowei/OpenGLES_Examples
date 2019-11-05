@@ -144,7 +144,7 @@ public:
 				sphere->setScale(glm::vec3(0.04f));
 				sphere->setUniform("albedo", glm::vec3(0.7f, 0.0f, 0.0f));
 				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
-				sphere->setUniform("metallic", glm::clamp((float)col / (float)(y + 1), 0.1f, 1.0f));
+				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
 				sphere->setUniform("ao", 1.0f);
 				sphere->setUniform("exposure", 1.0f);
 
