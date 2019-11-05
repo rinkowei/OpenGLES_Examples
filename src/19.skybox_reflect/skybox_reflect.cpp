@@ -34,7 +34,6 @@ public:
 		std::shared_ptr<TextureCube> cubemap = TextureCube::createFromFiles({ texturesDirectory + "/skyboxes/sincity/right.tga", texturesDirectory + "/skyboxes/sincity/left.tga",
 															 texturesDirectory + "/skyboxes/sincity/top.tga", texturesDirectory + "/skyboxes/sincity/bottom.tga",
 															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga" }, 1, false);
-		cubemap->generateMipmaps();
 
 		// create a cube model as skybox
 		skybox = Model::createFromFile("skybox", modelsDirectory + "/cube/cube.obj", {

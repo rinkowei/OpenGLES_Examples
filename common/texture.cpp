@@ -625,7 +625,7 @@ namespace es
 		}
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 
-		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		setMinFilter(GL_LINEAR);
 		setMagFilter(GL_LINEAR);
 		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
