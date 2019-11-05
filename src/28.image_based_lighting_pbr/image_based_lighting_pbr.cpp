@@ -46,6 +46,10 @@ public:
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
+		// setup camera
+		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+		mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+
 		captureFBO = Framebuffer::create();
 		captureRBO = Renderbuffer::create(GL_DEPTH_COMPONENT24, 512, 512);
 		captureFBO->attachRenderBufferTarget(captureRBO.get());
