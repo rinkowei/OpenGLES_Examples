@@ -21,6 +21,8 @@ uniform float exposure;
 
 uniform Light lights[4];
 
+uniform samplerCube irradianceMap;
+
 const float PI = 3.14159265359;
 
 float distributionGGX(vec3 N, vec3 H, float roughness)

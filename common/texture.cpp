@@ -203,7 +203,9 @@ namespace es
 		if (Utility::fileExtension(path) == "hdr")
 		{
 			ishdr = true;
+			stbi_set_flip_vertically_on_load(true);
 			data = (void*)stbi_loadf(path.c_str(), &width, &height, &components, 0);
+			stbi_set_flip_vertically_on_load(false);
 		}
 		else
 		{
