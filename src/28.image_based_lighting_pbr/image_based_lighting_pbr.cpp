@@ -8,8 +8,8 @@ class Example final : public ExampleBase
 public:
 	std::shared_ptr<Model> cube;
 
-	std::array<std::unique_ptr<Framebuffer>, 6> captureFBOs;
-	std::array<std::unique_ptr<Renderbuffer>, 6> captureRBOs;
+	std::unique_ptr<Framebuffer> captureFBO;
+	std::unique_ptr<Renderbuffer> captureRBO;
 
 	const int row = 7;
 	const int col = 7;
@@ -46,12 +46,9 @@ public:
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
-		for (std::size_t i = 0; i < captureFBOs.size(); i++)
-		{
-			captureFBOs[i] = Framebuffer::create();
-			captureRBOs[i] = Renderbuffer::create(GL_DEPTH_COMPONENT24, 512, 512);
-			captureFBOs[i]->attachRenderBufferTarget(captureRBOs[i].get());
-		}
+		captureFBO = Framebuffer::create();
+		captureRBO = Renderbuffer::create(GL_DEPTH_COMPONENT24, 512, 512);
+		captureFBO->attachRenderBufferTarget(captureRBO.get());
 
 		std::shared_ptr<Texture2D> hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/TropicalRuins.hdr", 1, false);
 
@@ -87,16 +84,14 @@ public:
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			cube->setUniform("captureView", captureViews[i]);
-			captureFBOs[0]->attachRenderTarget(0, envCubemap.get(), i, 0);
-			captureFBOs[0]->bind();
+			captureFBO->attachRenderTarget(0, envCubemap.get(), i, 0);
+			captureFBO->bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			cube->render();
-			captureFBOs[0]->unbind();
 		}
 
-		captureFBOs[0]->bind();
-		captureRBOs[0]->resize(32, 32);
+		captureRBO->resize(32, 32);
 
 		std::shared_ptr<Material> irradianceMat = Material::createFromData("irradiance_mat",
 			{
@@ -114,14 +109,14 @@ public:
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			cube->setUniform("captureView", captureViews[i]);
-			captureFBOs[0]->attachRenderTarget(0, irradianceCubemap.get(), i, 0);
-			captureFBOs[0]->bind();
+			captureFBO->attachRenderTarget(0, irradianceCubemap.get(), i, 0);
+			captureFBO->bind();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			cube->render();
-			captureFBOs[0]->unbind();
 		}
 
+		captureFBO->unbind();
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 
 		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",

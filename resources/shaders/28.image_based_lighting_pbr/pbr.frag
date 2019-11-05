@@ -105,7 +105,6 @@ void main()
 	vec3 diffuse = irradiance * albedo;
 
 	vec3 ambient = (kD * diffuse) * ao;
-	//vec3 ambient = 0.03 * albedo * ao;
 	vec3 color = ambient + Lo;
 
 	color = vec3(1.0) - exp(-color * exposure);
