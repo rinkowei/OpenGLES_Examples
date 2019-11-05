@@ -40,8 +40,8 @@ public:
 		ExampleBase::prepare();
 
 		// setup camera
-		mMainCamera->setPosition(glm::vec3(0.0f, 10.0f, 12.0f));
-		mMainCamera->setRotation(glm::vec3(45.0f, 0.0f, 0.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+		mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
@@ -65,12 +65,12 @@ public:
 			{
 				std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(x * col + y), sphereTemplate.get());
 			
-				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, 0.0f, float(x - (col / 2.0f)) * 2.5f);
+				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
 				sphere->setPosition(pos);
-				sphere->setScale(glm::vec3(0.035f));
+				sphere->setScale(glm::vec3(0.04f));
 				sphere->setUniform("albedo", glm::vec3(1.0f, 0.765557f, 0.336057f));
 				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
-				sphere->setUniform("metallic", glm::clamp((float)col / (float)(y + 1), 0.1f, 1.0f));
+				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
 				sphere->setUniform("ao", 1.0f);
 				sphere->setUniform("exposure", 1.0f);
 
