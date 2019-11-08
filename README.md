@@ -131,6 +131,10 @@ cmake -G "Visual Studio 16 2019"
 
 
 
+#### [27 - compute_shader](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/27.compute_shader>)
+
+
+
 #### [28 - basic_pbr](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/28.basic_pbr>)
 
 

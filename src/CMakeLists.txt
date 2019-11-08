@@ -11,7 +11,7 @@ function(buildExample EXAMPLE_NAME)
     endif()
     # Add shaders
     SET(SHADER_DIR "../resources/shaders/${EXAMPLE_NAME}")
-    file(GLOB SHADERS "${SHADER_DIR}/*.vert" "${SHADER_DIR}/*.geom" "${SHADER_DIR}/*.frag")
+    file(GLOB SHADERS "${SHADER_DIR}/*.vert" "${SHADER_DIR}/*.geom" "${SHADER_DIR}/*.frag" "${SHADER_DIR}/*.comp")
     source_group("Shaders" FILES ${SHADERS})
     if(WIN32)
         add_executable(${EXAMPLE_NAME} WIN32 ${SOURCE} ${SHADERS})
@@ -60,6 +60,7 @@ set(EXAMPLES
     24.cascade_shadow_mapping
     25.variance_shadow_mapping
     26.bloom_with_hdr
+    27.compute_shader
     28.basic_pbr
     29.image_based_lighting_pbr
 )
