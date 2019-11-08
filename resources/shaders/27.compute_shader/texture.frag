@@ -1,12 +1,12 @@
-#version 450
+#version 310 es
+precision mediump float;
+layout(location = 0) out vec4 fragColor;
 
-layout (binding = 1) uniform sampler2D samplerColor;
+in vec2 fTexcoord;
 
-layout (location = 0) in vec2 inUV;
-
-layout (location = 0) out vec4 outFragColor;
+uniform sampler2D inputImage;
 
 void main() 
 {
-  outFragColor = texture(samplerColor, inUV);
+	fragColor = texture(inputImage, fTexcoord);
 }
