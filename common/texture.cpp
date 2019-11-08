@@ -109,6 +109,8 @@ namespace es
 			glBindImageTexture(unit, mID, mipLevel, GL_TRUE, layer, access, format);
 		else
 			glBindImageTexture(unit, mID, mipLevel, GL_FALSE, 0, access, format);
+		
+		//////unbind(unit);
 	}
 
 	void Texture::setCompareMode(GLenum mode)
@@ -188,7 +190,8 @@ namespace es
 			}
 			else
 			{
-				GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, width, height, 0, mFormat, mType, data));
+				//GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, width, height, 0, mFormat, mType, data));
+				glTexSubImage2D(GL_TEXTURE_2D, mipLevel, 0, 0, width, height, mFormat, mType, data);
 			}
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
@@ -335,7 +338,8 @@ namespace es
 			
 			for (int i = 0; i < mMipLevels; i++)
 			{
-				GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
+				//GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
+				glTexStorage2D(mTarget, 1, mInternalFormat, mWidth, mHeight);
 
 				width = max(1, (width / 2));
 				height = max(1, (height / 2));
