@@ -20,22 +20,22 @@ namespace es
 		for (std::size_t i = 0; i < files.size(); i++)
 		{
 			std::string ext = Utility::fileExtension(files[i]);
-			GLenum shaderType = GL_INVALID_ENUM;
 			Shader* shader;
 			if (ext == "vert")
 			{
-				shaderType = GL_VERTEX_SHADER;
 				shader = VertexShader::createFromFile(files[i]);
 			}
 			else if (ext == "geom")
 			{
-				shaderType = GL_GEOMETRY_SHADER_EXT;
 				shader = GeometryShader::createFromFile(files[i]);
 			}
 			else if (ext == "frag")
 			{
-				shaderType = GL_FRAGMENT_SHADER;
 				shader = FragmentShader::createFromFile(files[i]);
+			}
+			else if (ext == "comp")
+			{
+				shader = ComputeShader::createFromFile(files[i]);
 			}
 
 			shaders.push_back(shader);

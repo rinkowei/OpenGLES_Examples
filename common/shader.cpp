@@ -123,4 +123,25 @@ namespace es
 		delete(shader);
 		return nullptr;
 	}
+
+	ComputeShader::ComputeShader(const std::string& path) : Shader(GL_COMPUTE_SHADER, path)
+	{
+
+	}
+
+	ComputeShader::~ComputeShader()
+	{
+
+	}
+
+	ComputeShader* ComputeShader::createFromFile(const std::string& path)
+	{
+		ComputeShader* shader = new (std::nothrow) ComputeShader(path);
+		if (shader)
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
+	}
 }

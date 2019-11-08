@@ -49,6 +49,15 @@ namespace es
 
 		static FragmentShader* createFromFile(const std::string& path);
 	};
+
+	class ComputeShader : public Shader
+	{
+	public:
+		ComputeShader(const std::string& path);
+		~ComputeShader();
+
+		static ComputeShader* createFromFile(const std::string& path);
+	};
 }
 
 #endif
