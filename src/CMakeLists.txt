@@ -60,8 +60,8 @@ set(EXAMPLES
     24.cascade_shadow_mapping
     25.variance_shadow_mapping
     26.bloom_with_hdr
-    27.basic_pbr
-    28.image_based_lighting_pbr
+    28.basic_pbr
+    29.image_based_lighting_pbr
 )
 
 buildExamples()

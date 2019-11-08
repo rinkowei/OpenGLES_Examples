@@ -30,7 +30,7 @@ public:
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/28.image_based_lighting_pbr/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/29.image_based_lighting_pbr/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()
