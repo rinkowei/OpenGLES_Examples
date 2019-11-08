@@ -11,18 +11,43 @@ namespace es
 	class Shader
 	{
 	public:
-		static Shader* createFromFile(GLenum type, const std::string& path);
+		Shader(GLenum type, const std::string& path);
+		virtual ~Shader();
 
 		bool isCompiled();
 		GLuint getID();
 		GLenum getType();
 	private:
-		Shader(GLenum type, const std::string& path);
-		~Shader();
-
 		bool mCompiled;
 		GLuint mID;
 		GLenum mType;
+	};
+
+	class VertexShader : public Shader
+	{
+	public:
+		VertexShader(const std::string& path);
+		~VertexShader();
+
+		static VertexShader* createFromFile(const std::string& path);
+	};
+
+	class GeometryShader : public Shader
+	{
+	public:
+		GeometryShader(const std::string& path);
+		~GeometryShader();
+
+		static GeometryShader* createFromFile(const std::string& path);
+	};
+
+	class FragmentShader : public Shader
+	{
+	public:
+		FragmentShader(const std::string& path);
+		~FragmentShader();
+
+		static FragmentShader* createFromFile(const std::string& path);
 	};
 }
 

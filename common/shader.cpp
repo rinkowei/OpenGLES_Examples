@@ -6,7 +6,7 @@ namespace es
 	Shader::Shader(GLenum type, const std::string& path)
 		:mID(0),
 		 mCompiled(false),
-		 mType(GL_VERTEX_SHADER)
+		 mType(GL_INVALID_ENUM)
 	{
 		std::string shaderStr;
 		if (!Utility::readFile(path, shaderStr))
@@ -46,17 +46,6 @@ namespace es
 		GLES_CHECK_ERROR(glDeleteShader(mID));
 	}
 
-	Shader* Shader::createFromFile(GLenum type, const std::string& path)
-	{
-		Shader* shader = new (std::nothrow) Shader(type, path);
-		if (shader)
-		{
-			return shader;
-		}
-		delete(shader);
-		return nullptr;
-	}
-
 	bool Shader::isCompiled()
 	{
 		return mCompiled;
@@ -70,5 +59,68 @@ namespace es
 	GLenum Shader::getType()
 	{
 		return mType;
+	}
+
+	VertexShader::VertexShader(const std::string& path) : Shader(GL_VERTEX_SHADER, path)
+	{
+
+	}
+
+	VertexShader::~VertexShader()
+	{
+
+	}
+
+	VertexShader* VertexShader::createFromFile(const std::string& path)
+	{
+		VertexShader* shader = new (std::nothrow) VertexShader(path);
+		if (shader)
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
+	}
+
+	GeometryShader::GeometryShader(const std::string& path) : Shader(GL_GEOMETRY_SHADER_EXT, path)
+	{
+
+	}
+
+	GeometryShader::~GeometryShader()
+	{
+
+	}
+
+	GeometryShader* GeometryShader::createFromFile(const std::string& path)
+	{
+		GeometryShader* shader = new (std::nothrow) GeometryShader(path);
+		if (shader)
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
+	}
+
+	FragmentShader::FragmentShader(const std::string& path) : Shader(GL_FRAGMENT_SHADER, path)
+	{
+
+	}
+
+	FragmentShader::~FragmentShader()
+	{
+
+	}
+
+	FragmentShader* FragmentShader::createFromFile(const std::string& path)
+	{
+		FragmentShader* shader = new (std::nothrow) FragmentShader(path);
+		if (shader)
+		{
+			return shader;
+		}
+		delete(shader);
+		return nullptr;
 	}
 }
