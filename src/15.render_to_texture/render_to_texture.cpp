@@ -70,7 +70,7 @@ public:
 		);
 		model->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		
-		renderTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+		renderTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, -1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, false);
 		renderTexture->setMinFilter(GL_LINEAR);
 		renderTexture->setMagFilter(GL_LINEAR);
 

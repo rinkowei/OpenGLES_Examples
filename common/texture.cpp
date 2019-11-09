@@ -10,8 +10,7 @@ namespace es
 		 mInternalFormat(GL_RGBA8),
 		 mFormat(GL_RGBA),
 		 mType(GL_UNSIGNED_BYTE),
-		 mComponents(4),
-		 mArraySize(1)
+		 mComponents(4)
 	{
 		GLES_CHECK_ERROR(glGenTextures(1, &mID));
 	}
@@ -65,11 +64,6 @@ namespace es
 		return mType;
 	}
 
-	uint32_t Texture::getArraySize()
-	{
-		return mArraySize;
-	}
-
 	void Texture::setWrapping(GLenum s, GLenum t, GLenum r)
 	{
 		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
@@ -103,14 +97,7 @@ namespace es
 
 	void Texture::bindImage(uint32_t unit, uint32_t mipLevel, uint32_t layer, GLenum access, GLenum format)
 	{
-		bind(unit);
-
-		if (mArraySize > 1)
-			glBindImageTexture(unit, mID, mipLevel, GL_TRUE, layer, access, format);
-		else
-			glBindImageTexture(unit, mID, mipLevel, GL_FALSE, 0, access, format);
-		
-		//////unbind(unit);
+		GLES_CHECK_ERROR(glBindImageTexture(unit, mID, mipLevel, GL_FALSE, 0, access, format));
 	}
 
 	void Texture::setCompareMode(GLenum mode)
@@ -131,14 +118,14 @@ namespace es
 
 	std::unordered_map<std::string, std::shared_ptr<Texture2D>> Texture2D::mTexture2DCache;
 
-	Texture2D::Texture2D(std::string path, int mipLevels, bool srgb) : Texture()
+	Texture2D::Texture2D(std::string path, int mipLevels, bool srgb, bool isFlipY) : Texture()
 	{
-		initFromFile(path, mipLevels, srgb);
+		initFromFile(path, mipLevels, srgb, isFlipY);
 	}
 
-	Texture2D::Texture2D(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type) : Texture()
+	Texture2D::Texture2D(uint32_t w, uint32_t h, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed) : Texture()
 	{
-		initFromData(w, h, arraySize, mipLevels, numSamples, internalFormat, format, type);
+		initFromData(w, h, mipLevels, numSamples, internalFormat, format, type, isFixed);
 	}
 
 	Texture2D::~Texture2D()
@@ -146,11 +133,11 @@ namespace es
 
 	}
 
-	std::shared_ptr<Texture2D> Texture2D::createFromFile(std::string path, int mipLevels, bool srgb)
+	std::shared_ptr<Texture2D> Texture2D::createFromFile(std::string path, int mipLevels, bool srgb, bool isFlipY)
 	{
 		if (mTexture2DCache.find(path) == mTexture2DCache.end())
 		{
-			std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, mipLevels, srgb);
+			std::shared_ptr<Texture2D> tex2d = std::make_shared<Texture2D>(path, mipLevels, srgb, isFlipY);
 			mTexture2DCache[path] = tex2d;
 			return tex2d;
 		}
@@ -160,12 +147,12 @@ namespace es
 		}
 	}
 
-	std::shared_ptr<Texture2D> Texture2D::createFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type)
+	std::shared_ptr<Texture2D> Texture2D::createFromData(uint32_t w, uint32_t h, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed)
 	{
-		return std::make_shared<Texture2D>(w, h, arraySize, mipLevels, numSamples, internalFormat, format, type);
+		return std::make_shared<Texture2D>(w, h, mipLevels, numSamples, internalFormat, format, type, isFixed);
 	}
 
-	void Texture2D::setData(int arrayIndex, int mipLevel, void* data)
+	void Texture2D::setData(uint32_t mipLevel, void* data)
 	{
 		if (mNumSamples > 1)
 		{
@@ -184,31 +171,30 @@ namespace es
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
 
-			if (mArraySize > 1)
+			if (mFixed)
 			{
-				GLES_CHECK_ERROR(glTexImage3D(mTarget, mipLevel, mInternalFormat, width, height, arrayIndex, 0, mFormat, mType, data));
+				GLES_CHECK_ERROR(glTexSubImage2D(mTarget, mipLevel, 0, 0, width, height, mFormat, mType, data));
 			}
 			else
 			{
-				//GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, width, height, 0, mFormat, mType, data));
-				glTexSubImage2D(GL_TEXTURE_2D, mipLevel, 0, 0, width, height, mFormat, mType, data);
+				GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, width, height, 0, mFormat, mType, data));
 			}
 
 			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 		}
 	}
 
-	void Texture2D::initFromFile(std::string path, int mipLevels, bool srgb)
+	void Texture2D::initFromFile(std::string path, int mipLevels, bool srgb, bool isFlipY)
 	{
 		int width, height, components;
 		void* data;
 		bool ishdr = false;
+
+		stbi_set_flip_vertically_on_load(isFlipY);
 		if (Utility::fileExtension(path) == "hdr")
 		{
 			ishdr = true;
-			stbi_set_flip_vertically_on_load(true);
 			data = (void*)stbi_loadf(path.c_str(), &width, &height, &components, 0);
-			stbi_set_flip_vertically_on_load(false);
 		}
 		else
 		{
@@ -222,6 +208,7 @@ namespace es
 		}
 
 		GLenum internalFormat, format;
+		GLenum type = GL_UNSIGNED_BYTE;
 
 		switch (components)
 		{
@@ -240,12 +227,14 @@ namespace es
 			case 3:
 			{
 				if (srgb)
-				{
 					internalFormat = GL_SRGB8;
-				}
 				else
-				{
 					internalFormat = GL_RGB8;
+
+				if (ishdr)
+				{
+					internalFormat = GL_RGB16F;
+					type = GL_FLOAT;
 				}
 				format = GL_RGB;
 				break;
@@ -253,12 +242,14 @@ namespace es
 			case 4:
 			{
 				if (srgb)
-				{
 					internalFormat = GL_SRGB8_ALPHA8;
-				}
 				else
-				{
 					internalFormat = GL_RGBA8;
+
+				if (ishdr)
+				{
+					internalFormat = GL_RGBA16F;
+					type = GL_FLOAT;
 				}
 				format = GL_RGBA;
 				break;
@@ -271,20 +262,13 @@ namespace es
 			}
 		}
 
-		mArraySize = 1;
 		mInternalFormat = internalFormat;
 		mFormat = format;
-		mType = GL_UNSIGNED_BYTE;
+		mType = type;
 		mWidth = width;
 		mHeight = height;
 		mNumSamples = 1;
-
-		if (ishdr)
-		{
-			mInternalFormat = GL_RGB16F;
-			mFormat = GL_RGB;
-			mType = GL_FLOAT;
-		}
+		mFixed = true;
 	    
 		if (mipLevels == -1)
 		{
@@ -302,71 +286,50 @@ namespace es
 			mMipLevels = mipLevels;
 		}
 
-		if (mArraySize > 1)
+		if (mNumSamples > 1)
 		{
-			mTarget = GL_TEXTURE_2D_ARRAY;
-
-			width = mWidth;
-			height = mHeight;
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
-			for (int i = 0; i < mMipLevels; i++)
-			{
-				GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mArraySize, 0, mFormat, mType, nullptr));
-
-				width = max(1, (width / 2));
-				height = max(1, (height / 2));
-			}
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+			mTarget = GL_TEXTURE_2D_MULTISAMPLE;
 		}
 		else
 		{
-			if (mNumSamples > 1)
-			{
-				mTarget = GL_TEXTURE_2D_MULTISAMPLE;
-			}
-			else
-			{
-				mTarget = GL_TEXTURE_2D;
-			}
-
-			width = mWidth;
-			height = mHeight;
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
-			
-			for (int i = 0; i < mMipLevels; i++)
-			{
-				//GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
-				glTexStorage2D(mTarget, 1, mInternalFormat, mWidth, mHeight);
-
-				width = max(1, (width / 2));
-				height = max(1, (height / 2));
-			}
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+			mTarget = GL_TEXTURE_2D;
 		}
-	
-		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
-		setMagFilter(GL_LINEAR);
 
-		setData(0, 0, data);
-		generateMipmaps();
+		width = mWidth;
+		height = mHeight;
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+		GLES_CHECK_ERROR(glTexStorage2D(mTarget, mMipLevels, mInternalFormat, mWidth, mHeight));
+
+		for (int i = 0; i < mMipLevels; i++)
+		{
+			glTexSubImage2D(mTarget, i, 0, 0, width, height, mFormat, mType, data);
+
+			width = max(1, (width / 2));
+			height = max(1, (height / 2));
+		}
+
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+		GLES_CHECK_ERROR(glGenerateMipmap(mTarget));
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 
 		stbi_image_free(data);
 	}
 
-	void Texture2D::initFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type)
+	void Texture2D::initFromData(uint32_t w, uint32_t h, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed)
 	{
-		mArraySize = arraySize;
 		mInternalFormat = internalFormat;
 		mFormat = format;
 		mType = type;
 		mWidth = w;
 		mHeight = h;
 		mNumSamples = numSamples;
+		mFixed = isFixed;
 
 		if (mipLevels == -1)
 		{
@@ -387,64 +350,48 @@ namespace es
 			mMipLevels = mipLevels;
 		}
 
-		if (arraySize > 1)
+		if (mNumSamples > 1)
+			mTarget = GL_TEXTURE_2D_MULTISAMPLE;
+		else
+			mTarget = GL_TEXTURE_2D;
+
+		int width = mWidth;
+		int height = mHeight;
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+
+		if (mNumSamples > 1)
 		{
-			mTarget = GL_TEXTURE_2D_ARRAY;
-
-			int width = mWidth;
-			int height = mHeight;
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
-
-			for (int i = 0; i < mMipLevels; i++)
+			if (mFixed)
 			{
-				GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mArraySize, 0, mFormat, mType, nullptr));
-
-				width = max(1, (width / 2));
-				height = max(1, (height / 2));
+				glTexStorage2DMultisample(mTarget, mNumSamples, mInternalFormat, mWidth, mHeight, true);
 			}
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 		}
 		else
 		{
-			if (mNumSamples > 1)
+			if (mFixed)
 			{
-				mTarget = GL_TEXTURE_2D_MULTISAMPLE;
-			}
-			else
-			{
-				mTarget = GL_TEXTURE_2D;
-			}
-
-			int width = mWidth;
-			int height = mHeight;
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
-
-			if (mNumSamples > 1)
-			{
-
+				glTexStorage2D(mTarget, mMipLevels, mInternalFormat, mWidth, mHeight);
 			}
 			else
 			{
 				for (int i = 0; i < mMipLevels; i++)
 				{
 					GLES_CHECK_ERROR(glTexImage2D(mTarget, i, mInternalFormat, width, height, 0, mFormat, mType, nullptr));
-					
+
 					width = max(1, (width / 2));
 					height = max(1, (height / 2));
 				}
 			}
-
-			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 		}
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
-		setWrapping(GL_REPEAT, GL_REPEAT, GL_REPEAT);
-		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
-		setMagFilter(GL_LINEAR);
+		GLES_CHECK_ERROR(glGenerateMipmap(mTarget));
 
-		generateMipmaps();
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 	}
 
 	void Texture2D::resize(uint32_t mipLevel, uint32_t w, uint32_t h)
@@ -472,6 +419,11 @@ namespace es
 	uint32_t Texture2D::getNumSamples()
 	{
 		return mNumSamples;
+	}
+
+	bool Texture2D::getFixed() const
+	{
+		return mFixed;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------------------------------------

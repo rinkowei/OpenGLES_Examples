@@ -33,7 +33,6 @@ namespace es
 		GLenum getInternalFormat();
 		GLenum getFormat();
 		GLenum getType();
-		uint32_t getArraySize();
 
 		void setWrapping(GLenum s, GLenum t, GLenum r);
 		void setBorderColor(float r, float g, float b, float a);
@@ -50,21 +49,20 @@ namespace es
 		GLenum mFormat;
 		GLenum mType;
 		GLuint mComponents;
-		uint32_t mArraySize;
 	};
 
 	class Texture2D : public Texture
 	{
 	public:
-		Texture2D(std::string path, int mipLevels = 1, bool srgb = true);
-		Texture2D(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
+		Texture2D(std::string path, int mipLevels = 1, bool srgb = true, bool isFlipY = true);
+		Texture2D(uint32_t w, uint32_t h, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed = true);
 		~Texture2D();
 
-		static std::shared_ptr<Texture2D> createFromFile(std::string path, int mipLevels = 1, bool srgb = true);
+		static std::shared_ptr<Texture2D> createFromFile(std::string path, int mipLevels = 1, bool srgb = true, bool isFlipY = true);
 
-		static std::shared_ptr<Texture2D> createFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
+		static std::shared_ptr<Texture2D> createFromData(uint32_t w, uint32_t h, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed = true);
 
-		void setData(int arrayIndex, int mipLevel, void* data);
+		void setData(uint32_t mipLevel, void* data);
 
 		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
 
@@ -72,14 +70,16 @@ namespace es
 		uint32_t getHeight();
 		uint32_t getMipLevels();
 		uint32_t getNumSamples();
+		bool getFixed() const;
 	private:
-		void initFromFile(std::string path, int mipLevels, bool srgb);
-		void initFromData(uint32_t w, uint32_t h, uint32_t arraySize, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type);
+		void initFromFile(std::string path, int mipLevels, bool srgb, bool isFlipY);
+		void initFromData(uint32_t w, uint32_t h, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed);
 
 		uint32_t mWidth;
 		uint32_t mHeight;
 		uint32_t mMipLevels;
 		uint32_t mNumSamples;
+		bool mFixed;
 
 		static std::unordered_map<std::string, std::shared_ptr<Texture2D>> mTexture2DCache;
 	};

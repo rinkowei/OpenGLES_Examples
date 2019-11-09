@@ -353,14 +353,7 @@ namespace es
 			mAttachments.push_back(buf);
 		}
 
-		if (texture->getArraySize() > 1)
-		{
-			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, buf, texture->getID(), mipLevel, layer));
-		}
-		else
-		{
-			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, buf, texture->getTarget(), texture->getID(), mipLevel));
-		}
+		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, buf, texture->getTarget(), texture->getID(), mipLevel));
 		
 		if (draw)
 		{
@@ -437,14 +430,7 @@ namespace es
 		bind();
 		GLES_CHECK_ERROR(glBindTexture(texture->getTarget(), texture->getID()));
 
-		if (texture->getArraySize() > 1)
-		{
-			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getID(), mipLevel, layer));
-		}
-		else
-		{
-			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getTarget(), texture->getID(), mipLevel));
-		}
+		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getTarget(), texture->getID(), mipLevel));
 
 		GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));
 
@@ -461,14 +447,7 @@ namespace es
 	{
 		bind();
 
-		if (texture->getArraySize() > 1)
-		{
-			GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture->getID(), mipLevel, layer));
-		}
-		else
-		{
-			GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture->getID(), mipLevel));
-		}
+		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, texture->getID(), mipLevel));
 
 		GLES_CHECK_ERROR(glDrawBuffers(0, GL_NONE));
 
