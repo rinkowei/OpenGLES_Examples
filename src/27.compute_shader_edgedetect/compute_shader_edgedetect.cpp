@@ -34,6 +34,8 @@ public:
 	{
 		ExampleBase::prepare();
 
+		glEnable(GL_DEPTH_TEST);
+		
 		computeProgram = Program::createFromFiles("compute_program", 
 			{
 				shadersDirectory + "edgedetect.comp"
