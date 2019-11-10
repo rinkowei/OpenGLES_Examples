@@ -61,8 +61,8 @@ set(EXAMPLES
     25.variance_shadow_mapping
     26.bloom_with_hdr
     27.compute_shader_edgedetect
-    28.basic_pbr
-    29.image_based_lighting_pbr
+    29.basic_pbr
+    30.image_based_lighting_pbr
 )
 
 buildExamples()
