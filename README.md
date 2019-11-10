@@ -131,7 +131,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [27 - compute_shader](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/27.compute_shader>)
+#### [27 - compute_shader_edgedetect](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/27.compute_shader_edgedetect>)
 
 
 
