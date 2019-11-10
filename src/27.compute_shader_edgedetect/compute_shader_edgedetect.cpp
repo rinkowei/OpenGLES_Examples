@@ -15,14 +15,14 @@ public:
 
 	Example()
 	{
-		title = "compute shader";
+		title = "compute shader edgedetect";
 		settings.vsync = true;
 		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/27.compute_shader/";
-		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/27.compute_shader/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/27.compute_shader_edgedetect/";
+		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/27.compute_shader_edgedetect/";
 	}
 
 	~Example()
