@@ -36,7 +36,7 @@ public:
 
 		computeProgram = Program::createFromFiles("compute_program", 
 			{
-				shadersDirectory + "emboss.comp"
+				shadersDirectory + "edgedetect.comp"
 	        }
 		);
 
@@ -75,12 +75,12 @@ public:
 		computeProgram->unapply();
 
 		inputQuad->setTexture("inputImage", inputImage);
-		inputQuad->setPosition(glm::vec3(0.0f, 1.05f, 0.0f));
-		inputQuad->setScale(glm::vec3(2.0f, 1.0f, 0.9f));
+		inputQuad->setPosition(glm::vec3(-1.8f, 0.0f, 0.0f));
+		inputQuad->setScale(glm::vec3(1.8f, 1.8f, 1.0f));
 		
 		outputQuad->setTexture("inputImage", outputImage);
-		outputQuad->setPosition(glm::vec3(0.0f, -1.05f, 0.0f));
-		outputQuad->setScale(glm::vec3(2.0f, 1.0f, 0.9f));
+		outputQuad->setPosition(glm::vec3(1.8f, 0.0f, 0.0f));
+		outputQuad->setScale(glm::vec3(1.8f, 1.8f, 1.0f));
 	}
 
 	virtual void render(float deltaTime) override
