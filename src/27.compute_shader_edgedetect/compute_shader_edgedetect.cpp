@@ -33,7 +33,7 @@ public:
 	virtual void prepare() override
 	{
 		ExampleBase::prepare();
-
+		
 		glEnable(GL_DEPTH_TEST);
 		
 		computeProgram = Program::createFromFiles("compute_program", 
@@ -48,7 +48,7 @@ public:
 				shadersDirectory + "texture.frag"
 			}
 		);
-
+	
 		outputQuad = Model::createFromFile("output_quad", modelsDirectory + "/quadrangle/quadrangle.obj",
 			{
 				shadersDirectory + "texture.vert",
