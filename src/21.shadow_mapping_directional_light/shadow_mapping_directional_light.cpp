@@ -13,7 +13,7 @@ public:
 	const uint32_t lightMapHeight = 2048;
 	std::unique_ptr<Framebuffer> lightMapFBO;
 
-	glm::vec3 lightPos = glm::vec3(-2.0f, 5.0f, 0.0f);
+	glm::vec3 lightDir = glm::vec3(1.0f, -1.0f, 0.0f);
 
 	glm::mat4 biasMatrix = glm::mat4(
 		0.5f, 0.0f, 0.0f, 0.0f,
@@ -85,9 +85,10 @@ public:
 	virtual void render(float deltaTime) override
 	{
 		// change light position over time
-		lightPos = glm::vec3(sin(timePassed) * 2.0f, 5.0f + cos(timePassed) * 1.0f, cos(timePassed) * 1.0f);
+		lightDir = glm::vec3(sin(timePassed) * 1.0f, -1.0f, cos(timePassed) * 1.0f);
+		//lightDir = glm::vec3(1.0f, -1.0f, 0.0f);
 		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
-		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightView = glm::lookAtLH<float>(lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceMatrix = lightProj * lightView;
 
 		glViewport(0, 0, lightMapWidth, lightMapHeight);
@@ -104,7 +105,7 @@ public:
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		playground->setUniform("lightPos", lightPos);
+		playground->setUniform("lightDir", lightDir);
 		playground->setUniform("viewPos", mMainCamera->getPosition());
 		playground->setUniform("lightSpaceMatrix", lightSpaceMatrix);
 		playground->render();
