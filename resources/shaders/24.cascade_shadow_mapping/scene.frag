@@ -20,22 +20,13 @@ struct DirectionalLight {
 uniform DirectionalLight dirLight;
 uniform vec3 viewPos;
 uniform float cascadeEndClipSpace[NUM_CASCADES];
-uniform sampler2D depthMap0;
-uniform sampler2D depthMap1;
-uniform sampler2D depthMap2;
+uniform sampler2D depthMap[NUM_CASCADES];
 
 float calculateShadow(int cascadeIndex, vec4 lightSpaceFragPos)
 {
-	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.z;
-	projCoords = projCoords * 0.5 + 0.5;
-	float depth = 0.0;
-	if (cascadeIndex == 0)
-		depth = texture(depthMap0, projCoords.xy).r;
-	else if (cascadeIndex == 1)
-		depth = texture(depthMap1, projCoords.xy).r;
-	else if (cascadeIndex == 2)
-		depth = texture(depthMap2, projCoords.xy).r;
-	if (depth < projCoords.z + 0.00001)
+	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
+	float depth = texture(depthMap[cascadeIndex], projCoords.xy).r;
+	if (depth < projCoords.z - 0.0005)
 	{
 		return 0.5;
 	}
@@ -48,7 +39,6 @@ void main()
 {
 	vec3 albedo = vec3(0.8f, 0.8f, 0.8f);
 	vec3 normal = normalize(fNormal);
-	vec3 lightColor = vec3(0.8f);
 
 	// ambient
 	vec3 ambient = dirLight.ambientIntensity * dirLight.color * albedo;
@@ -73,7 +63,7 @@ void main()
 			break;
 		}
 	}
-	
-    //fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0f);
-	fragColor = vec4(vec3(texture(depthMap0, fLightSpaceFragPos[0].xy).r), 1.0f);
+	shadow = calculateShadow(0, fLightSpaceFragPos[0]);
+    fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0f);
+	//fragColor = vec4(vec3(texture(depthMap[0], fLightSpaceFragPos[0].xy).r), 1.0f);
 }

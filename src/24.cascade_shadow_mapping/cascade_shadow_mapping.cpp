@@ -17,11 +17,11 @@ public:
 	std::shared_ptr<Material> shadowMat;
 	std::shared_ptr<Material> sceneMat;
 
-	std::unique_ptr<Framebuffer> lightMapFBO;
+	std::array<std::unique_ptr<Framebuffer>, NUM_CASCADES> lightMapFBOs;
 
-	const uint32_t lightMapWidth = 1024;
-	const uint32_t lightMapHeight = 1024;
-	std::array<std::shared_ptr<Texture2D>, 3> lightMaps;
+	const uint32_t lightMapWidth = 2048;
+	const uint32_t lightMapHeight = 2048;
+	std::array<std::shared_ptr<Texture2D>, NUM_CASCADES> lightMaps;
 
 	struct OrthoProjInfo
 	{
@@ -44,8 +44,6 @@ public:
 	};
 
 	DirectionalLight dirLight;
-
-	glm::vec3 lightPos = glm::vec3(-2.0f, 5.0f, 0.0f);
 
 	std::array<float, NUM_CASCADES + 1> cascadeEnd;
 
@@ -87,27 +85,28 @@ public:
 		glEnable(GL_CULL_FACE);
 		
 		cascadeEnd[0] = mMainCamera->getNearPlane();
-		cascadeEnd[1] = mMainCamera->getFarPlane() / 20.0f;
-		cascadeEnd[2] = mMainCamera->getFarPlane() / 10.0f;
+		cascadeEnd[1] = mMainCamera->getFarPlane() / 5.0f;
+		cascadeEnd[2] = mMainCamera->getFarPlane() / 2.0f;
 		cascadeEnd[3] = mMainCamera->getFarPlane();
 
 		dirLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
-		dirLight.ambientIntensity = 0.5f;
-		dirLight.diffuseIntensity = 0.9f;
+		dirLight.ambientIntensity = 0.3f;
+		dirLight.diffuseIntensity = 0.8f;
 		dirLight.direction = glm::vec3(1.0f, -1.0f, 0.0f);
 
-		lightMapFBO = Framebuffer::create();
+		for (std::size_t i = 0; i < lightMapFBOs.size(); i++)
+		{
+			lightMapFBOs[i] = Framebuffer::create();
+		}
 	
 		for (std::size_t i = 0; i < lightMaps.size(); i++)
 		{
 			lightMaps[i] = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, false);
-			lightMaps[i]->setMinFilter(GL_LINEAR);
-			lightMaps[i]->setMagFilter(GL_LINEAR);
+			lightMaps[i]->setMinFilter(GL_NEAREST);
+			lightMaps[i]->setMagFilter(GL_NEAREST);
 			lightMaps[i]->setCompareMode(GL_NONE);
 			lightMaps[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		}
-
-		lightMapFBO->attachDepthRenderTarget(lightMaps[0].get(), 0, 0);
 
 		shadowMat = Material::createFromData("shadow_mat",
 			{
@@ -125,9 +124,9 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-				{ "depthMap0", lightMaps[0] },
-				{ "depthMap1", lightMaps[1] },
-				{ "depthMap2", lightMaps[2] }
+				//{ "depthMap[0]", lightMaps[0] },
+				//{ "depthMap[1]", lightMaps[1] },
+				//{ "depthMap[2]", lightMaps[2] }
 			}
 		);
 
@@ -155,35 +154,15 @@ public:
 			venusShadows[i]->setPosition(glm::vec3(0.0f, 0.0f, 15.0f - i * 7.0f));
 			venusShadows[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		}
-		/*
-		playgroundShadow = Model::createFromFile("playground_shadow", modelsDirectory + "/playground/Playground.obj",
-			{
-				shadersDirectory + "depth_map.vert",
-				shadersDirectory + "depth_map.frag"
-			}
-		);
 
-		playground = Model::clone("playground", playgroundShadow.get());
-		std::shared_ptr<Material> mat = Material::createFromData("mat",
-			{
-				shadersDirectory + "playground.vert",
-				shadersDirectory + "playground.frag"
-			},
-			{
-				{ "depthMap", lightMap },
-			}
-			);
-		playground->setMaterial(mat);
-		playground->setUniform("biasMatrix", biasMatrix);
-		*/
-
+		sceneMat->setUniform("biasMatrix", biasMatrix);
 		sceneMat->setUniform("dirLight.color", dirLight.color);
 		sceneMat->setUniform("dirLight.direction", dirLight.direction);
 		sceneMat->setUniform("dirLight.ambientIntensity", dirLight.ambientIntensity);
-		sceneMat->setUniform("dirLight.color", dirLight.diffuseIntensity);
+		sceneMat->setUniform("dirLight.diffuseIntensity", dirLight.diffuseIntensity);
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{
-			//sceneMat->setTexture("depthMap" + std::to_string(i), lightMaps[i]);
+			sceneMat->setTexture("depthMap" + std::to_string(i), lightMaps[i]);
 
 			glm::vec4 clipSpacePos = mMainCamera->getProjection() * glm::vec4(0.0f, 0.0f, cascadeEnd[i + 1], 1.0f);
 			sceneMat->setUniform("cascadeEndClipSpace[" + std::to_string(i) + "]", clipSpacePos.z);
@@ -197,25 +176,27 @@ public:
 		glViewport(0, 0, lightMapWidth, lightMapHeight);
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{
-			lightMapFBO->attachDepthRenderTarget(lightMaps[i].get(), 0, 0);
-			lightMapFBO->bind();
+			lightMapFBOs[i]->attachDepthRenderTarget(lightMaps[i].get(), 0, 0);
+			lightMapFBOs[i]->bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-			glm::mat4 lightView = glm::lookAt(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 lightView = glm::lookAtLH<float>(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l, lightOrthoProjInfo[i].r, lightOrthoProjInfo[i].b, lightOrthoProjInfo[i].t, lightOrthoProjInfo[i].n, lightOrthoProjInfo[i].f);
+			//glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
 			glm::mat4 lightMatrix = lightProj * lightView;
 
 			shadowMat->setUniform("lightMatrix", lightMatrix);
+			sceneMat->setUniform("lightMatrix[" + std::to_string(i) + "]", lightMatrix);
 
 			planeShadow->render();
 			for (std::size_t j = 0; j < venusShadows.size(); j++)
 			{
-				venusShadows[i]->render();
+				venusShadows[j]->render();
 			}
+			lightMapFBOs[i]->unbind();
 		}
 
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
-		lightMapFBO->unbind();
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		/*
@@ -240,6 +221,7 @@ public:
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		*/
+		
 		sceneMat->setUniform("viewPos", mMainCamera->getPosition());
 		plane->render();
 
@@ -259,11 +241,12 @@ public:
 		glm::mat4 camView = mMainCamera->getView();
 		glm::mat4 camViewInv = glm::inverse(camView);
 
-		glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), dirLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightView = glm::lookAtLH<float>(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		float aspectRatio = mMainCamera->getAspectRatio();
-		float tanHalfHFov = glm::tan(glm::radians(mMainCamera->getFov() / 2.0f));
-		float tanHalfVFov = glm::tan(glm::radians(mMainCamera->getFov() * aspectRatio / 2.0f));
+		float fov = 90.0f;
+		float tanHalfHFov = glm::tan(glm::radians(fov / 2.0f));
+		float tanHalfVFov = glm::tan(glm::radians(fov * aspectRatio / 2.0f));
 
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{

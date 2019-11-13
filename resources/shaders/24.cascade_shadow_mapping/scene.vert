@@ -11,6 +11,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 lightMatrix[NUM_CASCADES];
+uniform mat4 biasMatrix;
 
 out vec2 fTexcoord;
 out vec3 fNormal;
@@ -26,7 +27,7 @@ void main()
 
 	for (int i = 0; i < NUM_CASCADES; i++)
 	{
-		fLightSpaceFragPos[i] = lightMatrix[i] * model * vec4(vPos, 1.0f);
+		fLightSpaceFragPos[i] = biasMatrix * lightMatrix[i] * model * vec4(vPos, 1.0f);
 	}
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
