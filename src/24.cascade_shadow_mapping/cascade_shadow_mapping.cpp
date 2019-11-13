@@ -10,24 +10,18 @@ class Example final : public ExampleBase
 public:
 	std::array<std::shared_ptr<Model>, 5> venusShadows;
 	std::array<std::shared_ptr<Model>, 5> venuses;
+
+	std::shared_ptr<Model> planeShadow;
 	std::shared_ptr<Model> plane;
 
-	const uint32_t lightMapWidth = 2048;
-	const uint32_t lightMapHeight = 2048;
+	std::shared_ptr<Material> shadowMat;
+	std::shared_ptr<Material> sceneMat;
+
 	std::unique_ptr<Framebuffer> lightMapFBO;
 
+	const uint32_t lightMapWidth = 1024;
+	const uint32_t lightMapHeight = 1024;
 	std::array<std::shared_ptr<Texture2D>, 3> lightMaps;
-
-	struct PersProjInfo
-	{
-		float fov = 90.0f;
-		uint32_t width = 2048;
-		uint32_t height = 2048;
-		float zNear = 1.0f;
-		float zFar = 200.0f;
-	};
-
-	PersProjInfo persProjInfo;
 
 	struct OrthoProjInfo
 	{
@@ -50,6 +44,8 @@ public:
 	};
 
 	DirectionalLight dirLight;
+
+	glm::vec3 lightPos = glm::vec3(-2.0f, 5.0f, 0.0f);
 
 	std::array<float, NUM_CASCADES + 1> cascadeEnd;
 
@@ -89,17 +85,11 @@ public:
 
 		// enable cull face
 		glEnable(GL_CULL_FACE);
-
-		persProjInfo.fov = 90.0f;
-		persProjInfo.width = 1024;
-		persProjInfo.height = 1024;
-		persProjInfo.zNear = 1.0f;
-		persProjInfo.zFar = 100.0f;
-
-		cascadeEnd[0] = persProjInfo.zNear;
-		cascadeEnd[1] = 15.0f;
-		cascadeEnd[2] = 50.0f;
-		cascadeEnd[3] = persProjInfo.zFar;
+		
+		cascadeEnd[0] = mMainCamera->getNearPlane();
+		cascadeEnd[1] = mMainCamera->getFarPlane() / 20.0f;
+		cascadeEnd[2] = mMainCamera->getFarPlane() / 10.0f;
+		cascadeEnd[3] = mMainCamera->getFarPlane();
 
 		dirLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 		dirLight.ambientIntensity = 0.5f;
@@ -119,29 +109,51 @@ public:
 
 		lightMapFBO->attachDepthRenderTarget(lightMaps[0].get(), 0, 0);
 
-		std::shared_ptr<Material> mat = Material::createFromData("mat",
+		shadowMat = Material::createFromData("shadow_mat",
 			{
-				shadersDirectory + "scene.vert",
-				shadersDirectory + "scene.frag"
+				shadersDirectory + "depth_map.vert",
+				shadersDirectory + "depth_map.frag"
 			},
 			{
 
 			}
 		);
 
+		sceneMat = Material::createFromData("scene_mat",
+			{
+				shadersDirectory + "scene.vert",
+				shadersDirectory + "scene.frag"
+			},
+			{
+				{ "depthMap0", lightMaps[0] },
+				{ "depthMap1", lightMaps[1] },
+				{ "depthMap2", lightMaps[2] }
+			}
+		);
+
 		plane = Model::createFromFile("plane", modelsDirectory + "/rocks_plane/rocks_plane.obj", {}, false);
-		plane->setMaterial(mat);
+		plane->setMaterial(sceneMat);
 		plane->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
 		plane->setScale(glm::vec3(1.5f, 2.0f, 1.0f));
+
+		planeShadow = Model::clone("plane_shadow", plane.get());
+		planeShadow->setMaterial(shadowMat);
+		planeShadow->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+		planeShadow->setScale(glm::vec3(1.5f, 2.0f, 1.0f));
 
 		std::shared_ptr<Model> venusTemplate = Model::createFromFile("venus_template", modelsDirectory + "/venus/venus.fbx", {}, false);
 		
 		for (std::size_t i = 0; i < venuses.size(); i++)
 		{
 			venuses[i] = Model::clone("venus_" + std::to_string(i), venusTemplate.get());
-			venuses[i]->setMaterial(mat);
+			venuses[i]->setMaterial(sceneMat);
 			venuses[i]->setPosition(glm::vec3(0.0f, 0.0f, 15.0f - i * 7.0f));
 			venuses[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+
+			venusShadows[i] = Model::clone("venus_shadow_" + std::to_string(i), venusTemplate.get());
+			venusShadows[i]->setMaterial(shadowMat);
+			venusShadows[i]->setPosition(glm::vec3(0.0f, 0.0f, 15.0f - i * 7.0f));
+			venusShadows[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		}
 		/*
 		playgroundShadow = Model::createFromFile("playground_shadow", modelsDirectory + "/playground/Playground.obj",
@@ -164,11 +176,48 @@ public:
 		playground->setMaterial(mat);
 		playground->setUniform("biasMatrix", biasMatrix);
 		*/
+
+		sceneMat->setUniform("dirLight.color", dirLight.color);
+		sceneMat->setUniform("dirLight.direction", dirLight.direction);
+		sceneMat->setUniform("dirLight.ambientIntensity", dirLight.ambientIntensity);
+		sceneMat->setUniform("dirLight.color", dirLight.diffuseIntensity);
+		for (uint32_t i = 0; i < NUM_CASCADES; i++)
+		{
+			//sceneMat->setTexture("depthMap" + std::to_string(i), lightMaps[i]);
+
+			glm::vec4 clipSpacePos = mMainCamera->getProjection() * glm::vec4(0.0f, 0.0f, cascadeEnd[i + 1], 1.0f);
+			sceneMat->setUniform("cascadeEndClipSpace[" + std::to_string(i) + "]", clipSpacePos.z);
+		}
 	}
 
 	virtual void render(float deltaTime) override
 	{
 		calculateOrthoProjs();
+
+		glViewport(0, 0, lightMapWidth, lightMapHeight);
+		for (uint32_t i = 0; i < NUM_CASCADES; i++)
+		{
+			lightMapFBO->attachDepthRenderTarget(lightMaps[i].get(), 0, 0);
+			lightMapFBO->bind();
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			glm::mat4 lightView = glm::lookAt(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l, lightOrthoProjInfo[i].r, lightOrthoProjInfo[i].b, lightOrthoProjInfo[i].t, lightOrthoProjInfo[i].n, lightOrthoProjInfo[i].f);
+			glm::mat4 lightMatrix = lightProj * lightView;
+
+			shadowMat->setUniform("lightMatrix", lightMatrix);
+
+			planeShadow->render();
+			for (std::size_t j = 0; j < venusShadows.size(); j++)
+			{
+				venusShadows[i]->render();
+			}
+		}
+
+		glViewport(0, 0, mWindowWidth, mWindowHeight);
+		lightMapFBO->unbind();
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		/*
 		// change light position over time
 		lightPos = glm::vec3(sin(timePassed) * 2.0f, 5.0f + cos(timePassed) * 1.0f, cos(timePassed) * 1.0f);
@@ -190,19 +239,12 @@ public:
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		playground->setUniform("lightPos", lightPos);
-		playground->setUniform("viewPos", mMainCamera->getPosition());
-		playground->setUniform("lightSpaceMatrix", lightSpaceMatrix);
-		playground->render();
 		*/
-		plane->setUniform("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
-		plane->setUniform("viewPos", mMainCamera->getPosition());
+		sceneMat->setUniform("viewPos", mMainCamera->getPosition());
 		plane->render();
 
 		for (std::size_t i = 0; i < venuses.size(); i++)
 		{
-			venuses[i]->setUniform("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
-			venuses[i]->setUniform("viewPos", mMainCamera->getPosition());
 			venuses[i]->render();
 		}
 	}
@@ -219,9 +261,9 @@ public:
 
 		glm::mat4 lightView = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), dirLight.direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		float aspectRatio = persProjInfo.width / persProjInfo.height;
-		float tanHalfHFov = glm::tan(glm::radians(persProjInfo.fov / 2.0f));
-		float tanHalfVFov = glm::tan(glm::radians(persProjInfo.fov * aspectRatio / 2.0f));
+		float aspectRatio = mMainCamera->getAspectRatio();
+		float tanHalfHFov = glm::tan(glm::radians(mMainCamera->getFov() / 2.0f));
+		float tanHalfVFov = glm::tan(glm::radians(mMainCamera->getFov() * aspectRatio / 2.0f));
 
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{

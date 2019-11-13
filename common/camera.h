@@ -45,6 +45,14 @@ namespace es
 		void setMoveSensitivity(float sensitivity);
 
 		float getMoveSensitivity() const;
+
+		float getFov() const;
+
+		float getNearPlane() const;
+
+		float getFarPlane() const;
+
+		float getAspectRatio() const;
 	private:
 		float mFov;
 		float mNear;

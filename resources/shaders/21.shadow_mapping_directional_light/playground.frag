@@ -7,7 +7,7 @@ in vec3 fNormal;
 in vec3 fFragPos;
 in vec4 fFragPosLightSpace;
 
-uniform vec3 lightPos;
+uniform vec3 lightDir;
 uniform vec3 viewPos;
 
 uniform sampler2D depthMap;
@@ -41,7 +41,7 @@ void main()
 	vec3 ambient = 0.2f * color;
 
 	// diffuse
-	vec3 lightDir = normalize(lightPos - fFragPos);
+	vec3 lightDir = normalize(-lightDir);
 	float diff = max(dot(lightDir, normal), 0.0f);
 	vec3 diffuse = diff * lightColor;
 
@@ -53,7 +53,7 @@ void main()
 
 	float shadow = 1.0f;
 	float bias = 0.005f * tan(acos(clamp(dot(fNormal, lightDir), 0.0f, 1.0f)));
-	bias = clamp(bias, 0.0f, 0.003f);
+	bias = clamp(bias, 0.0f, 0.0005f);
 
 	for (int i = 0; i < 16; i++)
 	{

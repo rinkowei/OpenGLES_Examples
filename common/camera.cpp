@@ -143,4 +143,24 @@ namespace es
 	{
 		return mMoveSensitivity;
 	}
+
+	float Camera::getFov() const
+	{
+		return mFov;
+	}
+
+	float Camera::getNearPlane() const
+	{
+		return mNear;
+	}
+
+	float Camera::getFarPlane() const
+	{
+		return mFar;
+	}
+
+	float Camera::getAspectRatio() const
+	{
+		return mAspectRatio;
+	}
 }
