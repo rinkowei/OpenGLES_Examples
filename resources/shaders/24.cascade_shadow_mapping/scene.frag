@@ -22,18 +22,40 @@ uniform vec3 viewPos;
 uniform float cascadeEndClipSpace[NUM_CASCADES];
 uniform sampler2D depthMap[NUM_CASCADES];
 
-float calculateShadow(int cascadeIndex, vec4 lightSpaceFragPos)
+float calculateShadow(int cascadeIndex, vec4 lightSpaceFragPos, vec3 normal, vec3 lightDir)
 {
 	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
-	float depth = texture(depthMap[cascadeIndex], projCoords.xy).r;
-	if (depth < projCoords.z - 0.0005)
+
+	float bias = 0.005f * tan(acos(clamp(dot(normal, lightDir), 0.0f, 1.0f)));
+	bias = clamp(bias, 0.0f, 0.0005f);
+
+	ivec2 texSize = textureSize(depthMap[cascadeIndex], 0).xy;
+	float scale = 1.0;
+	float dx = scale * 1.0 / float(texSize.x);
+	float dy = scale * 1.0 / float(texSize.y);
+
+	float shadow = 0.0;
+	int count = 0;
+	int range = 1;
+
+	for (int x = -range; x <= range; x++)
 	{
-		return 0.5;
+		for (int y = -range; y <= range; y++)
+		{
+			float depth = texture(depthMap[cascadeIndex], vec2(projCoords.x + dx * float(x), projCoords.y + dy * float(y))).r;
+			if (lightSpaceFragPos.w > 0.0 && depth < projCoords.z - bias)
+			{
+				shadow += 0.5;
+			}
+			else
+			{
+				shadow = 0.0;
+			}
+			count++;
+		}
 	}
-	else
-	{
-		return 1.0;
-	}
+
+	return shadow / float(count);
 }
 void main()
 {
@@ -59,11 +81,9 @@ void main()
 	{
 		if (fClipSpacePosZ <= cascadeEndClipSpace[i])
 		{
-			shadow = calculateShadow(i, fLightSpaceFragPos[i]);
+			shadow = calculateShadow(i, fLightSpaceFragPos[i], normal, lightDir);
 			break;
 		}
 	}
-	shadow = calculateShadow(0, fLightSpaceFragPos[0]);
-    fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0f);
-	//fragColor = vec4(vec3(texture(depthMap[0], fLightSpaceFragPos[0].xy).r), 1.0f);
+    fragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), 1.0f);
 }

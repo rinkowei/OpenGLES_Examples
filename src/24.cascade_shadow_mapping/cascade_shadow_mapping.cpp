@@ -105,7 +105,8 @@ public:
 			lightMaps[i]->setMinFilter(GL_NEAREST);
 			lightMaps[i]->setMagFilter(GL_NEAREST);
 			lightMaps[i]->setCompareMode(GL_NONE);
-			lightMaps[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+			lightMaps[i]->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
+			lightMaps[i]->setWrapping(GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT);
 		}
 
 		shadowMat = Material::createFromData("shadow_mat",
@@ -124,21 +125,19 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-				//{ "depthMap[0]", lightMaps[0] },
-				//{ "depthMap[1]", lightMaps[1] },
-				//{ "depthMap[2]", lightMaps[2] }
+
 			}
 		);
 
 		plane = Model::createFromFile("plane", modelsDirectory + "/rocks_plane/rocks_plane.obj", {}, false);
 		plane->setMaterial(sceneMat);
 		plane->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
-		plane->setScale(glm::vec3(1.5f, 2.0f, 1.0f));
-
+		plane->setScale(glm::vec3(2.0f, 3.0f, 1.0f));
+	
 		planeShadow = Model::clone("plane_shadow", plane.get());
 		planeShadow->setMaterial(shadowMat);
-		planeShadow->setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
-		planeShadow->setScale(glm::vec3(1.5f, 2.0f, 1.0f));
+		planeShadow->setRotation(plane->getRotation());
+		planeShadow->setScale(plane->getScaling());
 
 		std::shared_ptr<Model> venusTemplate = Model::createFromFile("venus_template", modelsDirectory + "/venus/venus.fbx", {}, false);
 		
@@ -147,12 +146,12 @@ public:
 			venuses[i] = Model::clone("venus_" + std::to_string(i), venusTemplate.get());
 			venuses[i]->setMaterial(sceneMat);
 			venuses[i]->setPosition(glm::vec3(0.0f, 0.0f, 15.0f - i * 7.0f));
-			venuses[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+			venuses[i]->setScale(glm::vec3(0.5f, 0.5f, 0.5f));
 
 			venusShadows[i] = Model::clone("venus_shadow_" + std::to_string(i), venusTemplate.get());
 			venusShadows[i]->setMaterial(shadowMat);
-			venusShadows[i]->setPosition(glm::vec3(0.0f, 0.0f, 15.0f - i * 7.0f));
-			venusShadows[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+			venusShadows[i]->setPosition(venuses[i]->getPosition());
+			venusShadows[i]->setScale(venuses[i]->getScaling());
 		}
 
 		sceneMat->setUniform("biasMatrix", biasMatrix);
@@ -162,9 +161,9 @@ public:
 		sceneMat->setUniform("dirLight.diffuseIntensity", dirLight.diffuseIntensity);
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{
-			sceneMat->setTexture("depthMap" + std::to_string(i), lightMaps[i]);
+			sceneMat->setTexture("depthMap[" + std::to_string(i) + "]", lightMaps[i]);
 
-			glm::vec4 clipSpacePos = mMainCamera->getProjection() * glm::vec4(0.0f, 0.0f, cascadeEnd[i + 1], 1.0f);
+			glm::vec4 clipSpacePos = glm::perspective(45.0f, mMainCamera->getAspectRatio(), mMainCamera->getNearPlane(), mMainCamera->getFarPlane()) * glm::vec4(0.0f, 0.0f, -cascadeEnd[i + 1], 1.0f);
 			sceneMat->setUniform("cascadeEndClipSpace[" + std::to_string(i) + "]", clipSpacePos.z);
 		}
 	}
@@ -174,6 +173,7 @@ public:
 		calculateOrthoProjs();
 
 		glViewport(0, 0, lightMapWidth, lightMapHeight);
+		//glCullFace(GL_FRONT);
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{
 			lightMapFBOs[i]->attachDepthRenderTarget(lightMaps[i].get(), 0, 0);
@@ -181,8 +181,8 @@ public:
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glm::mat4 lightView = glm::lookAtLH<float>(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l, lightOrthoProjInfo[i].r, lightOrthoProjInfo[i].b, lightOrthoProjInfo[i].t, lightOrthoProjInfo[i].n, lightOrthoProjInfo[i].f);
-			//glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l / 20.0f, lightOrthoProjInfo[i].r / 20.0f, lightOrthoProjInfo[i].b / 20.0f, lightOrthoProjInfo[i].t / 20.0f, lightOrthoProjInfo[i].n / 20.0f, lightOrthoProjInfo[i].f / 20.0f);
+			//glm::mat4 lightProj = glm::ortho<float>(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 100.0f);
 			glm::mat4 lightMatrix = lightProj * lightView;
 
 			shadowMat->setUniform("lightMatrix", lightMatrix);
@@ -195,32 +195,11 @@ public:
 			}
 			lightMapFBOs[i]->unbind();
 		}
+		//glCullFace(GL_BACK);
 
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		/*
-		// change light position over time
-		lightPos = glm::vec3(sin(timePassed) * 2.0f, 5.0f + cos(timePassed) * 1.0f, cos(timePassed) * 1.0f);
-		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
-		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 lightSpaceMatrix = lightProj * lightView;
-
-		glViewport(0, 0, lightMapWidth, lightMapHeight);
-		lightMapFBO->bind();
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		playgroundShadow->setUniform("lightSpaceMatrix", lightSpaceMatrix);
-		
-		glCullFace(GL_FRONT);
-		playgroundShadow->render();
-		glCullFace(GL_BACK);
-
-		lightMapFBO->unbind();
-		glViewport(0, 0, mWindowWidth, mWindowHeight);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		*/
 		
 		sceneMat->setUniform("viewPos", mMainCamera->getPosition());
 		plane->render();
