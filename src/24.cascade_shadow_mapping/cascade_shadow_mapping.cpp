@@ -8,8 +8,8 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	std::array<std::shared_ptr<Model>, 5> venusShadows;
-	std::array<std::shared_ptr<Model>, 5> venuses;
+	std::array<std::shared_ptr<Model>, 10> venusShadows;
+	std::array<std::shared_ptr<Model>, 10> venuses;
 
 	std::shared_ptr<Model> planeShadow;
 	std::shared_ptr<Model> plane;
@@ -75,7 +75,7 @@ public:
 		ExampleBase::prepare();
 		
 		// setup camera
-		mMainCamera->setPosition(glm::vec3(0.0f, 10.0f, 25.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 30.0f));
 		mMainCamera->setRotation(glm::vec3(30.0f, 0.0f, 0.0f));
 
 		// enable depth test
@@ -145,8 +145,8 @@ public:
 		{
 			venuses[i] = Model::clone("venus_" + std::to_string(i), venusTemplate.get());
 			venuses[i]->setMaterial(sceneMat);
-			venuses[i]->setPosition(glm::vec3(0.0f, 0.0f, 15.0f - i * 7.0f));
-			venuses[i]->setScale(glm::vec3(0.5f, 0.5f, 0.5f));
+			venuses[i]->setPosition(glm::vec3(0.0f, 0.0f, 20.0f - i * 3.0f));
+			venuses[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 
 			venusShadows[i] = Model::clone("venus_shadow_" + std::to_string(i), venusTemplate.get());
 			venusShadows[i]->setMaterial(shadowMat);
@@ -163,7 +163,7 @@ public:
 		{
 			sceneMat->setTexture("depthMap[" + std::to_string(i) + "]", lightMaps[i]);
 
-			glm::vec4 clipSpacePos = glm::perspective(45.0f, mMainCamera->getAspectRatio(), mMainCamera->getNearPlane(), mMainCamera->getFarPlane()) * glm::vec4(0.0f, 0.0f, -cascadeEnd[i + 1], 1.0f);
+			glm::vec4 clipSpacePos = mMainCamera->getProjection() * glm::vec4(0.0f, 0.0f, -cascadeEnd[i + 1], 1.0f);
 			sceneMat->setUniform("cascadeEndClipSpace[" + std::to_string(i) + "]", clipSpacePos.z);
 		}
 	}
@@ -182,7 +182,7 @@ public:
 
 			glm::mat4 lightView = glm::lookAtLH<float>(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l / 20.0f, lightOrthoProjInfo[i].r / 20.0f, lightOrthoProjInfo[i].b / 20.0f, lightOrthoProjInfo[i].t / 20.0f, lightOrthoProjInfo[i].n / 20.0f, lightOrthoProjInfo[i].f / 20.0f);
-			//glm::mat4 lightProj = glm::ortho<float>(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 100.0f);
+
 			glm::mat4 lightMatrix = lightProj * lightView;
 
 			shadowMat->setUniform("lightMatrix", lightMatrix);
@@ -235,15 +235,15 @@ public:
 			float yf = cascadeEnd[i + 1] * tanHalfVFov;
 
 			std::array<glm::vec4, NUM_FRUSTUM_CORNERS> frustumCorners = {
-				glm::vec4(xn, yn, cascadeEnd[i], 1.0f),
-				glm::vec4(-xn,  yn, cascadeEnd[i], 1.0),
-				glm::vec4(xn,  -yn, cascadeEnd[i], 1.0),
-				glm::vec4(-xn, -yn, cascadeEnd[i], 1.0),
+				glm::vec4(xn, yn, -cascadeEnd[i], 1.0f),
+				glm::vec4(-xn,  yn, -cascadeEnd[i], 1.0),
+				glm::vec4(xn,  -yn, -cascadeEnd[i], 1.0),
+				glm::vec4(-xn, -yn, -cascadeEnd[i], 1.0),
 
-				glm::vec4(xf,   yf, cascadeEnd[i + 1], 1.0),
-				glm::vec4(-xf,  yf, cascadeEnd[i + 1], 1.0),
-				glm::vec4(xf,  -yf, cascadeEnd[i + 1], 1.0),
-				glm::vec4(-xf, -yf, cascadeEnd[i + 1], 1.0)
+				glm::vec4(xf,   yf, -cascadeEnd[i + 1], 1.0),
+				glm::vec4(-xf,  yf, -cascadeEnd[i + 1], 1.0),
+				glm::vec4(xf,  -yf, -cascadeEnd[i + 1], 1.0),
+				glm::vec4(-xf, -yf, -cascadeEnd[i + 1], 1.0)
 			};
 
 			std::array<glm::vec4, NUM_FRUSTUM_CORNERS> frustumCornersL;
