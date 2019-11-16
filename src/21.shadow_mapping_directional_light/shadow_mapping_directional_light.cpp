@@ -6,14 +6,17 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	std::shared_ptr<Model> playgroundShadow;
 	std::shared_ptr<Model> playground;
+
+	std::shared_ptr<Material> lightPassMat;
+	std::shared_ptr<Material> diffuseMat;
 
 	const uint32_t lightMapWidth = 2048;
 	const uint32_t lightMapHeight = 2048;
 	std::unique_ptr<Framebuffer> lightMapFBO;
 
 	glm::vec3 lightDir = glm::vec3(1.0f, -1.0f, 0.0f);
+	glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
 
 	glm::mat4 biasMatrix = glm::mat4(
 		0.5f, 0.0f, 0.0f, 0.0f,
@@ -60,15 +63,17 @@ public:
 		lightMapFBO = Framebuffer::create();
 		lightMapFBO->attachDepthRenderTarget(lightMap.get(), 0, 0);
 		
-		playgroundShadow = Model::createFromFile("playground_shadow", modelsDirectory + "/playground/Playground.obj",
+		lightPassMat = Material::createFromFiles("lightPass_mat",
 			{
-				shadersDirectory + "depth_map.vert",
-				shadersDirectory + "depth_map.frag"
+				shadersDirectory + "light_pass.vert",
+				shadersDirectory + "light_pass.frag"
+			},
+			{
+				
 			}
 		);
 
-		playground = Model::clone("playground", playgroundShadow.get());
-		std::shared_ptr<Material> mat = Material::createFromData("mat",
+		diffuseMat = Material::createFromData("playground_mat",
 			{
 				shadersDirectory + "playground.vert",
 				shadersDirectory + "playground.frag"
@@ -77,44 +82,50 @@ public:
 				{ "depthMap", lightMap },
 			}
 		);
-		playground->setMaterial(mat);
-		playground->setUniform("biasMatrix", biasMatrix);
-		
+
+		playground = Model::createFromFile("playground", modelsDirectory + "/playground/Playground.obj", {}, false);
 	}
 
 	virtual void render(float deltaTime) override
 	{
-		// change light position over time
-		lightDir = glm::vec3(sin(timePassed) * 1.0f, -1.0f, cos(timePassed) * 1.0f);
-		//lightDir = glm::vec3(1.0f, -1.0f, 0.0f);
-		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
-		glm::mat4 lightView = glm::lookAtLH<float>(lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 lightSpaceMatrix = lightProj * lightView;
+		lightMapPass();
 
-		glViewport(0, 0, lightMapWidth, lightMapHeight);
-		lightMapFBO->bind();
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		playgroundShadow->setUniform("lightSpaceMatrix", lightSpaceMatrix);
-
-		glCullFace(GL_FRONT);
-		playgroundShadow->render();
-		glCullFace(GL_BACK);
-		
-		lightMapFBO->unbind();
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		playground->setMaterial(diffuseMat);
 		playground->setUniform("lightDir", lightDir);
 		playground->setUniform("viewPos", mMainCamera->getPosition());
 		playground->setUniform("lightSpaceMatrix", lightSpaceMatrix);
+		playground->setUniform("biasMatrix", biasMatrix);
 		playground->render();
-		
 	}
 
 	virtual void windowResized() override
 	{
 		ExampleBase::windowResized();
+	}
+
+	void lightMapPass()
+	{
+		// change light position over time
+		lightDir = glm::vec3(sin(timePassed) * 1.0f, -1.0f, cos(timePassed) * 1.0f);
+		glm::mat4 lightProj = glm::ortho<float>(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 10.0f);
+		glm::mat4 lightView = glm::lookAtLH<float>(lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		lightSpaceMatrix = lightProj * lightView;
+
+		glViewport(0, 0, lightMapWidth, lightMapHeight);
+		lightMapFBO->bind();
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		playground->setMaterial(lightPassMat);
+		playground->setUniform("lightSpaceMatrix", lightSpaceMatrix);
+
+		glCullFace(GL_FRONT);
+		playground->render();
+		glCullFace(GL_BACK);
+
+		lightMapFBO->unbind();
 	}
 };
 
