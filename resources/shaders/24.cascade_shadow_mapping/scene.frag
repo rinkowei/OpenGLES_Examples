@@ -75,7 +75,7 @@ void main()
     vec3 halfwayDir = normalize(lightDir + viewDir);  
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * dirLight.color;   
-	
+
 	float shadow = 0.0f;
 	for (int i = 0; i < NUM_CASCADES; i++)
 	{

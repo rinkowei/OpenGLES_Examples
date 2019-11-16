@@ -3,17 +3,14 @@
 namespace es
 {
 	Camera::Camera(float fov, float near, float far, float aspectRatio, const glm::vec3& position, const glm::vec3& forward)
-		:mNear(near),
-		 mFar(far),
-		 mAspectRatio(aspectRatio),
-		 mMoveSensitivity(10.0f),
+		 :mMoveSensitivity(10.0f),
 		 mPosition(position),
 		 mIsDirty(true)
 	{
-		mForward = glm::normalize(forward);
+		mFront = glm::normalize(forward);
 		mWorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-		mRight = glm::normalize(glm::cross(mForward, mWorldUp));
-		mUp = glm::normalize(glm::cross(mRight, mForward));
+		mRight = glm::normalize(glm::cross(mFront, mWorldUp));
+		mUp = glm::normalize(glm::cross(mRight, mFront));
 
 		mRoll = 0.0f;
 		mPitch = 0.0f;
@@ -78,17 +75,17 @@ namespace es
 			mOrientation = glm::normalize(mOrientation);
 
 			mRotate = glm::mat4_cast(mOrientation);
-			mForward = glm::conjugate(mOrientation) * glm::vec3(0.0f, 0.0f, -1.0f);
+			mFront = glm::conjugate(mOrientation) * glm::vec3(0.0f, 0.0f, -1.0f);
 
-			mRight = glm::normalize(glm::cross(mForward, mWorldUp));
-			mUp = glm::normalize(glm::cross(mRight, mForward));
+			mRight = glm::normalize(glm::cross(mFront, mWorldUp));
+			mUp = glm::normalize(glm::cross(mRight, mFront));
 
 			mTranslate = glm::translate(glm::mat4(1.0f), -mPosition);
 			mView = mRotate * mTranslate;
 			mPrevViewProjection = mViewProjection;
 			mViewProjection = mProjection * mView;
 
-			frustumFromMatrix(mFrustum, mViewProjection);
+			updateFrustum();
 
 			mIsDirty = false;
 		}
@@ -99,15 +96,28 @@ namespace es
 		mProjection = glm::perspective(glm::radians(fov), aspectRatio, near, far);
 	}
 
-	bool Camera::aabbInsideFrustum(glm::vec3 maxV, glm::vec3 minV)
+	void Camera::updateFrustum()
 	{
-		return true;
+		float nearHeight = 2 * tan(mFrustum.mFov / 2) * mFrustum.mNear;
+		float nearWidth = nearHeight * mFrustum.mAspectRatio;
+
+		float farHeight = 2 * tan(mFrustum.mFov / 2) * mFrustum.mFar;
+		float farWidth = farHeight * mFrustum.mAspectRatio;
+
+		glm::vec3 fc = mPosition + mFront * mFrustum.mFar;
+		glm::vec3 nc = mPosition + mFront * mFrustum.mNear;
+
+		mFrustum.mFrustumCorners[4] = fc + (mUp * farHeight / 2.0f) - (mRight * farWidth / 2.0f); // 
+		mFrustum.mFrustumCorners[5] = fc + (mUp * farHeight / 2.0f) + (mRight * farWidth / 2.0f); // 
+		mFrustum.mFrustumCorners[7] = fc - (mUp * farHeight / 2.0f) - (mRight * farWidth / 2.0f); // 
+		mFrustum.mFrustumCorners[6] = fc - (mUp * farHeight / 2.0f) + (mRight * farWidth / 2.0f); // 
+
+		mFrustum.mFrustumCorners[0] = nc + (mUp * nearHeight / 2.0f) - (mRight * nearWidth / 2.0f); // 
+		mFrustum.mFrustumCorners[1] = nc + (mUp * nearHeight / 2.0f) + (mRight * nearWidth / 2.0f); // 
+		mFrustum.mFrustumCorners[3] = nc - (mUp * nearHeight / 2.0f) - (mRight * nearWidth / 2.0f); // 
+		mFrustum.mFrustumCorners[2] = nc - (mUp * nearHeight / 2.0f) + (mRight * nearWidth / 2.0f); // 
 	}
 
-	bool Camera::aabbInsidePlane(Plane plane, glm::vec3 maxV, glm::vec3 minV)
-	{
-		return true;
-	}
 	const glm::vec3& Camera::getPosition() const
 	{
 		return mPosition;
@@ -116,7 +126,7 @@ namespace es
 
 	const glm::vec3& Camera::getForward() const
 	{
-		return mForward;
+		return mFront;
 	}
 
 	const glm::vec3& Camera::getRight() const
@@ -146,21 +156,26 @@ namespace es
 
 	float Camera::getFov() const
 	{
-		return mFov;
+		return mFrustum.mFov;
 	}
 
 	float Camera::getNearPlane() const
 	{
-		return mNear;
+		return mFrustum.mNear;
 	}
 
 	float Camera::getFarPlane() const
 	{
-		return mFar;
+		return mFrustum.mFar;
 	}
 
 	float Camera::getAspectRatio() const
 	{
-		return mAspectRatio;
+		return mFrustum.mAspectRatio;
+	}
+
+	const Frustum& Camera::getFrustum() const
+	{
+		return mFrustum;
 	}
 }

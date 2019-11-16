@@ -3,6 +3,7 @@
 #include <material.h>
 using namespace es;
 
+#define MAX_SPLITS 4
 #define NUM_CASCADES 3
 #define NUM_FRUSTUM_CORNERS 8
 class Example final : public ExampleBase
@@ -17,23 +18,13 @@ public:
 	std::shared_ptr<Material> shadowMat;
 	std::shared_ptr<Material> sceneMat;
 
-	std::array<std::unique_ptr<Framebuffer>, NUM_CASCADES> lightMapFBOs;
+	std::unique_ptr<Framebuffer> lightMapFBO;
 
-	const uint32_t lightMapWidth = 2048;
-	const uint32_t lightMapHeight = 2048;
-	std::array<std::shared_ptr<Texture2D>, NUM_CASCADES> lightMaps;
+	const uint32_t lightMapSize = 2048;
+	std::shared_ptr<Texture2DArray> lightMapArray;
 
-	struct OrthoProjInfo
-	{
-		float r;
-		float l;
-		float b;
-		float t;
-		float n;
-		float f;
-	};
-
-	std::array<OrthoProjInfo, NUM_CASCADES> lightOrthoProjInfo;
+	glm::mat4 lightViewMatrix;
+	glm::mat4 lightOrthoMatrix;
 
 	struct DirectionalLight
 	{
@@ -45,7 +36,8 @@ public:
 
 	DirectionalLight dirLight;
 
-	std::array<float, NUM_CASCADES + 1> cascadeEnd;
+	std::array<float, MAX_SPLITS> cascadeSplitArray;
+	std::array<glm::mat4, MAX_SPLITS> cascadeMatrices;
 
 	glm::mat4 biasMatrix = glm::mat4(
 		0.5f, 0.0f, 0.0f, 0.0f,
@@ -94,20 +86,14 @@ public:
 		dirLight.diffuseIntensity = 0.8f;
 		dirLight.direction = glm::vec3(1.0f, -1.0f, 0.0f);
 
-		for (std::size_t i = 0; i < lightMapFBOs.size(); i++)
-		{
-			lightMapFBOs[i] = Framebuffer::create();
-		}
+		lightMapFBO = Framebuffer::create();
 	
-		for (std::size_t i = 0; i < lightMaps.size(); i++)
-		{
-			lightMaps[i] = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, false);
-			lightMaps[i]->setMinFilter(GL_NEAREST);
-			lightMaps[i]->setMagFilter(GL_NEAREST);
-			lightMaps[i]->setCompareMode(GL_NONE);
-			lightMaps[i]->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
-			lightMaps[i]->setWrapping(GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT);
-		}
+		lightMapArray = Texture2DArray::createFromData(lightMapSize, lightMapSize, MAX_SPLITS, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, true);
+		lightMapArray->setMinFilter(GL_LINEAR);
+		lightMapArray->setMagFilter(GL_LINEAR);
+		lightMapArray->setCompareMode(GL_COMPARE_REF_TO_TEXTURE);
+		lightMapArray->setCompareFunc(GL_LEQUAL);
+		lightMapArray->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		shadowMat = Material::createFromData("shadow_mat",
 			{
@@ -170,9 +156,7 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-		calculateOrthoProjs();
-
-		glViewport(0, 0, lightMapWidth, lightMapHeight);
+		glViewport(0, 0, lightMapSize, lightMapSize);
 		//glCullFace(GL_FRONT);
 		for (uint32_t i = 0; i < NUM_CASCADES; i++)
 		{
@@ -181,7 +165,7 @@ public:
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			glm::mat4 lightView = glm::lookAtLH<float>(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l / 20.0f, lightOrthoProjInfo[i].r / 20.0f, lightOrthoProjInfo[i].b / 20.0f, lightOrthoProjInfo[i].t / 20.0f, lightOrthoProjInfo[i].n / 20.0f, lightOrthoProjInfo[i].f / 20.0f);
+			glm::mat4 lightProj = glm::ortho<float>(lightOrthoProjInfo[i].l / 10.0f, lightOrthoProjInfo[i].r / 10.0f, lightOrthoProjInfo[i].b / 10.0f, lightOrthoProjInfo[i].t / 10.0f, lightOrthoProjInfo[i].n / 10.0f, lightOrthoProjInfo[i].f / 10.0f);
 
 			glm::mat4 lightMatrix = lightProj * lightView;
 
@@ -196,7 +180,7 @@ public:
 			lightMapFBOs[i]->unbind();
 		}
 		//glCullFace(GL_BACK);
-
+	
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -215,65 +199,116 @@ public:
 		ExampleBase::windowResized();
 	}
 
-	void calculateOrthoProjs()
+	void lightMapPass()
 	{
-		glm::mat4 camView = mMainCamera->getView();
-		glm::mat4 camViewInv = glm::inverse(camView);
+		Frustum cameraFrustum = mMainCamera->getFrustum();
 
-		glm::mat4 lightView = glm::lookAtLH<float>(dirLight.direction, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		std::array<float, MAX_SPLITS> cascadeSplits;
 
-		float aspectRatio = mMainCamera->getAspectRatio();
-		float fov = 90.0f;
-		float tanHalfHFov = glm::tan(glm::radians(fov / 2.0f));
-		float tanHalfVFov = glm::tan(glm::radians(fov * aspectRatio / 2.0f));
+		float lambda = 1.0f;
 
-		for (uint32_t i = 0; i < NUM_CASCADES; i++)
+		float minDistance = 0.0f;
+		float maxDistance = 1.0f;
+
+		float nearClip = cameraFrustum.mNear;
+		float farClip = cameraFrustum.mFar;
+		float clipRange = farClip - nearClip;
+
+		float minZ = nearClip + minDistance * clipRange;
+		float maxZ = nearClip + maxDistance * clipRange;
+
+		float range = maxZ - minZ;
+		float ratio = maxZ / minZ;
+
+		for (unsigned int i = 0; i < MAX_SPLITS; ++i)
 		{
-			float xn = cascadeEnd[i] * tanHalfHFov;
-			float xf = cascadeEnd[i + 1] * tanHalfHFov;
-			float yn = cascadeEnd[i] * tanHalfVFov;
-			float yf = cascadeEnd[i + 1] * tanHalfVFov;
+			float p = (i + 1) / static_cast<float>(MAX_SPLITS);
+			float log = minZ * std::pow(ratio, p);
+			float uniform = minZ + range * p;
+			float d = lambda * (log - uniform) + uniform;
+			cascadeSplits[i] = (d - nearClip) / clipRange;
+		}
 
-			std::array<glm::vec4, NUM_FRUSTUM_CORNERS> frustumCorners = {
-				glm::vec4(xn, yn, -cascadeEnd[i], 1.0f),
-				glm::vec4(-xn,  yn, -cascadeEnd[i], 1.0),
-				glm::vec4(xn,  -yn, -cascadeEnd[i], 1.0),
-				glm::vec4(-xn, -yn, -cascadeEnd[i], 1.0),
+		for (unsigned int cascadeIterator = 0; cascadeIterator < MAX_SPLITS; ++cascadeIterator)
+		{
+			float prevSplitDistance = cascadeIterator == 0 ? minDistance : cascadeSplits[cascadeIterator - 1];
+			float splitDistance = cascadeSplits[cascadeIterator];
 
-				glm::vec4(xf,   yf, -cascadeEnd[i + 1], 1.0),
-				glm::vec4(-xf,  yf, -cascadeEnd[i + 1], 1.0),
-				glm::vec4(xf,  -yf, -cascadeEnd[i + 1], 1.0),
-				glm::vec4(-xf, -yf, -cascadeEnd[i + 1], 1.0)
+			std::array<glm::vec3, 8> frustumCorners =
+			{
+				glm::vec3(-1.0f,  1.0f, -1.0f),
+				glm::vec3(1.0f,  1.0f, -1.0f),
+				glm::vec3(1.0f, -1.0f, -1.0f),
+				glm::vec3(-1.0f, -1.0f, -1.0f),
+				glm::vec3(-1.0f,  1.0f,  1.0f),
+				glm::vec3(1.0f,  1.0f,  1.0f),
+				glm::vec3(1.0f, -1.0f,  1.0f),
+				glm::vec3(-1.0f, -1.0f,  1.0f)
 			};
 
-			std::array<glm::vec4, NUM_FRUSTUM_CORNERS> frustumCornersL;
-
-			float minX = std::numeric_limits<float>::max();
-			float maxX = std::numeric_limits<float>::min();
-			float minY = std::numeric_limits<float>::max();
-			float maxY = std::numeric_limits<float>::min();
-			float minZ = std::numeric_limits<float>::max();
-			float maxZ = std::numeric_limits<float>::min();
-
-			for (uint32_t j = 0; j < NUM_FRUSTUM_CORNERS; j++)
+			glm::mat4 invViewProj = glm::inverse(mMainCamera->getProjection() * mMainCamera->getView());
+			for (std::size_t i = 0; i < frustumCorners.size(); ++i)
 			{
-				glm::vec4 vW = camViewInv * frustumCorners[j];
-				frustumCornersL[j] = lightView * vW;
-
-				minX = glm::min(minX, frustumCornersL[j].x);
-				maxX = glm::max(maxX, frustumCornersL[j].x);
-				minY = glm::min(minY, frustumCornersL[j].y);
-				maxY = glm::max(maxY, frustumCornersL[j].y);
-				minZ = glm::min(minZ, frustumCornersL[j].z);
-				maxZ = glm::max(maxZ, frustumCornersL[j].z);
+				glm::vec4 inversePoint = invViewProj * glm::vec4(frustumCorners[i], 1.0f);
+				frustumCorners[i] = glm::vec3(inversePoint / inversePoint.w);
 			}
 
-			lightOrthoProjInfo[i].r = maxX;
-			lightOrthoProjInfo[i].l = minX;
-			lightOrthoProjInfo[i].b = minY;
-			lightOrthoProjInfo[i].t = maxY;
-			lightOrthoProjInfo[i].f = maxZ;
-			lightOrthoProjInfo[i].n = minZ;
+			for (unsigned int i = 0; i < 4; ++i)
+			{
+				glm::vec3 cornerRay = frustumCorners[i + 4] - frustumCorners[i];
+				glm::vec3 nearCornerRay = cornerRay * prevSplitDistance;
+				glm::vec3 farCornerRay = cornerRay * splitDistance;
+				frustumCorners[i + 4] = frustumCorners[i] + farCornerRay;
+				frustumCorners[i] = frustumCorners[i] + nearCornerRay;
+			}
+
+			glm::vec3 frustumCenter = glm::vec3(0.0f);
+			for (std::size_t i = 0; i < frustumCorners.size(); ++i)
+			{
+				frustumCenter += frustumCorners[i];
+			}
+			frustumCenter /= 8.0f;
+
+			float farInfinity = -std::numeric_limits<float>::infinity();
+			float nearInfinity = std::numeric_limits<float>::infinity();
+
+			float radius = 0.0f;
+			for (std::size_t i = 0; i < frustumCorners.size(); ++i)
+			{
+				float distance = glm::length(frustumCorners[i] - frustumCenter);
+				radius = glm::max(radius, distance);
+			}
+			radius = std::ceil(radius * 16.0f) / 16.0f;
+
+			glm::vec3 maxExtents = glm::vec3(radius, radius, radius);
+			glm::vec3 minExtents = -maxExtents;
+
+			glm::vec3 lightDirection = frustumCenter - glm::normalize(glm::vec3(-0.1f, -0.5f, 0.0f)) * -minExtents.z;
+			lightViewMatrix = glm::mat4(1.0f);
+			lightViewMatrix = glm::lookAt(lightDirection, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+
+			glm::vec3 cascadeExtents = maxExtents - minExtents;
+
+			lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, cascadeExtents.z);
+
+			glm::mat4 lightMatrix = lightOrthoMatrix * lightViewMatrix;
+			glm::vec4 shadowOrigin = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			shadowOrigin = lightMatrix * shadowOrigin;
+			shadowOrigin = shadowOrigin * static_cast<float>(lightMapSize) / 2.0f;
+
+			glm::vec4 roundedOrigin = glm::round(shadowOrigin);
+			glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
+			roundOffset = roundOffset * 2.0f / static_cast<float>(lightMapSize);
+			roundOffset.z = 0.0f;
+			roundOffset.w = 0.0f;
+
+			glm::mat4 shadowProj = lightOrthoMatrix;
+			shadowProj[3] += roundOffset;
+			lightOrthoMatrix = shadowProj;
+
+			const float clipDist = cameraFrustum.mFar - cameraFrustum.mNear;
+			cascadeSplitArray[cascadeIterator] = (cameraFrustum.mNear + splitDistance * clipDist) * -1.0f;
+			cascadeMatrices[cascadeIterator] = lightOrthoMatrix * lightViewMatrix;
 		}
 	}
 };

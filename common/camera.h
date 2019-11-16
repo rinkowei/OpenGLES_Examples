@@ -28,9 +28,7 @@ namespace es
 
 		void updateProjection(float fov, float near, float far, float aspectRatio);
 
-		bool aabbInsideFrustum(glm::vec3 maxV, glm::vec3 minV);
-
-		bool aabbInsidePlane(Plane plane, glm::vec3 maxV, glm::vec3 minV);
+		void updateFrustum();
 
 		const glm::vec3& getPosition() const;
 
@@ -53,16 +51,13 @@ namespace es
 		float getFarPlane() const;
 
 		float getAspectRatio() const;
-	private:
-		float mFov;
-		float mNear;
-		float mFar;
-		float mAspectRatio;
 
+		const Frustum& getFrustum() const;
+	private:
 		float mMoveSensitivity;
 
 		glm::vec3 mPosition;
-		glm::vec3 mForward;
+		glm::vec3 mFront;
 		glm::vec3 mUp;
 		glm::vec3 mRight;
 		glm::vec3 mWorldUp;
@@ -74,15 +69,12 @@ namespace es
 
 		bool mIsDirty;
 
-		glm::mat4 mModel;
 		glm::mat4 mView;
 		glm::mat4 mProjection;
 		glm::mat4 mViewProjection;
 		glm::mat4 mPrevViewProjection;
 		glm::mat4 mRotate;
 		glm::mat4 mTranslate;
-
-		std::array<Plane, 6> mPlanes;
 
 		Frustum mFrustum;
 	};

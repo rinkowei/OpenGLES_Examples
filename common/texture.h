@@ -40,8 +40,6 @@ namespace es
 		void setMagFilter(GLenum filter);
 		void setCompareMode(GLenum mode);
 		void setCompareFunc(GLenum func);
-
-		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h) = 0;
 	protected:
 		GLuint mID;
 		GLenum mTarget;
@@ -50,6 +48,8 @@ namespace es
 		GLenum mType;
 		GLuint mComponents;
 	};
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	class Texture2D : public Texture
 	{
@@ -64,7 +64,7 @@ namespace es
 
 		void setData(uint32_t mipLevel, void* data);
 
-		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
+		void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
 
 		uint32_t getWidth();
 		uint32_t getHeight();
@@ -84,6 +84,37 @@ namespace es
 		static std::unordered_map<std::string, std::shared_ptr<Texture2D>> mTexture2DCache;
 	};
 
+	class Texture2DArray : public Texture
+	{
+	public:
+		Texture2DArray(uint32_t w, uint32_t h, uint32_t d, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed = true);
+		~Texture2DArray();
+
+		static std::shared_ptr<Texture2DArray> createFromData(uint32_t w, uint32_t h, uint32_t d, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed = true);
+
+		uint32_t getWidth() const;
+		uint32_t getHeight() const;
+		uint32_t getDepth() const;
+		uint32_t getMipLevels() const;
+		uint32_t getNumSamples() const;
+		bool getFixed() const;
+
+		void resize(uint32_t mipLevel, uint32_t w, uint32_t h, uint32_t d);
+	private:
+		void initFromData(uint32_t w, uint32_t h, uint32_t d, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed);
+
+		uint32_t mWidth;
+		uint32_t mHeight;
+		uint32_t mDepth;
+		uint32_t mMipLevels;
+		uint32_t mNumSamples;
+		bool mFixed;
+
+		static std::unordered_map<std::string, std::shared_ptr<Texture2DArray>> mTexture2DArrayCache;
+	};
+
+	// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 	class TextureCube : public Texture
 	{
 	public:
@@ -96,7 +127,7 @@ namespace es
 
 		void setData(int faceIndex, int layerIndex, int mipLevel, void* data);
 
-		virtual void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
+		void resize(uint32_t mipLevel, uint32_t w, uint32_t h);
 
 		uint32_t getWidth();
 		uint32_t getHeight();

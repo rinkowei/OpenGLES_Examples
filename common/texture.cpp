@@ -396,9 +396,15 @@ namespace es
 
 	void Texture2D::resize(uint32_t mipLevel, uint32_t w, uint32_t h)
 	{
-		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
-		GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr));
-		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+		if (!mFixed)
+		{
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+			GLES_CHECK_ERROR(glTexImage2D(mTarget, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr));
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+
+			mWidth = w;
+			mHeight = h;
+		}
 	}
 
 	uint32_t Texture2D::getWidth()
@@ -424,6 +430,144 @@ namespace es
 	bool Texture2D::getFixed() const
 	{
 		return mFixed;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------------------------------------
+
+	std::unordered_map<std::string, std::shared_ptr<Texture2DArray>> Texture2DArray::mTexture2DArrayCache;
+
+	Texture2DArray::Texture2DArray(uint32_t w, uint32_t h, uint32_t d, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed) : Texture()
+	{
+		initFromData(w, h, d, mipLevels, numSamples, internalFormat, format, type, isFixed);
+	}
+
+	Texture2DArray::~Texture2DArray()
+	{
+
+	}
+
+	std::shared_ptr<Texture2DArray> Texture2DArray::createFromData(uint32_t w, uint32_t h, uint32_t d, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed)
+	{
+		return std::make_shared<Texture2DArray>(w, h, d, mipLevels, numSamples, internalFormat, format, type, isFixed);
+	}
+
+	void Texture2DArray::initFromData(uint32_t w, uint32_t h, uint32_t d, int32_t mipLevels, uint32_t numSamples, GLenum internalFormat, GLenum format, GLenum type, bool isFixed)
+	{
+		mInternalFormat = internalFormat;
+		mFormat = format;
+		mType = type;
+		mWidth = w;
+		mHeight = h;
+		mDepth = d;
+		mNumSamples = numSamples;
+		mFixed = isFixed;
+
+		if (mipLevels == -1)
+		{
+			mMipLevels = 1;
+
+			int width = mWidth;
+			int height = mHeight;
+
+			while (width > 1 && height > 1)
+			{
+				width = max(1, (width / 2));
+				height = max(1, (height / 2));
+				mMipLevels++;
+			}
+		}
+		else
+		{
+			mMipLevels = mipLevels;
+		}
+
+		if (mNumSamples > 1)
+			mTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+		else
+			mTarget = GL_TEXTURE_2D_ARRAY;
+
+		int width = mWidth;
+		int height = mHeight;
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+
+		if (mNumSamples > 1)
+		{
+			if (mFixed)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "OpenGL ES : glTexStorage3DMultisample only can be supported by ES 3.2");
+				//GLES_CHECK_ERROR(glTexStorage3DMultisample(mTarget, mNumSamples, mInternalFormat, mWidth, mHeight, mDepth, true));
+			}
+		}
+		else
+		{
+			if (mFixed)
+			{
+				GLES_CHECK_ERROR(glTexStorage3D(mTarget, mMipLevels, mInternalFormat, mWidth, mHeight, mDepth));
+			}
+			else
+			{
+				for (int i = 0; i < mMipLevels; i++)
+				{
+					GLES_CHECK_ERROR(glTexImage3D(mTarget, i, mInternalFormat, width, height, mDepth, 0, mFormat, mType, nullptr));
+
+					width = max(1, (width / 2));
+					height = max(1, (height / 2));
+				}
+			}
+		}
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+		GLES_CHECK_ERROR(glGenerateMipmap(mTarget));
+
+		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+	}
+
+	uint32_t Texture2DArray::getWidth() const
+	{
+		return mWidth;
+	}
+
+	uint32_t Texture2DArray::getHeight() const
+	{
+		return mHeight;
+	}
+
+	uint32_t Texture2DArray::getDepth() const
+	{
+		return mDepth;
+	}
+
+	uint32_t Texture2DArray::getMipLevels() const
+	{
+		return mMipLevels;
+	}
+
+	uint32_t Texture2DArray::getNumSamples() const
+	{
+		return mNumSamples;
+	}
+
+	bool Texture2DArray::getFixed() const
+	{
+		return mFixed;
+	}
+
+	void Texture2DArray::resize(uint32_t mipLevel, uint32_t w, uint32_t h, uint32_t d)
+	{
+		if (!mFixed)
+		{
+			GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
+			GLES_CHECK_ERROR(glTexImage3D(mTarget, mipLevel, mInternalFormat, w, h, d, 0, mFormat, mType, nullptr));
+			GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+
+			mWidth = w;
+			mHeight = h;
+			mDepth = d;
+		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -625,6 +769,9 @@ namespace es
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr);
 		}
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
+
+		mWidth = w;
+		mHeight = h;
 	}
 
 	uint32_t TextureCube::getWidth()
