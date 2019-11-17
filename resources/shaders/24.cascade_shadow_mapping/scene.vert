@@ -5,31 +5,23 @@ layout(location = 2) in vec3 vNormal;
 layout(location = 3) in vec3 vTangent;
 layout(location = 4) in vec3 vBitangent;
 
-const int NUM_CASCADES = 3;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 lightMatrix[NUM_CASCADES];
-uniform mat4 biasMatrix;
 
 out vec2 fTexcoord;
 out vec3 fNormal;
 out vec3 fFragPos;
-out vec4 fLightSpaceFragPos[NUM_CASCADES];
-out float fClipSpacePosZ;
+out vec4 fViewSpaceFragPos;
+out mat4 fViewMatrix;
 
 void main()
 {
 	fTexcoord = vTexcoord;
 	fNormal = transpose(inverse(mat3(model))) * vNormal;
-	fFragPos = vec3(model * vec4(vPos, 1.0f));
-
-	for (int i = 0; i < NUM_CASCADES; i++)
-	{
-		fLightSpaceFragPos[i] = biasMatrix * lightMatrix[i] * model * vec4(vPos, 1.0f);
-	}
+	fFragPos = vec3(model * vec4(vPos, 1.0));
+	fViewSpaceFragPos = view * model * vec4(vPos, 1.0f);
+	fViewMatrix = view;
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
-	fClipSpacePosZ = gl_Position.z;
 }

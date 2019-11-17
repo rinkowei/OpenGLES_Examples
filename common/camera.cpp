@@ -20,6 +20,11 @@ namespace es
 		mProjection = glm::perspective(glm::radians(fov), aspectRatio, near, far);
 		mPrevViewProjection = glm::mat4(1.0f);
 
+		mFrustum.mFov = fov;
+		mFrustum.mNear = near;
+		mFrustum.mFar = far;
+		mFrustum.mAspectRatio = aspectRatio;
+	
 		update();
 	}
 

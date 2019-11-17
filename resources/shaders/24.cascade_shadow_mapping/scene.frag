@@ -7,8 +7,8 @@ const int NUM_CASCADES = 3;
 in vec2 fTexcoord;
 in vec3 fNormal;
 in vec3 fFragPos;
-in vec4 fLightSpaceFragPos[NUM_CASCADES];
-in float fClipSpacePosZ;
+in vec4 fViewSpaceFragPos;
+in mat4 fViewMatrix;
 
 struct DirectionalLight {
 	vec3 color;
@@ -17,73 +17,73 @@ struct DirectionalLight {
 	float diffuseIntensity;
 };
 
+uniform vec2 windowSize;
+uniform vec4 cascadedSplits;
+uniform int numOfCascades;
+uniform mat4 lightMatrices[4];
 uniform DirectionalLight dirLight;
 uniform vec3 viewPos;
-uniform float cascadeEndClipSpace[NUM_CASCADES];
-uniform sampler2D depthMap[NUM_CASCADES];
+uniform sampler2D cascadedDepthMap[4];
 
-float calculateShadow(int cascadeIndex, vec4 lightSpaceFragPos, vec3 normal, vec3 lightDir)
+float calculateShadow(vec3 lightDir, vec3 normal, float depthViewSpace, vec3 viewPosition)
 {
-	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
+	float positiveViewSpaceZ = depthViewSpace;
+	int cascadeIndex = 0;
 
-	float bias = 0.005f * tan(acos(clamp(dot(normal, lightDir), 0.0f, 1.0f)));
-	bias = clamp(bias, 0.0f, 0.0005f);
-
-	ivec2 texSize = textureSize(depthMap[cascadeIndex], 0).xy;
-	float scale = 1.0;
-	float dx = scale * 1.0 / float(texSize.x);
-	float dy = scale * 1.0 / float(texSize.y);
-
-	float shadow = 0.0;
-	int count = 0;
-	int range = 1;
-
-	for (int x = -range; x <= range; x++)
+	for (int i = 0; i < numOfCascades - 1; ++i)
 	{
-		for (int y = -range; y <= range; y++)
+		if (positiveViewSpaceZ < cascadedSplits[i])
 		{
-			float depth = texture(depthMap[cascadeIndex], vec2(projCoords.x + dx * float(x), projCoords.y + dy * float(y))).r;
-			if (lightSpaceFragPos.w > 0.0 && depth < projCoords.z - bias)
-			{
-				shadow += 0.5;
-			}
-			else
-			{
-				shadow = 0.0;
-			}
-			count++;
-		}
-	}
-
-	return shadow / float(count);
-}
-void main()
-{
-	vec3 albedo = vec3(0.8f, 0.8f, 0.8f);
-	vec3 normal = normalize(fNormal);
-
-	// ambient
-	vec3 ambient = dirLight.ambientIntensity * dirLight.color * albedo;
-
-	// diffuse
-	vec3 lightDir = normalize(-dirLight.direction);
-	float diff = max(dot(lightDir, normal), 0.0f);
-	vec3 diffuse = diff * dirLight.diffuseIntensity * dirLight.color;
-
-	// specular
-    vec3 viewDir = normalize(viewPos - fFragPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
-    vec3 specular = spec * dirLight.color;   
-
-	float shadow = 0.0f;
-	for (int i = 0; i < NUM_CASCADES; i++)
-	{
-		if (fClipSpacePosZ <= cascadeEndClipSpace[i])
-		{
-			shadow = calculateShadow(i, fLightSpaceFragPos[i], normal, lightDir);
+			cascadeIndex = i + 1;
 			break;
 		}
 	}
-    fragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), 1.0f);
+	float angleBias = 0.006f;
+
+	mat4 lightMatrix = lightMatrices[cascadeIndex];
+
+	vec4 Texcoord = vec4(gl_FragCoord.x / windowSize.x, gl_FragCoord.y / windowSize.y, cascadeIndex, 1.0);
+
+	vec4 fragModelViewSpace = vec4(viewPosition, 1.0);
+
+	vec4 fragModelSpace = inverse(fViewMatrix) * fragModelViewSpace;
+
+	vec4 fragLightSpace = lightMatrix * fragModelSpace;
+
+	vec3 projCoords = fragLightSpace.xyz / fragLightSpace.z;
+
+	projCoords = projCoords * 0.5 + 0.5;
+
+	float currentDepth = projCoords.z;
+
+	projCoords.z = float(cascadeIndex);
+
+	float bias = max(angleBias * (1.0 - dot(normal, lightDir)), 0.0008);
+
+	float shadow = 0.0;
+
+	ivec2 texelSize = textureSize(cascadedDepthMap[cascadeIndex], 0).xy;
+
+	float pcfDepth = texture(cascadedDepthMap[cascadeIndex], projCoords.xy).r;
+
+	shadow += currentDepth > pcfDepth - bias ? 1.0 : 0.0;
+
+	return shadow;
+}
+void main()
+{
+	vec3 albedo = vec3(0.8, 0.8, 0.8);
+	vec3 ambient = dirLight.ambientIntensity * dirLight.color * albedo;
+
+	vec3 diffuse = max(dot(fNormal, -dirLight.direction), 0.0) * dirLight.color * dirLight.diffuseIntensity * albedo;
+
+	vec3 viewDir = normalize(viewPos - fFragPos);
+	vec3 halfwayDir = normalize(-dirLight.direction + viewDir);  
+    float spec = pow(max(dot(fNormal, halfwayDir), 0.0f), 64.0f);
+    vec3 specular = spec * dirLight.color * albedo;   
+	
+	float shadow = calculateShadow(-dirLight.direction, fNormal, fViewSpaceFragPos.z, fViewSpaceFragPos.xyz);
+    fragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), 1.0);
+	//fragColor = vec4(shadow, shadow, shadow, 1.0);
+	//fragColor = vec4(vec3(texture(cascadedDepthMap, vec3(fViewSpaceFragPos.xy, 2)).r), 1.0);
 }

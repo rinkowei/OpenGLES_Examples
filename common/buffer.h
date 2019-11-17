@@ -159,6 +159,8 @@ namespace es
 		void attachDepthRenderTarget(TextureCube* texture, uint32_t face, uint32_t layer, uint32_t mipLevel);
 
 		void attachRenderBufferTarget(Renderbuffer* rbo);
+
+		void addAttachmentLayer(GLenum attachment, GLuint texture, GLint level, GLint layer);
 	private:
 		void checkStatus();
 

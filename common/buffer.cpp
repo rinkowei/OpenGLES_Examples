@@ -471,9 +471,18 @@ namespace es
 		{
 			attachment = GL_DEPTH_ATTACHMENT;
 		}
-		
+	
 		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rbo->mID));
 		checkStatus();
+		unbind();
+	}
+
+	void Framebuffer::addAttachmentLayer(GLenum attachment, GLuint texture, GLint level, GLint layer)
+	{
+		bind();
+
+		GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture, level, layer));
+
 		unbind();
 	}
 
