@@ -107,7 +107,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [21 - shadow_mapping_directional_light](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/21.shadow_mapping_directional_light>)
+#### [21 - orthographic_shadow_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/21.orthographic_shadow_mapping>)
 
 
 

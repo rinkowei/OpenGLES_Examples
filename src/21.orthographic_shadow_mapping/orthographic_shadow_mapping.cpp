@@ -27,12 +27,12 @@ public:
 
 	Example()
 	{
-		title = "shadow mapping directional light";
+		title = "orthographic shadow mapping";
 		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/21.shadow_mapping_directional_light/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/21.orthographic_shadow_mapping/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()
