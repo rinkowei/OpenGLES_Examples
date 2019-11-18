@@ -121,7 +121,7 @@ public:
 		room->setMaterial(lightPassMat);
 		for (std::size_t i = 0; i < 6; ++i)
 		{
-			lightMapFBO->attachDepthRenderTarget(lightMap.get(), i, 0, 0);
+			lightMapFBO->addAttachmentTexture2D(GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, lightMap->getID(), 0);
 			lightMapFBO->bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
 

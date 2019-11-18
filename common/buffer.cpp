@@ -477,11 +477,20 @@ namespace es
 		unbind();
 	}
 
-	void Framebuffer::addAttachmentLayer(GLenum attachment, GLuint texture, GLint level, GLint layer)
+	void Framebuffer::addAttachmentTextureLayer(GLenum attachment, GLuint texture, GLint level, GLint layer)
 	{
 		bind();
 
 		GLES_CHECK_ERROR(glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture, level, layer));
+
+		unbind();
+	}
+
+	void Framebuffer::addAttachmentTexture2D(GLenum attachment, GLenum texTarget, GLuint texture, GLint level)
+	{
+		bind();
+
+		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, texture, level));
 
 		unbind();
 	}

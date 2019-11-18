@@ -160,7 +160,9 @@ namespace es
 
 		void attachRenderBufferTarget(Renderbuffer* rbo);
 
-		void addAttachmentLayer(GLenum attachment, GLuint texture, GLint level, GLint layer);
+		void addAttachmentTextureLayer(GLenum attachment, GLuint texture, GLint level, GLint layer);
+
+		void addAttachmentTexture2D(GLenum attachment, GLenum texTarget, GLuint texture, GLint level);
 	private:
 		void checkStatus();
 
