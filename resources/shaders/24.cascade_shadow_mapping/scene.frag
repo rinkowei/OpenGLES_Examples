@@ -23,7 +23,7 @@ uniform int numOfCascades;
 uniform mat4 lightMatrices[4];
 uniform DirectionalLight dirLight;
 uniform vec3 viewPos;
-uniform sampler2D cascadedDepthMap[4];
+uniform highp sampler2DArray cascadedDepthMap;
 
 float calculateShadow(vec3 lightDir, vec3 normal, float depthViewSpace, vec3 viewPosition)
 {
@@ -35,7 +35,6 @@ float calculateShadow(vec3 lightDir, vec3 normal, float depthViewSpace, vec3 vie
 		if (positiveViewSpaceZ < cascadedSplits[i])
 		{
 			cascadeIndex = i + 1;
-			break;
 		}
 	}
 	float angleBias = 0.006f;
@@ -50,7 +49,7 @@ float calculateShadow(vec3 lightDir, vec3 normal, float depthViewSpace, vec3 vie
 
 	vec4 fragLightSpace = lightMatrix * fragModelSpace;
 
-	vec3 projCoords = fragLightSpace.xyz / fragLightSpace.z;
+	vec3 projCoords = fragLightSpace.xyz / fragLightSpace.w;
 
 	projCoords = projCoords * 0.5 + 0.5;
 
@@ -62,9 +61,10 @@ float calculateShadow(vec3 lightDir, vec3 normal, float depthViewSpace, vec3 vie
 
 	float shadow = 0.0;
 
-	ivec2 texelSize = textureSize(cascadedDepthMap[cascadeIndex], 0).xy;
+	ivec2 texelSize = textureSize(cascadedDepthMap, 0).xy;
 
-	float pcfDepth = texture(cascadedDepthMap[cascadeIndex], projCoords.xy).r;
+	vec4 shadowCoord = vec4(0.0);
+	float pcfDepth = texture(cascadedDepthMap, projCoords).r;
 
 	shadow += currentDepth > pcfDepth - bias ? 1.0 : 0.0;
 
@@ -82,8 +82,8 @@ void main()
     float spec = pow(max(dot(fNormal, halfwayDir), 0.0f), 64.0f);
     vec3 specular = spec * dirLight.color * albedo;   
 	
-	float shadow = calculateShadow(-dirLight.direction, fNormal, fViewSpaceFragPos.z, fViewSpaceFragPos.xyz);
-    fragColor = vec4(ambient + (1.0 - shadow) * (diffuse + specular), 1.0);
+	float shadow = calculateShadow(dirLight.direction, fNormal, fViewSpaceFragPos.z, fViewSpaceFragPos.xyz);
+    fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0);
 	//fragColor = vec4(shadow, shadow, shadow, 1.0);
 	//fragColor = vec4(vec3(texture(cascadedDepthMap, vec3(fViewSpaceFragPos.xy, 2)).r), 1.0);
 }

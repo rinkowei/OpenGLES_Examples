@@ -16,10 +16,10 @@ public:
 	std::shared_ptr<Material> lightPassMat;
 	std::shared_ptr<Material> sceneMat;
 
-	std::array<std::unique_ptr<Framebuffer>, MAX_SPLITS> lightMapFBOs;
+	std::unique_ptr<Framebuffer> lightMapFBO;
 
 	const uint32_t lightMapSize = 2048;
-	std::array<std::shared_ptr<Texture2D>, MAX_SPLITS> lightMaps;
+	std::shared_ptr<Texture2DArray> lightMapArray;
 
 	glm::mat4 lightViewMatrix;
 	glm::mat4 lightOrthoMatrix;
@@ -79,20 +79,14 @@ public:
 		dirLight.diffuseIntensity = 0.8f;
 		dirLight.direction = glm::vec3(1.0f, -1.0f, 0.0f);
 
-		for (std::size_t i = 0; i < lightMapFBOs.size(); i++)
-		{
-			lightMapFBOs[i] = Framebuffer::create();
-		}
+		lightMapFBO = Framebuffer::create();
 	
-		for (std::size_t i = 0; i < lightMaps.size(); i++)
-		{
-			lightMaps[i] = Texture2D::createFromData(lightMapSize, lightMapSize, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, false);
-			lightMaps[i]->setMinFilter(GL_LINEAR);
-			lightMaps[i]->setMagFilter(GL_LINEAR);
-			lightMaps[i]->setCompareMode(GL_COMPARE_REF_TO_TEXTURE);
-			lightMaps[i]->setCompareFunc(GL_LEQUAL);
-			lightMaps[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-		}
+		lightMapArray = Texture2DArray::createFromData(lightMapSize, lightMapSize, MAX_SPLITS, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, false);
+		lightMapArray->setMinFilter(GL_LINEAR);
+		lightMapArray->setMagFilter(GL_LINEAR);
+		lightMapArray->setCompareMode(GL_COMPARE_REF_TO_TEXTURE);
+		lightMapArray->setCompareFunc(GL_LEQUAL);
+		lightMapArray->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		lightPassMat = Material::createFromFiles("lightPass_mat",
 			{
@@ -110,7 +104,7 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-
+				{ "cascadedDepthMap", lightMapArray }
 			}
 		);
 
@@ -136,11 +130,6 @@ public:
 		sceneMat->setUniform("windowSize", glm::vec2(mWindowWidth, mWindowHeight));
 		sceneMat->setUniform("cascadedSplits", glm::vec4(cascadeSplitArray[0], cascadeSplitArray[1], cascadeSplitArray[2], cascadeSplitArray[3]));
 		sceneMat->setUniform("numOfCascades", MAX_SPLITS);
-
-		for (unsigned int i = 0; i < MAX_SPLITS; i++)
-		{
-			sceneMat->setTexture("cascadedDepthMap[" + std::to_string(i) + "]", lightMaps[i]);
-		}
 	}
 
 	virtual void render(float deltaTime) override
@@ -264,7 +253,7 @@ public:
 
 			glm::vec3 cascadeExtents = maxExtents - minExtents;
 
-			lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, cascadeExtents.z);
+			lightOrthoMatrix = glm::ortho<float>(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, cascadeExtents.z);
 
 			glm::mat4 lightMatrix = lightOrthoMatrix * lightViewMatrix;
 			glm::vec4 shadowOrigin = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -285,9 +274,8 @@ public:
 			cascadeSplitArray[cascadeIterator] = (cameraFrustum.mNear + splitDistance * clipDist) * -1.0f;
 			cascadeMatrices[cascadeIterator] = lightOrthoMatrix * lightViewMatrix;
 
-			lightMapFBOs[cascadeIterator]->attachDepthRenderTarget(lightMaps[cascadeIterator].get(), 0, 0);
-			//lightMapFBO->addAttachmentLayer(GL_DEPTH_ATTACHMENT, lightMapArray->getID(), 0, cascadeIterator);
-			lightMapFBOs[cascadeIterator]->bind();
+			lightMapFBO->addAttachmentLayer(GL_DEPTH_ATTACHMENT, lightMapArray->getID(), 0, cascadeIterator);
+			lightMapFBO->bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			plane->setMaterial(lightPassMat);
@@ -300,9 +288,8 @@ public:
 				venuses[i]->setUniform("lightMatrix", lightOrthoMatrix * lightViewMatrix);
 				venuses[i]->render();
 			}
-
-			lightMapFBOs[cascadeIterator]->unbind();
 		}
+		lightMapFBO->unbind();
 	}
 };
 

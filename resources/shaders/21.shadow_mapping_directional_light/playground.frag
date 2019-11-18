@@ -10,7 +10,7 @@ in vec4 fFragPosLightSpace;
 uniform vec3 lightDir;
 uniform vec3 viewPos;
 
-uniform sampler2D depthMap;
+uniform highp sampler2DShadow depthMap;
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 
@@ -53,11 +53,12 @@ void main()
 
 	float shadow = 1.0f;
 	float bias = 0.005f * tan(acos(clamp(dot(fNormal, lightDir), 0.0f, 1.0f)));
-	bias = clamp(bias, 0.0f, 0.0005f);
+	bias = clamp(bias, 0.0f, 0.005f);
 
 	for (int i = 0; i < 16; i++)
 	{
-		if (texture(depthMap, vec2(fFragPosLightSpace.xy + poissonDisk[i] / 700.0f)).r < fFragPosLightSpace.z - bias)
+		vec4 shadowCoord = vec4(fFragPosLightSpace.x + poissonDisk[i].x / 700.0f, fFragPosLightSpace.y + poissonDisk[i].y / 700.0f, fFragPosLightSpace.z, fFragPosLightSpace.w);
+		if (textureProj(depthMap, shadowCoord) < fFragPosLightSpace.z - bias)
 		{
 			shadow -= 0.08;
 		}
