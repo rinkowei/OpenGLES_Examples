@@ -11,9 +11,9 @@ public:
 	std::shared_ptr<Material> lightPassMat;
 	std::shared_ptr<Material> diffuseMat;
 
-	const uint32_t lightMapWidth = 2048;
-	const uint32_t lightMapHeight = 2048;
+	const uint32_t lightMapSize = 2048;
 	std::unique_ptr<Framebuffer> lightMapFBO;
+	std::shared_ptr<Texture2D> lightMap;
 
 	glm::vec3 lightDir = glm::vec3(1.0f, -1.0f, 0.0f);
 	glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
@@ -54,7 +54,7 @@ public:
 		// enable cull face
 		glEnable(GL_CULL_FACE);
 		
-		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, true);
+		lightMap = Texture2D::createFromData(lightMapSize, lightMapSize, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, true);
 		lightMap->setMinFilter(GL_NEAREST);
 		lightMap->setMagFilter(GL_NEAREST);
 		lightMap->setCompareMode(GL_COMPARE_REF_TO_TEXTURE);
@@ -62,7 +62,7 @@ public:
 		lightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		
 		lightMapFBO = Framebuffer::create();
-		lightMapFBO->attachDepthRenderTarget(lightMap.get(), 0, 0);
+		lightMapFBO->addAttachmentTexture2D(GL_DEPTH_ATTACHMENT, lightMap->getTarget(), lightMap->getID(), 0);
 		
 		lightPassMat = Material::createFromFiles("lightPass_mat",
 			{
@@ -115,7 +115,7 @@ public:
 		glm::mat4 lightView = glm::lookAtLH<float>(lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		lightSpaceMatrix = lightProj * lightView;
 
-		glViewport(0, 0, lightMapWidth, lightMapHeight);
+		glViewport(0, 0, lightMapSize, lightMapSize);
 		lightMapFBO->bind();
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
