@@ -119,7 +119,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [24 - cascade_shadow_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/24.cascade_shadow_mapping>)
+#### [24 - cascaded_shadow_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/24.cascaded_shadow_mapping>)
 
 
 

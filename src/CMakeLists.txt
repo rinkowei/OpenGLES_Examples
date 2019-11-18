@@ -57,7 +57,7 @@ set(EXAMPLES
     21.orthographic_shadow_mapping
     22.omnidirectional_shadow_mapping
     23.perspective_shadow_mapping
-    24.cascade_shadow_mapping
+    24.cascaded_shadow_mapping
     25.variance_shadow_mapping
     26.bloom_with_hdr
     27.compute_shader_edgedetect
