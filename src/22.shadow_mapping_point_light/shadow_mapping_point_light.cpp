@@ -12,7 +12,7 @@ public:
 	std::shared_ptr<Material> diffuseMat;
 
 	const uint32_t lightMapSize = 2048;
-	std::array<std::unique_ptr<Framebuffer>, 6> lightMapFBOs;
+	std::unique_ptr<Framebuffer> lightMapFBO;
 	std::shared_ptr<TextureCube> lightMap;
 
 	// point light position
@@ -58,10 +58,7 @@ public:
 		lightMap->setMagFilter(GL_NEAREST);
 		lightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	
-		for (std::size_t i = 0; i < lightMapFBOs.size(); i++)
-		{
-			lightMapFBOs[i] = Framebuffer::create();
-		}
+		lightMapFBO = Framebuffer::create();
 
 		lightPassMat = Material::createFromFiles("lightPass_mat",
 			{
@@ -122,18 +119,18 @@ public:
 		glCullFace(GL_FRONT);
 
 		room->setMaterial(lightPassMat);
-		for (std::size_t i = 0; i < lightMapFBOs.size(); ++i)
+		for (std::size_t i = 0; i < 6; ++i)
 		{
-			lightMapFBOs[i]->attachDepthRenderTarget(lightMap.get(), i, 0, 0);
-			lightMapFBOs[i]->bind();
+			lightMapFBO->attachDepthRenderTarget(lightMap.get(), i, 0, 0);
+			lightMapFBO->bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 			room->setUniform("farPlane", farPlane);
 			room->setUniform("lightPos", lightPos);
 			room->setUniform("lightSpaceMatrix", lightSpaceMatrices[i]);
 			room->render();
-			lightMapFBOs[i]->unbind();
 		}
+		lightMapFBO->unbind();
 		glCullFace(GL_BACK);
 	}
 };
