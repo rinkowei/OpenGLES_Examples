@@ -28,12 +28,12 @@ public:
 
 	Example()
 	{
-		title = "shadow mapping spot light";
+		title = "perspective shadow mapping";
 		settings.vsync = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/23.shadow_mapping_spot_light/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/23.perspective_shadow_mapping/";
 	}
 
 	~Example()

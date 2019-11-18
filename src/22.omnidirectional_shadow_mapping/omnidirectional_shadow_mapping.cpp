@@ -25,13 +25,12 @@ public:
 
 	Example()
 	{
-		title = "shadow mapping point light";
+		title = "omnidirectional shadow mapping";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/22.shadow_mapping_point_light/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/22.omnidirectional_shadow_mapping/";
 	}
 
 	~Example()

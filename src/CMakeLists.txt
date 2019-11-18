@@ -55,8 +55,8 @@ set(EXAMPLES
     19.skybox_reflect
     20.parallax_mapping
     21.orthographic_shadow_mapping
-    22.shadow_mapping_point_light
-    23.shadow_mapping_spot_light
+    22.omnidirectional_shadow_mapping
+    23.perspective_shadow_mapping
     24.cascade_shadow_mapping
     25.variance_shadow_mapping
     26.bloom_with_hdr
