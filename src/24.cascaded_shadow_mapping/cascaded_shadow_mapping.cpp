@@ -20,7 +20,7 @@ public:
 
 	std::unique_ptr<Framebuffer> lightMapFBO;
 
-	const uint32_t lightMapSize = 2048;
+	const uint32_t lightMapSize = 4096;
 	std::shared_ptr<Texture2DArray> lightMapArray;
 
 	glm::mat4 lightViewMatrix;
@@ -30,8 +30,6 @@ public:
 	{
 		glm::vec3 color;
 		glm::vec3 direction;
-		float ambientIntensity;
-		float diffuseIntensity;
 	};
 
 	DirectionalLight dirLight;
@@ -85,8 +83,6 @@ public:
 		glEnable(GL_CULL_FACE);
 
 		dirLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
-		dirLight.ambientIntensity = 0.3f;
-		dirLight.diffuseIntensity = 0.8f;
 		dirLight.direction = glm::vec3(1.0f, -1.0f, 0.0f);
 
 		lightMapFBO = Framebuffer::create();
@@ -113,7 +109,7 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-				
+				{ "cascadedDepthMap", lightMapArray }
 			}
 		);
 
@@ -132,11 +128,7 @@ public:
 
 		sceneMat->setUniform("dirLight.color", dirLight.color);
 		sceneMat->setUniform("dirLight.direction", dirLight.direction);
-		sceneMat->setUniform("dirLight.ambientIntensity", dirLight.ambientIntensity);
-		sceneMat->setUniform("dirLight.diffuseIntensity", dirLight.diffuseIntensity);
 		sceneMat->setUniform("biasMatrix", biasMatrix);
-
-		sceneMat->setTexture("cascadedDepthMap", lightMapArray);
 
 		debugQuad = Model::createFromFile("debug_quad", modelsDirectory + "/quadrangle/quadrangle.obj",
 			{
@@ -248,10 +240,10 @@ public:
 			glm::vec3 maxExtents = glm::vec3(radius);
 			glm::vec3 minExtents = -maxExtents;
 
-			glm::vec3 lightDir = dirLight.direction;
-			glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
-			minExtents *= 2.0f;
-			maxExtents *= 2.0f;
+			glm::vec3 lightDir = -dirLight.direction;
+			glm::mat4 lightViewMatrix = glm::lookAtLH<float>(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+			minExtents *= 1.0f;
+			maxExtents *= 1.0f;
 			glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
 			cascades[i].splitDepth = (nearClip + splitDist * clipRange) * 1.0f;
