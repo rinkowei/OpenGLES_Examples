@@ -36,6 +36,14 @@ public:
 
 	DirectionalLight dirLight;
 
+	struct Cascade
+	{
+		float splitDepth;
+		glm::mat4 viewProjMatrix;
+	};
+
+	std::array<Cascade, MAX_SPLITS> cascades;
+
 	std::array<float, MAX_SPLITS> cascadeSplitArray;
 	std::array<glm::mat4, MAX_SPLITS> cascadeMatrices;
 
@@ -67,7 +75,7 @@ public:
 		ExampleBase::prepare();
 		
 		// setup camera
-		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+		mMainCamera->setPosition(glm::vec3(0.0f, 15.0f, 30.0f));
 		mMainCamera->setRotation(glm::vec3(30.0f, 0.0f, 0.0f));
 
 		// enable depth test
@@ -105,7 +113,7 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-				{ "cascadedDepthMap", lightMapArray }
+				
 			}
 		);
 
@@ -122,15 +130,13 @@ public:
 			venuses[i]->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
 		}
 
-		//sceneMat->setUniform("biasMatrix", biasMatrix);
 		sceneMat->setUniform("dirLight.color", dirLight.color);
 		sceneMat->setUniform("dirLight.direction", dirLight.direction);
 		sceneMat->setUniform("dirLight.ambientIntensity", dirLight.ambientIntensity);
 		sceneMat->setUniform("dirLight.diffuseIntensity", dirLight.diffuseIntensity);
+		sceneMat->setUniform("biasMatrix", biasMatrix);
 
-		sceneMat->setUniform("windowSize", glm::vec2(mWindowWidth, mWindowHeight));
-		sceneMat->setUniform("cascadedSplits", glm::vec4(cascadeSplitArray[0], cascadeSplitArray[1], cascadeSplitArray[2], cascadeSplitArray[3]));
-		sceneMat->setUniform("numOfCascades", MAX_SPLITS);
+		sceneMat->setTexture("cascadedDepthMap", lightMapArray);
 
 		debugQuad = Model::createFromFile("debug_quad", modelsDirectory + "/quadrangle/quadrangle.obj",
 			{
@@ -151,20 +157,20 @@ public:
 
 		for (unsigned int i = 0; i < MAX_SPLITS; ++i)
 		{
-			sceneMat->setUniform("lightMatrices[" + std::to_string(i) + "]", cascadeMatrices[i]);
+			sceneMat->setUniform("cascadedSplits[" + std::to_string(i) + "]", cascades[i].splitDepth);
+			sceneMat->setUniform("lightSpaceMatrices[" + std::to_string(i) + "]", cascades[i].viewProjMatrix);
 		}
 		sceneMat->setUniform("viewPos", mMainCamera->getPosition());
 
 		plane->setMaterial(sceneMat);
-		//plane->render();
-
+		plane->render();
 		for (std::size_t i = 0; i < venuses.size(); i++)
 		{
 			venuses[i]->setMaterial(sceneMat);
-			//venuses[i]->render();
+			venuses[i]->render();
 		}
 
-		debugQuad->render();
+		//debugQuad->render();
 	}
 
 	virtual void windowResized() override
@@ -244,23 +250,25 @@ public:
 
 			glm::vec3 lightDir = dirLight.direction;
 			glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
+			minExtents *= 2.0f;
+			maxExtents *= 2.0f;
 			glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
-			//cascades[i].splitDepth = (camera.getNearClip() + splitDist * clipRange) * -1.0f;
-			//cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
+			cascades[i].splitDepth = (nearClip + splitDist * clipRange) * 1.0f;
+			cascades[i].viewProjMatrix = lightOrthoMatrix * lightViewMatrix;
 
 			glViewport(0, 0, lightMapSize, lightMapSize);
 			lightMapFBO->addAttachmentTextureLayer(GL_DEPTH_ATTACHMENT, lightMapArray->getID(), 0, i);
 			lightMapFBO->bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
-			plane->setMaterial(lightPassMat);
-			plane->setUniform("lightMatrix", lightOrthoMatrix * lightViewMatrix);
-			plane->render();
 
+			lightPassMat->setUniform("lightSpaceMatrix", cascades[i].viewProjMatrix);
+
+			plane->setMaterial(lightPassMat);
+			plane->render();
 			for (std::size_t i = 0; i < venuses.size(); i++)
 			{
 				venuses[i]->setMaterial(lightPassMat);
-				venuses[i]->setUniform("lightMatrix", lightOrthoMatrix * lightViewMatrix);
 				venuses[i]->render();
 			}
 

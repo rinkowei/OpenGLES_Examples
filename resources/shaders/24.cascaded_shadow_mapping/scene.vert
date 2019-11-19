@@ -11,17 +11,17 @@ uniform mat4 projection;
 
 out vec2 fTexcoord;
 out vec3 fNormal;
+out vec3 fPos;
 out vec3 fFragPos;
-out vec4 fViewSpaceFragPos;
-out mat4 fViewMatrix;
+out vec3 fViewSpaceFragPos;
 
 void main()
 {
 	fTexcoord = vTexcoord;
 	fNormal = transpose(inverse(mat3(model))) * vNormal;
+	fPos = vPos;
 	fFragPos = vec3(model * vec4(vPos, 1.0));
-	fViewSpaceFragPos = view * model * vec4(vPos, 1.0f);
-	fViewMatrix = view;
+	fViewSpaceFragPos = (view * model * vec4(vPos, 1.0f)).xyz;
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }

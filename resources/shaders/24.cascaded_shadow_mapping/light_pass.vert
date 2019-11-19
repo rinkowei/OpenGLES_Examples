@@ -6,9 +6,9 @@ layout(location = 3) in vec3 vTangent;
 layout(location = 4) in vec3 vBitangent;
 
 uniform mat4 model;
-uniform mat4 lightMatrix;
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
-	gl_Position = lightMatrix * model * vec4(vPos, 1.0f);
+	gl_Position = lightSpaceMatrix * model * vec4(vPos, 1.0f);
 }
