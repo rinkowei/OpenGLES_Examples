@@ -6,7 +6,9 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	std::shared_ptr<Model> cube;
+	std::shared_ptr<Model> bunny;
+
+	std::unique_ptr<Framebuffer> depthFBO;
 
 	Example()
 	{
@@ -34,7 +36,7 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
-
+		bunny = Model::createFromFile("bunny", modelsDirectory + "/bunny/bunny.obj", {}, false);
 	}
 
 	virtual void windowResized() override

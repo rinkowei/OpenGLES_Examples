@@ -73,7 +73,7 @@ void main()
 			cascadeIndex = i + 1;
 		}
 	}
-	cascadeIndex = 0;
+	//cascadeIndex = 1;
 	vec4 shadowCoord = (biasMatrix * lightSpaceMatrices[cascadeIndex]) * vec4(fFragPos, 1.0);
 
 	float shadow = 0.0;
@@ -107,6 +107,6 @@ void main()
 			cascadeColor = vec3(0.0f, 0.1f, 0.1f);
 			break;
 	}
-	fragColor = vec4(vec3(ambient + shadow * (diffuse + specular)), 1.0);
+	fragColor = vec4(vec3(ambient + shadow * (diffuse + specular)) + cascadeColor, 1.0);
 	//fragColor = vec4(vec3(texture(cascadedDepthMap, vec3(shadowCoord.xy, 2)).r), 1.0);
 }

@@ -21,7 +21,7 @@ void main()
 	fNormal = transpose(inverse(mat3(model))) * vNormal;
 	fPos = vPos;
 	fFragPos = vec3(model * vec4(vPos, 1.0));
-	fViewSpaceFragPos = (view * model * vec4(vPos, 1.0f)).xyz;
+	fViewSpaceFragPos = (view * vec4(vPos, 1.0f)).xyz;
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }
