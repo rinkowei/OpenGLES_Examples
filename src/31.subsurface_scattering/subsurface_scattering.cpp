@@ -58,6 +58,14 @@ public:
 		depthMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		depthFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, depthMap->getTarget(), depthMap->getID(), 0);
+		depthFBO->bind();
+		unsigned int rbo;
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, depthMapSize, depthMapSize);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+		depthFBO->unbind();
 
 		bunny = Model::createFromFile("bunny", modelsDirectory + "/bunny/bunny.obj", {}, false);
 
@@ -81,6 +89,7 @@ public:
 			}
 		);
 		sssMat->setUniform("biasMatrix", biasMatrix);
+		sssMat->setUniform("lightDir", lightDir);
 	}
 
 	virtual void render(float deltaTime) override
@@ -92,7 +101,7 @@ public:
 
 		bunny->setMaterial(depthPassMat);
 		glm::mat4 lightView = glm::lookAt(-lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 lightProj = glm::ortho(-2.5f, 2.5f, -2.5f, 2.5f, 0.1f, 20.0f);
+		glm::mat4 lightProj = glm::ortho(-2.5f, 2.5f, -2.5f, 2.5f, -10.0f, 20.0f);
 
 		bunny->setUniform("lightView", lightView);
 		bunny->setUniform("lightProj", lightProj);
@@ -104,6 +113,7 @@ public:
 		bunny->setMaterial(sssMat);
 		bunny->setUniform("lightView", lightView);
 		bunny->setUniform("lightProj", lightProj);
+		bunny->setUniform("viewPos", mMainCamera->getPosition());
 		bunny->render();
 	}
 
