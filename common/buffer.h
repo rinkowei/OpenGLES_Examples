@@ -128,6 +128,8 @@ namespace es
 
 		void resize(uint32_t w, uint32_t h);
 
+		GLenum getTarget() const;
+
 		GLuint getID() const;
 	private:
 		GLenum mTarget;
@@ -163,6 +165,8 @@ namespace es
 		void addAttachmentTextureLayer(GLenum attachment, GLuint texture, GLint level, GLint layer);
 
 		void addAttachmentTexture2D(GLenum attachment, GLenum texTarget, GLuint texture, GLint level);
+
+		void addAttachmentRenderbuffer(GLenum attachment, GLenum rboTarget, GLuint renderbuffer);
 
 		void drawBuffers(GLsizei n, const GLenum* bufs);
 

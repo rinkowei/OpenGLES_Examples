@@ -300,6 +300,11 @@ namespace es
 		unbind();
 	}
 
+	GLenum Renderbuffer::getTarget() const
+	{
+		return mTarget;
+	}
+
 	GLuint Renderbuffer::getID() const
 	{
 		return mID;
@@ -492,6 +497,15 @@ namespace es
 
 		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, texture, level));
 	
+		unbind();
+	}
+
+	void Framebuffer::addAttachmentRenderbuffer(GLenum attachment, GLenum rboTarget, GLuint renderbuffer)
+	{
+		bind();
+
+		GLES_CHECK_ERROR(glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, rboTarget, renderbuffer));
+
 		unbind();
 	}
 

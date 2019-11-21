@@ -11,6 +11,7 @@ public:
 	const uint32_t depthMapSize = 2048;
 	std::unique_ptr<Framebuffer> depthFBO;
 	std::shared_ptr<Texture2D> depthMap;
+	std::unique_ptr<Renderbuffer> renderbuffer;
 
 	std::shared_ptr<Material> depthPassMat;
 	std::shared_ptr<Material> sssMat;
@@ -58,14 +59,9 @@ public:
 		depthMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		depthFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, depthMap->getTarget(), depthMap->getID(), 0);
-		depthFBO->bind();
-		unsigned int rbo;
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, depthMapSize, depthMapSize);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-		depthFBO->unbind();
+		
+		renderbuffer = Renderbuffer::create(GL_DEPTH24_STENCIL8, depthMapSize, depthMapSize);
+		depthFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, renderbuffer->getTarget(), renderbuffer->getID());
 
 		bunny = Model::createFromFile("bunny", modelsDirectory + "/bunny/bunny.obj", {}, false);
 
