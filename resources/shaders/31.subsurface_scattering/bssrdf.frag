@@ -25,8 +25,12 @@ void main()
 	vec3 N = normalize(fNormal);
 	vec3 L = normalize(-lightDir);
 	vec3 V = normalize(viewPos - fFragPos);
-	vec3 R = reflect(L, N);
+
+	vec3 ambient = 0.1f * albedo;
 
 	vec3 diff = max(dot(N, L), 0.0f) * albedo;
-	fragColor = vec4(scatPower); //* vec4(diff + (albedo * 0.1f), 1.0f);//
+
+	vec3 spec = pow(max(dot(N, normalize(V + L)), 0.0f), 32.0f) * albedo;
+
+	fragColor = vec4(vec3(ambient + scatPower * diff + spec), 1.0f);
 }

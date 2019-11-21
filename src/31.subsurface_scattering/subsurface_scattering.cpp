@@ -46,14 +46,14 @@ public:
 		ExampleBase::prepare();
 
 		// enable depth test
-		GLES_CHECK_ERROR(glEnable(GL_DEPTH_TEST));
+		glEnable(GL_DEPTH_TEST);
 
 		// enable cull face
-		GLES_CHECK_ERROR(glEnable(GL_CULL_FACE));
+		glEnable(GL_CULL_FACE);
 
 		depthFBO = Framebuffer::create();
 
-		depthMap = Texture2D::createFromData(depthMapSize, depthMapSize, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, false);
+		depthMap = Texture2D::createFromData(depthMapSize, depthMapSize, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
 		depthMap->setMinFilter(GL_NEAREST);
 		depthMap->setMagFilter(GL_NEAREST);
 		depthMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -62,6 +62,9 @@ public:
 		
 		renderbuffer = Renderbuffer::create(GL_DEPTH24_STENCIL8, depthMapSize, depthMapSize);
 		depthFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, renderbuffer->getTarget(), renderbuffer->getID());
+
+		std::array<GLenum, 1> bufs = { GL_COLOR_ATTACHMENT0 };
+		depthFBO->drawBuffers(bufs.size(), bufs.data());
 
 		bunny = Model::createFromFile("bunny", modelsDirectory + "/bunny/bunny.obj", {}, false);
 
