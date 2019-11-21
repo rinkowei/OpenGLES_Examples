@@ -495,6 +495,24 @@ namespace es
 		unbind();
 	}
 
+	void Framebuffer::drawBuffers(GLsizei n, const GLenum* bufs)
+	{
+		bind();
+
+		GLES_CHECK_ERROR(glDrawBuffers(n, bufs));
+
+		unbind();
+	}
+
+	void Framebuffer::readBuffers(GLenum src)
+	{
+		bind();
+
+		GLES_CHECK_ERROR(glReadBuffer(src));
+
+		unbind();
+	}
+
 	void Framebuffer::checkStatus()
 	{
 		GLenum status = GLES_CHECK_ERROR(glCheckFramebufferStatus(GL_FRAMEBUFFER));

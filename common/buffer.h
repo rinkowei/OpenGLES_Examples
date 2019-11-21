@@ -163,6 +163,10 @@ namespace es
 		void addAttachmentTextureLayer(GLenum attachment, GLuint texture, GLint level, GLint layer);
 
 		void addAttachmentTexture2D(GLenum attachment, GLenum texTarget, GLuint texture, GLint level);
+
+		void drawBuffers(GLsizei n, const GLenum* bufs);
+
+		void readBuffers(GLenum src);
 	private:
 		void checkStatus();
 
