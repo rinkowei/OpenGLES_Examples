@@ -1,15 +1,16 @@
 #version 310 es
 layout(location = 0) in vec3 vPos;
+layout(location = 1) in vec2 vTexcoord;
+layout(location = 2) in vec3 vNormal;
 
-out vec3 fFragPos;
+out float distance;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 lightView;
+uniform mat4 lightProj;
 
 void main()
 {
-	fFragPos = vPos;
-	vec4 clipPos = projection * mat4(mat3(view)) * vec4(vPos, 1.0f);
-	gl_Position = clipPos.xyww;
+	distance = length(lightView * vec4(vPos, 1.0f));
+	gl_Position = lightProj * lightView * vec4(vPos + vNormal * 0.003f, 1.0f);
 }

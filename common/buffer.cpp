@@ -491,7 +491,7 @@ namespace es
 		bind();
 
 		GLES_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, texture, level));
-
+	
 		unbind();
 	}
 
