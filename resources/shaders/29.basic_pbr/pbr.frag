@@ -24,7 +24,7 @@ uniform Light lights[4];
 const float PI = 3.14159265359;
 
 float distributionGGX(vec3 N, vec3 H, float roughness)
-{
+{	
 	float a = roughness * roughness;
 	float a2 = a * a;
 	float NdotH = max(dot(N, H), 0.0);
@@ -56,9 +56,9 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 	return ggx1 * ggx2;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
+vec3 fresnelSchlick(vec3 F0, vec3 V, vec3 H)
 {
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+	return F0 + (1.0 - F0) * exp2((-5.55473 * dot(V, H) - 6.98316) * dot(V, H));
 }
 
 void main()
@@ -79,7 +79,7 @@ void main()
 
 		float D = distributionGGX(N, H, roughness);
 		float G = geometrySmith(N, V, L, roughness);
-		vec3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+		vec3 F = fresnelSchlick(F0, V, H);
 
 		vec3 nominator = D * G * F;
 		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
