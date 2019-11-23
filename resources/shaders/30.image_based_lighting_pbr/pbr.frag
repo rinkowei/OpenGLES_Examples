@@ -63,9 +63,9 @@ vec3 fresnelSchlickFast(vec3 F0, vec3 V, vec3 H)
 	return F0 + (1.0 - F0) * exp2((-5.55473 * dot(V, H) - 6.98316) * dot(V, H));
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 void main()
@@ -102,7 +102,7 @@ void main()
 		Lo += (kD * albedo / PI + specular) * radiance * max(dot(N, L), 0.0);
 	}
 
-	vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+	vec3 kS = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 	vec3 irradiance = texture(irradianceMap, N).rgb;

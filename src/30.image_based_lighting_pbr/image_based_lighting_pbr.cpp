@@ -61,7 +61,7 @@ public:
 		captureRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, 512, 512);
 		captureFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, captureRBO->getTarget(), captureRBO->getID());
 
-		hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/newport_loft.hdr", 1, false);
+		hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/Alexs_Apartment.hdr", 1, false);
 
 		envCubemap = TextureCube::createFromData("env_cubemap", 512, 512, 1, GL_RGB16F, GL_RGB, GL_FLOAT, nullptr);
 		envCubemap->setMinFilter(GL_LINEAR);
@@ -173,8 +173,8 @@ public:
 				sphere->setPosition(pos);
 				sphere->setScale(glm::vec3(0.04f));
 				sphere->setUniform("albedo", glm::vec3(0.7f, 0.0f, 0.0f));
-				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
-				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
+				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 0.9f));
+				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 0.9f));
 				sphere->setUniform("ao", 1.0f);
 				sphere->setUniform("exposure", 1.0f);
 
@@ -203,12 +203,14 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
+		glEnable(GL_CULL_FACE);
 		for (std::size_t i = 0; i < spheres.size(); i++)
 		{
 			spheres[i]->setUniform("viewPos", mMainCamera->getPosition());
 			spheres[i]->render();
 		}
 
+		glDisable(GL_CULL_FACE);
 		cube->render();
 	}
 
