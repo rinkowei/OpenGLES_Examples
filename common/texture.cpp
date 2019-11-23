@@ -233,7 +233,7 @@ namespace es
 
 				if (ishdr)
 				{
-					internalFormat = GL_RGB16F;
+					internalFormat = GL_RGB32F;
 					type = GL_FLOAT;
 				}
 				format = GL_RGB;
@@ -248,7 +248,7 @@ namespace es
 
 				if (ishdr)
 				{
-					internalFormat = GL_RGBA16F;
+					internalFormat = GL_RGBA32F;
 					type = GL_FLOAT;
 				}
 				format = GL_RGBA;
@@ -751,12 +751,6 @@ namespace es
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, w, h, 0, mFormat, mType, data);
 		}
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
-
-		setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
-		setMagFilter(GL_LINEAR);
-		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
-		generateMipmaps();
 
 		return true;
 	}
