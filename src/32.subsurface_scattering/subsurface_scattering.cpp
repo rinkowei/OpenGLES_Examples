@@ -33,7 +33,7 @@ public:
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/31.subsurface_scattering/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/32.subsurface_scattering/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()

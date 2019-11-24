@@ -64,7 +64,8 @@ set(EXAMPLES
     28.compute_shader_particles
     29.basic_pbr
     30.image_based_lighting_pbr
-    31.subsurface_scattering
+    31.image_based_lighting_pbr_textured
+    32.subsurface_scattering
 )
 
 buildExamples()
