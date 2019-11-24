@@ -234,7 +234,7 @@ public:
 		lights[2].position = glm::vec3(15.0f, -10.0f, 15.0f);
 		lights[3].position = glm::vec3(15.0f, -10.0f, -15.0f);
 
-		cerberus->setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+		cerberus->setRotation(glm::vec3(0.0f, 90.0f, 0.0f));
 		cerberus->setScale(glm::vec3(0.2f));
 		cerberus->setUniform("exposure", 2.0f);
 
