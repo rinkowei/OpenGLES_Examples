@@ -748,10 +748,10 @@ namespace es
 		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
 		for (GLuint i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, w, h, 0, mFormat, mType, data);
+			GLES_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, mWidth, mHeight, 0, mFormat, mType, data));
 		}
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
-
+		
 		return true;
 	}
 
@@ -760,7 +760,7 @@ namespace es
 		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
 		for (GLuint i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr);
+			GLES_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, mipLevel, mInternalFormat, w, h, 0, mFormat, mType, nullptr));
 		}
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 

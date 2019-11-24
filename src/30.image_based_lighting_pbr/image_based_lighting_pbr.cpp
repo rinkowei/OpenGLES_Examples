@@ -7,6 +7,7 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Model> cube;
+	std::shared_ptr<Model> quad;
 
 	std::unique_ptr<Framebuffer> captureFBO;
 	std::unique_ptr<Renderbuffer> captureRBO;
@@ -14,6 +15,9 @@ public:
 	std::shared_ptr<Texture2D> hdrEnvironmentTexture;
 	std::shared_ptr<TextureCube> envCubemap;
 	std::shared_ptr<TextureCube> irradianceCubemap;
+
+	std::shared_ptr<TextureCube> prefilterCubemap;
+	std::shared_ptr<Texture2D> brdfLUT;
 
 	glm::mat4 captureProj;
 	std::array<glm::mat4, 6> captureViews;
@@ -64,7 +68,7 @@ public:
 		hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/Alexs_Apartment.hdr", 1, false);
 
 		envCubemap = TextureCube::createFromData("env_cubemap", 512, 512, 1, GL_RGB16F, GL_RGB, GL_FLOAT, nullptr);
-		envCubemap->setMinFilter(GL_LINEAR);
+		envCubemap->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 		envCubemap->setMagFilter(GL_LINEAR);
 		envCubemap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
@@ -72,7 +76,18 @@ public:
 		irradianceCubemap->setMinFilter(GL_LINEAR);
 		irradianceCubemap->setMagFilter(GL_LINEAR);
 		irradianceCubemap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		
+		prefilterCubemap = TextureCube::createFromData("prefilter_cubemap", 128, 128, 1, GL_RGB16F, GL_RGB, GL_FLOAT, nullptr);
+		prefilterCubemap->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		prefilterCubemap->setMagFilter(GL_LINEAR);
+		prefilterCubemap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		prefilterCubemap->generateMipmaps();
 
+		brdfLUT = Texture2D::createFromData(512, 512, 1, 1, GL_RG16F, GL_RG, GL_FLOAT, false);
+		brdfLUT->setMinFilter(GL_LINEAR);
+		brdfLUT->setMagFilter(GL_LINEAR);
+		brdfLUT->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		
 		captureProj= glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		captureViews = 
 		{
@@ -109,6 +124,7 @@ public:
 			cube->render();
 		}
 		captureFBO->unbind();
+		envCubemap->generateMipmaps();
 
 		std::shared_ptr<Material> irradianceMat = Material::createFromData("irradiance_mat",
 			{
@@ -136,7 +152,64 @@ public:
 			cube->render();
 		}
 		captureFBO->unbind();
-		
+
+		std::shared_ptr<Material> prefilterMat = Material::createFromData("prefilter_mat",
+			{
+				shadersDirectory + "cubemap.vert",
+				shadersDirectory + "prefilter.frag"
+			},
+			{
+				{ "environmentMap", envCubemap }
+			}
+		);
+		cube->setMaterial(prefilterMat);
+		cube->setUniform("captureProj", captureProj);
+
+		captureFBO->bind();
+		unsigned int maxMipLevels = 5;
+		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+		{
+			unsigned int mipWidth = 128 * std::pow(0.5, mip);
+			unsigned int mipHeight = 128 * std::pow(0.5, mip);
+			captureRBO->resize(mipWidth, mipHeight);
+
+			glViewport(0, 0, mipWidth, mipHeight);
+
+			float roughness = (float)mip / (float)(maxMipLevels - 1);
+			cube->setUniform("roughness", roughness);
+			for (unsigned int i = 0; i < 6; ++i)
+			{
+				cube->setUniform("captureView", captureViews[i]);
+				captureFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterCubemap->getID(), mip);
+				captureFBO->bind();
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				cube->render();
+			}
+		}
+		captureFBO->unbind();
+
+		std::shared_ptr<Material> brdfMat = Material::createFromFiles("brdf_mat",
+			{
+				shadersDirectory + "brdf.vert",
+				shadersDirectory + "brdf.frag"
+			},
+			{
+				
+			}
+		);
+
+		quad = Model::createFromFile("quad", modelsDirectory + "/quadrangle/quadrangle.obj", {}, false);
+		quad->setMaterial(brdfMat);
+
+		captureFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, brdfLUT->getTarget(), brdfLUT->getID(), 0);
+		captureFBO->bind();
+		captureRBO->resize(512, 512);
+		glViewport(0, 0, 512, 512);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		quad->render();
+		captureFBO->unbind();
+	
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 
 		std::shared_ptr<Material> pbrMat = Material::createFromData("pbr_mat",
@@ -145,7 +218,9 @@ public:
 				shadersDirectory + "pbr.frag"
 			},
 			{
-				{ "irradianceMap", irradianceCubemap }
+				{ "irradianceMap", irradianceCubemap },
+				{ "prefilterMap", prefilterCubemap },
+				{ "brdfLUT", brdfLUT }
 			}
 		);
 		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",
@@ -173,8 +248,8 @@ public:
 				sphere->setPosition(pos);
 				sphere->setScale(glm::vec3(0.04f));
 				sphere->setUniform("albedo", glm::vec3(0.7f, 0.0f, 0.0f));
-				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 0.9f));
-				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 0.9f));
+				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
+				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
 				sphere->setUniform("ao", 1.0f);
 				sphere->setUniform("exposure", 1.0f);
 
@@ -203,6 +278,7 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
+		
 		glEnable(GL_CULL_FACE);
 		for (std::size_t i = 0; i < spheres.size(); i++)
 		{
@@ -212,6 +288,7 @@ public:
 
 		glDisable(GL_CULL_FACE);
 		cube->render();
+		
 	}
 
 	virtual void windowResized() override
