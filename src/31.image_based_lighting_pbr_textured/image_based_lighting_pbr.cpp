@@ -8,6 +8,7 @@ class Example final : public ExampleBase
 public:
 	std::shared_ptr<Model> cube;
 	std::shared_ptr<Model> quad;
+	std::shared_ptr<Model> cerberus;
 
 	std::unique_ptr<Framebuffer> captureFBO;
 	std::unique_ptr<Renderbuffer> captureRBO;
@@ -22,26 +23,22 @@ public:
 	glm::mat4 captureProj;
 	std::array<glm::mat4, 6> captureViews;
 
-	const int row = 7;
-	const int col = 7;
-	std::vector<std::shared_ptr<Model>> spheres;
-
 	struct Light
 	{
 		glm::vec3 color;
 		glm::vec3 position;
 	};
-	std::array<Light, 6> lights;
+	std::array<Light, 4> lights;
 
 	Example()
 	{
-		title = "image based lighting pbr";
+		title = "image based lighting pbr textured";
 		settings.vsync = true;
 		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/30.image_based_lighting_pbr/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/31.image_based_lighting_pbr_textured/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()
@@ -58,7 +55,7 @@ public:
 		glDepthFunc(GL_LEQUAL);
 
 		// setup camera
-		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+		mMainCamera->setPosition(glm::vec3(-10.0f, 0.0f, 30.0f));
 		mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
 		captureFBO = Framebuffer::create();
@@ -212,56 +209,40 @@ public:
 	
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 
-		std::shared_ptr<Material> pbrMat = Material::createFromData("pbr_mat",
+		std::shared_ptr<Material> pbrMat = Material::createFromFiles("pbr_mat",
 			{
 				shadersDirectory + "pbr.vert",
 				shadersDirectory + "pbr.frag"
 			},
 			{
-				{ "irradianceMap", irradianceCubemap },
-				{ "prefilterMap", prefilterCubemap },
-				{ "brdfLUT", brdfLUT }
+				{ "albedoMap", modelsDirectory + "/cerberus/albedo.png" },
+				{ "metallicMap", modelsDirectory + "/cerberus/metallic.png" },
+				{ "normalMap", modelsDirectory + "/cerberus/normal.png" },
+				{ "roughnessMap", modelsDirectory + "/cerberus/roughness.png" },
+				{ "aoMap", modelsDirectory + "/cerberus/ao.png" },
 			}
 		);
-		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",
-			{
 
-			},
-			false
-		);
-		sphereTemplate->setMaterial(pbrMat);
+		cerberus = Model::createFromFile("cerberus", modelsDirectory + "/cerberus/cerberus.fbx", {}, false);
+		cerberus->setMaterial(pbrMat);
+		cerberus->setTexture("irradianceMap", irradianceCubemap);
+		cerberus->setTexture("prefilterMap", prefilterCubemap);
+		cerberus->setTexture("brdfLUT", brdfLUT);
 
-		lights[0].position = glm::vec3(-10.0f, -10.0f, 0.0f);
-		lights[1].position = glm::vec3(-10.0f, 10.0f, 0.0f);
-		lights[2].position = glm::vec3(10.0f, 10.0f, 0.0f);
-		lights[3].position = glm::vec3(10.0f, -10.0f, 0.0f);
-		lights[4].position = glm::vec3(0.0f, 0.0f, 10.0f);
-		lights[5].position = glm::vec3(0.0f, 0.0f, -10.0f);
+		lights[0].position = glm::vec3(-15.0f, -10.0f, -15.0f);
+		lights[1].position = glm::vec3(-15.0f, -10.0f, 15.0f);
+		lights[2].position = glm::vec3(15.0f, -10.0f, 15.0f);
+		lights[3].position = glm::vec3(15.0f, -10.0f, -15.0f);
 
-		for (int x = 0; x < row; x++)
+		cerberus->setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+		cerberus->setScale(glm::vec3(0.2f));
+		cerberus->setUniform("exposure", 2.0f);
+
+		for (std::size_t i = 0; i < lights.size(); i++)
 		{
-			for (int y = 0; y < col; y++)
-			{
-				std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(x * col + y), sphereTemplate.get());
-
-				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
-				sphere->setPosition(pos);
-				sphere->setScale(glm::vec3(0.04f));
-				sphere->setUniform("albedo", glm::vec3(0.7f, 0.0f, 0.0f));
-				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
-				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
-				sphere->setUniform("ao", 1.0f);
-				sphere->setUniform("exposure", 1.0f);
-
-				for (std::size_t i = 0; i < lights.size(); i++)
-				{
-					lights[i].color = glm::vec3(100.0f, 100.0f, 100.0f);
-					sphere->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
-					sphere->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
-				}
-
-				spheres.push_back(sphere);
-			}
+			lights[i].color = glm::vec3(100.0f, 100.0f, 100.0f);
+			cerberus->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
+			cerberus->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
 		}
 		
 		std::shared_ptr<Material> backgroundMat = Material::createFromData("background_mat",
@@ -280,11 +261,8 @@ public:
 	{
 		
 		glEnable(GL_CULL_FACE);
-		for (std::size_t i = 0; i < spheres.size(); i++)
-		{
-			spheres[i]->setUniform("viewPos", mMainCamera->getPosition());
-			spheres[i]->render();
-		}
+		cerberus->setUniform("viewPos", mMainCamera->getPosition());
+		cerberus->render();
 
 		glDisable(GL_CULL_FACE);
 		cube->render();

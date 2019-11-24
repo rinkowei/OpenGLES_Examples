@@ -227,8 +227,8 @@ namespace es
 			{
 				aiString str;
 				material->GetTexture(texType, j, &str);
-				
-				std::string texName = Utility::pathWithoutFile(std::string(str.C_Str()));
+			
+				std::string texName = Utility::fileWithoutPath(std::string(str.C_Str()));
 				textureFiles.insert(std::make_pair(kTextureTypeStrings[i] + "_" + std::to_string(j), mDirectory + "/" + texName));
 			}
 			texType = static_cast<aiTextureType>(texType + 1);

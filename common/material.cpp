@@ -183,7 +183,9 @@ namespace es
 
 		if (!isExists)
 		{
-			mTextureMap[std::make_pair(name, static_cast<int>(mTextureMap.size()))] = texture;
+			int location = static_cast<int>(mTextureMap.size());
+			mTextureMap[std::make_pair(name, location)] = texture;
+			mProgram->setUniform(name, location);
 		}
 	}
 }

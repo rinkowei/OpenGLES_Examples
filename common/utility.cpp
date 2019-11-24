@@ -82,6 +82,15 @@ namespace es
 		return path.substr(0, found);
 	}
 
+	std::string Utility::fileWithoutPath(std::string path)
+	{
+#ifdef WIN32
+		std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+		std::size_t found = path.find_last_of("/\\");
+		return path.substr(found + 1, path.length());
+	}
+
 	std::string Utility::fileExtension(const std::string& filePath)
 	{
 		std::size_t found = filePath.find_last_of(".");

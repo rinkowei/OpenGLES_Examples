@@ -25,6 +25,8 @@ namespace es
 
 		static std::string pathWithoutFile(std::string path);
 
+		static std::string fileWithoutPath(std::string path);
+
 		static std::string fileExtension(const std::string& filePath);
 
 		static std::string createNewGUID();
