@@ -30,6 +30,8 @@ public:
 	};
 	std::array<Light, 4> lights;
 
+	const float exposure = 3.0f;
+
 	Example()
 	{
 		title = "image based lighting pbr textured";
@@ -236,7 +238,7 @@ public:
 
 		cerberus->setRotation(glm::vec3(0.0f, 90.0f, 0.0f));
 		cerberus->setScale(glm::vec3(0.2f));
-		cerberus->setUniform("exposure", 2.0f);
+		cerberus->setUniform("exposure", exposure);
 
 		for (std::size_t i = 0; i < lights.size(); i++)
 		{
@@ -255,6 +257,7 @@ public:
 			}
 		);
 		cube->setMaterial(backgroundMat);
+		cube->setUniform("exposure", exposure);
 	}
 
 	virtual void render(float deltaTime) override
