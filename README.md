@@ -152,3 +152,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 #### [32 - subsurface_scattering](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/32.subsurface_scattering>)
+
+
+
+#### [33 - spherical_harmonics_lighting](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/33.spherical_harmonics_lighting>)

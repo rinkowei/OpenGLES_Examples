@@ -1,0 +1,21 @@
+#version 310 es
+
+layout (local_size_x = 1024) in;
+layout (binding = 0, rgba8) uniform readonly highp image2D inputImage;
+layout (binding = 1, rgba8) uniform writeonly highp image2D outputImage;
+
+shared vec4 scanline[1024];
+
+void main()
+{	
+	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+
+	scanline[pos.x] = imageLoad(inputImage, pos);
+	barrier();
+	vec4 result = scanline[min(pos.x + 1, 1023)] - scanline[max(pos.x - 1, 0)];
+	if (result.r > 0.0 || result.g > 0.0 || result.b > 0.0)
+	{
+		result.rgb = vec3(1.0);
+	}
+	imageStore(outputImage, pos.yx, result);
+}
