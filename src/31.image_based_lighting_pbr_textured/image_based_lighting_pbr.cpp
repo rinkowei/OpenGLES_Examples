@@ -8,7 +8,7 @@ class Example final : public ExampleBase
 public:
 	std::shared_ptr<Model> cube;
 	std::shared_ptr<Model> quad;
-	std::shared_ptr<Model> cerberus;
+	std::shared_ptr<Model> drakefirePistol;
 
 	std::unique_ptr<Framebuffer> captureFBO;
 	std::unique_ptr<Renderbuffer> captureRBO;
@@ -217,34 +217,34 @@ public:
 				shadersDirectory + "pbr.frag"
 			},
 			{
-				{ "albedoMap", modelsDirectory + "/cerberus/albedo.png" },
-				{ "metallicMap", modelsDirectory + "/cerberus/metallic.png" },
-				{ "normalMap", modelsDirectory + "/cerberus/normal.png" },
-				{ "roughnessMap", modelsDirectory + "/cerberus/roughness.png" },
-				{ "aoMap", modelsDirectory + "/cerberus/ao.png" },
+				{ "albedoMap", modelsDirectory + "/drakefire_pistol/albedo.jpg" },
+				{ "metallicMap", modelsDirectory + "/drakefire_pistol/metallic.jpg" },
+				{ "normalMap", modelsDirectory + "/drakefire_pistol/normal.jpg" },
+				{ "roughnessMap", modelsDirectory + "/drakefire_pistol/roughness.jpg" },
+				{ "aoMap", modelsDirectory + "/drakefire_pistol/ao.jpg" },
 			}
 		);
 
-		cerberus = Model::createFromFile("cerberus", modelsDirectory + "/cerberus/cerberus.fbx", {}, false);
-		cerberus->setMaterial(pbrMat);
-		cerberus->setTexture("irradianceMap", irradianceCubemap);
-		cerberus->setTexture("prefilterMap", prefilterCubemap);
-		cerberus->setTexture("brdfLUT", brdfLUT);
+		drakefirePistol = Model::createFromFile("drakefire_pistol", modelsDirectory + "/drakefire_pistol/drakefire_pistol.obj", {}, false);
+		drakefirePistol->setMaterial(pbrMat);
+		drakefirePistol->setTexture("irradianceMap", irradianceCubemap);
+		drakefirePistol->setTexture("prefilterMap", prefilterCubemap);
+		drakefirePistol->setTexture("brdfLUT", brdfLUT);
 
 		lights[0].position = glm::vec3(-15.0f, -10.0f, -15.0f);
 		lights[1].position = glm::vec3(-15.0f, -10.0f, 15.0f);
 		lights[2].position = glm::vec3(15.0f, -10.0f, 15.0f);
 		lights[3].position = glm::vec3(15.0f, -10.0f, -15.0f);
 
-		cerberus->setRotation(glm::vec3(0.0f, 90.0f, 0.0f));
-		cerberus->setScale(glm::vec3(0.2f));
-		cerberus->setUniform("exposure", exposure);
+		drakefirePistol->setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+		drakefirePistol->setScale(glm::vec3(10.0f));
+		drakefirePistol->setUniform("exposure", exposure);
 
 		for (std::size_t i = 0; i < lights.size(); i++)
 		{
 			lights[i].color = glm::vec3(100.0f, 100.0f, 100.0f);
-			cerberus->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
-			cerberus->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
+			drakefirePistol->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
+			drakefirePistol->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
 		}
 		
 		std::shared_ptr<Material> backgroundMat = Material::createFromData("background_mat",
@@ -264,8 +264,8 @@ public:
 	{
 		
 		glEnable(GL_CULL_FACE);
-		cerberus->setUniform("viewPos", mMainCamera->getPosition());
-		cerberus->render();
+		drakefirePistol->setUniform("viewPos", mMainCamera->getPosition());
+		drakefirePistol->render();
 
 		glDisable(GL_CULL_FACE);
 		cube->render();
