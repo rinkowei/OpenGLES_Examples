@@ -11,6 +11,7 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Model> cube;
+	std::shared_ptr<Model> cutter;
 
 	std::unique_ptr<Framebuffer> captureFBO;
 	std::unique_ptr<Renderbuffer> captureRBO;
@@ -23,10 +24,6 @@ public:
 
 	glm::mat4 captureProj;
 	std::array<glm::mat4, 6> captureViews;
-
-	const int row = 7;
-	const int col = 7;
-	std::vector<std::shared_ptr<Model>> spheres;
 
 	struct Light
 	{
@@ -41,7 +38,6 @@ public:
 	{
 		title = "spherical harmonics lighting";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -62,7 +58,7 @@ public:
 		glDepthFunc(GL_LEQUAL);
 
 		// setup camera
-		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+		mMainCamera->setPosition(glm::vec3(5.0f, 0.0f, 35.0f));
 		mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
 		captureFBO = Framebuffer::create();
@@ -103,7 +99,7 @@ public:
 			{
 				{ "equirectangularMap", hdrEnvironmentTexture }
 			}
-			);
+		);
 
 		cube = Model::createFromFile("cube", modelsDirectory + "/cube/cube.obj", {}, false);
 		cube->setMaterial(equirectangularToCubemapMat);
@@ -162,23 +158,20 @@ public:
 				shadersDirectory + "pbr.frag"
 			},
 			{
-				{ "albedoMap", texturesDirectory + "/PBR/wood-veneer/albedo.png" },
-				{ "metallicMap", texturesDirectory + "/PBR/wood-veneer/metallic.png" },
-				{ "normalMap", texturesDirectory + "/PBR/wood-veneer/normal.png" },
-				{ "roughnessMap", texturesDirectory + "/PBR/wood-veneer/roughness.png" },
-				{ "aoMap", texturesDirectory + "/PBR/wood-veneer/ao.png" }
+				{ "albedoMap", modelsDirectory + "/cutter/albedo.png" },
+				{ "metallicMap", modelsDirectory + "/cutter/metallic.png" },
+				{ "normalMap", modelsDirectory + "/cutter/normal.png" },
+				{ "roughnessMap", modelsDirectory + "/cutter/roughness.png" },
+				{ "aoMap", modelsDirectory + "/cutter/ao.png" }
 			}
 		);
 
-		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.dae",
-			{
+		cutter = Model::createFromFile("cutter", modelsDirectory + "/cutter/cutter.fbx", {}, false);
+		cutter->setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+		cutter->setScale(glm::vec3(0.05f));
 
-			},
-			false
-		);
-
-		sphereTemplate->setMaterial(pbrMat);
-		sphereTemplate->setTexture("irradianceSH", sh);
+		cutter->setMaterial(pbrMat);
+		cutter->setTexture("irradianceSH", sh);
 
 		lights[0].position = glm::vec3(-10.0f, -10.0f, 0.0f);
 		lights[1].position = glm::vec3(-10.0f, 10.0f, 0.0f);
@@ -187,27 +180,13 @@ public:
 		lights[4].position = glm::vec3(0.0f, 0.0f, 10.0f);
 		lights[5].position = glm::vec3(0.0f, 0.0f, -10.0f);
 
-		for (int x = 0; x < row; x++)
+		for (std::size_t i = 0; i < lights.size(); i++)
 		{
-			for (int y = 0; y < col; y++)
-			{
-				std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(x * col + y), sphereTemplate.get());
-
-				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
-				sphere->setPosition(pos);
-				sphere->setScale(glm::vec3(0.8f));
-
-				for (std::size_t i = 0; i < lights.size(); i++)
-				{
-					lights[i].color = glm::vec3(100.0f, 100.0f, 100.0f);
-					sphere->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
-					sphere->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
-				}
-				sphere->setUniform("exposure", exposure);
-
-				spheres.push_back(sphere);
-			}
+			lights[i].color = glm::vec3(100.0f, 100.0f, 100.0f);
+			cutter->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
+			cutter->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
 		}
+		cutter->setUniform("exposure", exposure);
 
 		std::shared_ptr<Material> skyboxMat = Material::createFromData("skybox_mat",
 			{
@@ -225,11 +204,8 @@ public:
 	{
 
 		glEnable(GL_CULL_FACE);
-		for (std::size_t i = 0; i < spheres.size(); i++)
-		{
-			spheres[i]->setUniform("viewPos", mMainCamera->getPosition());
-			spheres[i]->render();
-		}
+		cutter->setUniform("viewPos", mMainCamera->getPosition());
+		cutter->render();
 
 		glDisable(GL_CULL_FACE);
 		cube->render();
