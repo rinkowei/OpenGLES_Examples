@@ -59,6 +59,7 @@ public:
 		// setup camera
 		mMainCamera->setPosition(glm::vec3(-10.0f, 0.0f, 30.0f));
 		mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+		mMainCamera->setMoveSensitivity(50.0f);
 
 		captureFBO = Framebuffer::create();
 		captureRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, 512, 512);

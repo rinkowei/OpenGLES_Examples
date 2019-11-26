@@ -46,7 +46,7 @@ public:
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
 
-		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.obj",
+		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.dae",
 			{
 				shadersDirectory + "pbr.vert",
 				shadersDirectory + "pbr.frag"
@@ -67,7 +67,7 @@ public:
 			
 				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
 				sphere->setPosition(pos);
-				sphere->setScale(glm::vec3(0.04f));
+				sphere->setScale(glm::vec3(0.8f));
 				sphere->setUniform("albedo", glm::vec3(1.0f, 0.765557f, 0.336057f));
 				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
 				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
