@@ -3,6 +3,10 @@
 #include <material.h>
 using namespace es;
 
+#define IRRADIANCE_CUBEMAP_SIZE 128
+#define IRRADIANCE_WORK_GROUP_SIZE 8
+#define SH_INTERMEDIATE_SIZE (IRRADIANCE_CUBEMAP_SIZE / IRRADIANCE_WORK_GROUP_SIZE)
+
 class Example final : public ExampleBase
 {
 public:
@@ -13,6 +17,9 @@ public:
 
 	std::shared_ptr<Texture2D> hdrEnvironmentTexture;
 	std::shared_ptr<TextureCube> envCubemap;
+
+	std::shared_ptr<Texture2DArray> shIntermediate;
+	std::shared_ptr<Texture2D> sh;
 
 	glm::mat4 captureProj;
 	std::array<glm::mat4, 6> captureViews;
@@ -60,12 +67,20 @@ public:
 		captureRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, 512, 512);
 		captureFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, captureRBO->getTarget(), captureRBO->getID());
 
-		hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/Alexs_Apartment.hdr", 1, false);
+		hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/Topanga_Forest.hdr", 1, false);
 
 		envCubemap = TextureCube::createFromData("env_cubemap", 512, 512, 1, GL_RGB16F, GL_RGB, GL_FLOAT, nullptr);
 		envCubemap->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 		envCubemap->setMagFilter(GL_LINEAR);
 		envCubemap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		shIntermediate = Texture2DArray::createFromData(SH_INTERMEDIATE_SIZE * 9, SH_INTERMEDIATE_SIZE, 6, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
+		shIntermediate->setMinFilter(GL_NEAREST);
+		shIntermediate->setMagFilter(GL_NEAREST);
+
+		sh = Texture2D::createFromData(9, 1, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
+		sh->setMinFilter(GL_NEAREST);
+		sh->setMagFilter(GL_NEAREST);
 
 		captureProj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		captureViews =
@@ -105,6 +120,38 @@ public:
 		captureFBO->unbind();
 		envCubemap->generateMipmaps();
 
+		std::shared_ptr<Program> shProjectionProgram = Program::createFromFiles("sh_projection_program",
+			{
+				shadersDirectory + "sh_projection.comp"
+			}
+		);
+
+		shProjectionProgram->apply();
+		shProjectionProgram->setUniform("width", envCubemap->getWidth() / 4.0f);
+		shProjectionProgram->setUniform("height", envCubemap->getHeight() / 4.0f);
+		shProjectionProgram->setUniform("envCubemap", 0);
+		envCubemap->bind(0);
+		shIntermediate->bindImage(0, 0, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+		glDispatchCompute(IRRADIANCE_CUBEMAP_SIZE / IRRADIANCE_WORK_GROUP_SIZE, IRRADIANCE_CUBEMAP_SIZE / IRRADIANCE_WORK_GROUP_SIZE, 6);
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+		std::shared_ptr<Program> shAddProgram = Program::createFromFiles("sh_add_program",
+			{
+				shadersDirectory + "sh_add.comp"
+			}
+		);
+
+		shAddProgram->apply();
+		shAddProgram->setUniform("shIntermediate", 0);
+		shIntermediate->bind(0);
+		sh->bindImage(0, 0, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+		glDispatchCompute(9, 1, 1);
+
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 
 		std::shared_ptr<Material> pbrMat = Material::createFromData("pbr_mat",
@@ -113,7 +160,7 @@ public:
 				shadersDirectory + "pbr.frag"
 			},
 			{
-
+				{ "irradianceSH", sh }
 			}
 		);
 
@@ -142,9 +189,9 @@ public:
 				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
 				sphere->setPosition(pos);
 				sphere->setScale(glm::vec3(0.8f));
-				sphere->setUniform("albedo", glm::vec3(0.7f, 0.0f, 0.0f));
-				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
-				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
+				sphere->setUniform("albedo", glm::vec3(1.0f, 1.0f, 1.0f));
+				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 0.9f));
+				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 0.9f));
 				sphere->setUniform("ao", 1.0f);
 				sphere->setUniform("exposure", 1.0f);
 

@@ -1,21 +1,64 @@
 #version 310 es
 
-layout (local_size_x = 1024) in;
-layout (binding = 0, rgba8) uniform readonly highp image2D inputImage;
-layout (binding = 1, rgba8) uniform writeonly highp image2D outputImage;
+#define LOCAL_SIZE 8
+#define IRRADIANCE_MAP_SIZE 128
+#define SH_INTERMEDIATE_SIZE 16
+#define NUM_CUBEMAP_FACES 6
 
-shared vec4 scanline[1024];
+const float PI = 3.141592654;
+
+layout(local_size_x = 1, local_size_y = SH_INTERMEDIATE_SIZE, local_size_z = NUM_CUBEMAP_FACES) in;
+
+layout(binding = 0, rgba32f) uniform writeonly highp image2D sh;
+
+uniform highp sampler2DArray shIntermediate;
+
+shared vec3  shCoeffs[SH_INTERMEDIATE_SIZE][NUM_CUBEMAP_FACES];
+shared float weights[SH_INTERMEDIATE_SIZE][NUM_CUBEMAP_FACES];
 
 void main()
 {	
-	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    shCoeffs[gl_GlobalInvocationID.y][gl_GlobalInvocationID.z] = vec3(0.0);
+    weights[gl_GlobalInvocationID.y][gl_GlobalInvocationID.z]   = 0.0;
 
-	scanline[pos.x] = imageLoad(inputImage, pos);
-	barrier();
-	vec4 result = scanline[min(pos.x + 1, 1023)] - scanline[max(pos.x - 1, 0)];
-	if (result.r > 0.0 || result.g > 0.0 || result.b > 0.0)
-	{
-		result.rgb = vec3(1.0);
-	}
-	imageStore(outputImage, pos.yx, result);
+    barrier();
+
+    // Add up coefficients along X axis.
+    for (int i = 0; i < SH_INTERMEDIATE_SIZE; i++)
+    {
+        ivec3 p   = ivec3(int(gl_GlobalInvocationID.x) * SH_INTERMEDIATE_SIZE + i, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z);
+        vec4  val = texelFetch(shIntermediate, p, 0);
+
+        shCoeffs[gl_GlobalInvocationID.y][gl_GlobalInvocationID.z] += val.rgb;
+        weights[gl_GlobalInvocationID.y][gl_GlobalInvocationID.z] += val.a;
+    }
+
+    barrier();
+
+    if (gl_GlobalInvocationID.z == 0u)
+    {
+        // Add up coefficients along Z axis.
+        for (int i = 1; i < NUM_CUBEMAP_FACES; i++)
+        {
+            shCoeffs[gl_GlobalInvocationID.y][0] += shCoeffs[gl_GlobalInvocationID.y][i];
+            weights[gl_GlobalInvocationID.y][0] += weights[gl_GlobalInvocationID.y][i];
+        }
+    }
+
+    barrier();
+
+    if (gl_GlobalInvocationID.y == 0u && gl_GlobalInvocationID.z == 0u)
+    {
+        // Add up coefficients along Y axis.
+        for (int i = 1; i < SH_INTERMEDIATE_SIZE; i++)
+        {
+            shCoeffs[0][0] += shCoeffs[i][0];
+            weights[0][0] += weights[i][0];
+        }
+
+        float scale = (4.0 * PI) / weights[0][0];
+
+        // Write out the coefficents.
+        imageStore(sh, ivec2(int(gl_GlobalInvocationID.x), 0), vec4(shCoeffs[0][0] * scale, weights[0][0]));
+    }
 }

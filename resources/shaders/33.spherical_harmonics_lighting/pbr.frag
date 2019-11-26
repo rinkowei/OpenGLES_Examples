@@ -19,9 +19,24 @@ uniform float ao;
 
 uniform float exposure;
 
+uniform sampler2D irradianceSH;
+
 uniform Light lights[6];
 
 const float PI = 3.14159265359;
+const float CosineA0 = PI;
+const float CosineA1 = (2.0 * PI) / 3.0;
+const float CosineA2 = PI * 0.25;
+
+struct SH9
+{
+    float c[9];
+};
+
+struct SH9Color
+{
+    vec3 c[9];
+};
 
 float distributionGGX(vec3 N, vec3 H, float roughness)
 {	
@@ -66,6 +81,52 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+void projectOnSH9(in vec3 dir, inout SH9 sh)
+{
+    // Band 0
+    sh.c[0] = 0.282095;
+
+    // Band 1
+    sh.c[1] = -0.488603 * dir.y;
+    sh.c[2] = 0.488603 * dir.z;
+    sh.c[3] = -0.488603 * dir.x;
+
+    // Band 2
+    sh.c[4] = 1.092548 * dir.x * dir.y;
+    sh.c[5] = -1.092548 * dir.y * dir.z;
+    sh.c[6] = 0.315392 * (3.0 * dir.z * dir.z - 1.0);
+    sh.c[7] = -1.092548 * dir.x * dir.z;
+    sh.c[8] = 0.546274 * (dir.x * dir.x - dir.y * dir.y);
+}
+
+vec3 evaluateSH9Irradiance(in vec3 direction)
+{
+    SH9 basis;
+
+    projectOnSH9(direction, basis);
+
+    basis.c[0] *= CosineA0;
+    basis.c[1] *= CosineA1;
+    basis.c[2] *= CosineA1;
+    basis.c[3] *= CosineA1;
+    basis.c[4] *= CosineA2;
+    basis.c[5] *= CosineA2;
+    basis.c[6] *= CosineA2;
+    basis.c[7] *= CosineA2;
+    basis.c[8] *= CosineA2;
+
+    vec3 color = vec3(0.0);
+
+    for (int i = 0; i < 9; i++)
+        color += texelFetch(irradianceSH, ivec2(i, 0), 0).rgb * basis.c[i];
+
+    color.x = max(0.0, color.x);
+    color.y = max(0.0, color.y);
+    color.z = max(0.0, color.z);
+
+    return color / PI;
+}
+
 void main()
 {
 	vec3 N = normalize(fNormal);
@@ -106,7 +167,10 @@ void main()
 	vec3 kD = 1.0 - kS;
 	kD *= 1.0 - metallic;
 
-	vec3 ambient = 0.1 * albedo;
+	vec3 irradiance = evaluateSH9Irradiance(N);
+	vec3 diffuse = irradiance * albedo;
+
+	vec3 ambient = (kD * diffuse) * ao;
 	vec3 color = ambient + Lo;
 
 	color = vec3(1.0) - exp(-color * exposure);
