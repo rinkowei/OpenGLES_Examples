@@ -6,31 +6,34 @@ using namespace es;
 class Example final : public ExampleBase
 {
 public:
-	std::shared_ptr<Model> bunny;
+	std::shared_ptr<Model> cube;
 
-	const uint32_t depthMapSize = 2048;
-	std::unique_ptr<Framebuffer> depthFBO;
-	std::shared_ptr<Texture2D> depthMap;
-	std::unique_ptr<Renderbuffer> renderbuffer;
+	std::unique_ptr<Framebuffer> captureFBO;
+	std::unique_ptr<Renderbuffer> captureRBO;
 
-	std::shared_ptr<Material> depthPassMat;
-	std::shared_ptr<Material> sssMat;
+	std::shared_ptr<Texture2D> hdrEnvironmentTexture;
+	std::shared_ptr<TextureCube> envCubemap;
 
-	glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, -1.0f, -1.0f));
+	glm::mat4 captureProj;
+	std::array<glm::mat4, 6> captureViews;
 
-	glm::mat4 biasMatrix = glm::mat4(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	);
+	const int row = 7;
+	const int col = 7;
+	std::vector<std::shared_ptr<Model>> spheres;
+
+	struct Light
+	{
+		glm::vec3 color;
+		glm::vec3 position;
+	};
+	std::array<Light, 6> lights;
 
 	Example()
 	{
 		title = "spherical harmonics lighting";
 		settings.vsync = true;
 		settings.validation = true;
-		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
 		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/33.spherical_harmonics_lighting/";
@@ -47,73 +50,140 @@ public:
 
 		// enable depth test
 		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
 
-		// enable cull face
-		glEnable(GL_CULL_FACE);
+		// setup camera
+		mMainCamera->setPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+		mMainCamera->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-		depthFBO = Framebuffer::create();
+		captureFBO = Framebuffer::create();
+		captureRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, 512, 512);
+		captureFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, captureRBO->getTarget(), captureRBO->getID());
 
-		depthMap = Texture2D::createFromData(depthMapSize, depthMapSize, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
-		depthMap->setMinFilter(GL_NEAREST);
-		depthMap->setMagFilter(GL_NEAREST);
-		depthMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		hdrEnvironmentTexture = Texture2D::createFromFile(texturesDirectory + "/sIBL/Alexs_Apartment.hdr", 1, false);
 
-		depthFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, depthMap->getTarget(), depthMap->getID(), 0);
-		
-		renderbuffer = Renderbuffer::create(GL_DEPTH24_STENCIL8, depthMapSize, depthMapSize);
-		depthFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, renderbuffer->getTarget(), renderbuffer->getID());
+		envCubemap = TextureCube::createFromData("env_cubemap", 512, 512, 1, GL_RGB16F, GL_RGB, GL_FLOAT, nullptr);
+		envCubemap->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		envCubemap->setMagFilter(GL_LINEAR);
+		envCubemap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		std::array<GLenum, 1> bufs = { GL_COLOR_ATTACHMENT0 };
-		depthFBO->drawBuffers(bufs.size(), bufs.data());
+		captureProj = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		captureViews =
+		{
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+		};
 
-		bunny = Model::createFromFile("bunny", modelsDirectory + "/bunny/bunny.obj", {}, false);
-
-		depthPassMat = Material::createFromFiles("depth_pass_mat",
+		std::shared_ptr<Material> equirectangularToCubemapMat = Material::createFromData("equirectangular_to_cubemap_mat",
 			{
-				shadersDirectory + "depth_pass.vert",
-				shadersDirectory + "depth_pass.frag"
+				shadersDirectory + "cubemap.vert",
+				shadersDirectory + "equirectangular_to_cubemap.frag"
 			},
 			{
-			
+				{ "equirectangularMap", hdrEnvironmentTexture }
+			}
+			);
+
+		cube = Model::createFromFile("cube", modelsDirectory + "/cube/cube.obj", {}, false);
+		cube->setMaterial(equirectangularToCubemapMat);
+		cube->setUniform("captureProj", captureProj);
+
+		glViewport(0, 0, 512, 512);
+		for (unsigned int i = 0; i < 6; i++)
+		{
+			cube->setUniform("captureView", captureViews[i]);
+			captureFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap->getID(), 0);
+			captureFBO->bind();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			cube->render();
+		}
+		captureFBO->unbind();
+		envCubemap->generateMipmaps();
+
+		glViewport(0, 0, mWindowWidth, mWindowHeight);
+
+		std::shared_ptr<Material> pbrMat = Material::createFromData("pbr_mat",
+			{
+				shadersDirectory + "pbr.vert",
+				shadersDirectory + "pbr.frag"
+			},
+			{
+
 			}
 		);
 
-		sssMat = Material::createFromData("sss_mat",
+		std::shared_ptr<Model> sphereTemplate = Model::createFromFile("sphere_template", modelsDirectory + "/sphere/sphere.dae",
 			{
-				shadersDirectory + "bssrdf.vert",
-				shadersDirectory + "bssrdf.frag"
+
+			},
+			false
+		);
+
+		sphereTemplate->setMaterial(pbrMat);
+
+		lights[0].position = glm::vec3(-10.0f, -10.0f, 0.0f);
+		lights[1].position = glm::vec3(-10.0f, 10.0f, 0.0f);
+		lights[2].position = glm::vec3(10.0f, 10.0f, 0.0f);
+		lights[3].position = glm::vec3(10.0f, -10.0f, 0.0f);
+		lights[4].position = glm::vec3(0.0f, 0.0f, 10.0f);
+		lights[5].position = glm::vec3(0.0f, 0.0f, -10.0f);
+
+		for (int x = 0; x < row; x++)
+		{
+			for (int y = 0; y < col; y++)
+			{
+				std::shared_ptr<Model> sphere = Model::clone("sphere_" + std::to_string(x * col + y), sphereTemplate.get());
+
+				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
+				sphere->setPosition(pos);
+				sphere->setScale(glm::vec3(0.8f));
+				sphere->setUniform("albedo", glm::vec3(0.7f, 0.0f, 0.0f));
+				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 1.0f));
+				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 1.0f));
+				sphere->setUniform("ao", 1.0f);
+				sphere->setUniform("exposure", 1.0f);
+
+				for (std::size_t i = 0; i < lights.size(); i++)
+				{
+					lights[i].color = glm::vec3(100.0f, 100.0f, 100.0f);
+					sphere->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
+					sphere->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
+				}
+
+				spheres.push_back(sphere);
+			}
+		}
+
+		std::shared_ptr<Material> backgroundMat = Material::createFromData("background_mat",
+			{
+				shadersDirectory + "skybox.vert",
+				shadersDirectory + "skybox.frag"
 			},
 			{
-				{ "depthMap", depthMap }
+				{ "environmentMap", envCubemap }
 			}
-		);
-		sssMat->setUniform("biasMatrix", biasMatrix);
-		sssMat->setUniform("lightDir", lightDir);
+			);
+		cube->setMaterial(backgroundMat);
 	}
 
 	virtual void render(float deltaTime) override
 	{
-		depthFBO->bind();
-		glViewport(0, 0, depthMapSize, depthMapSize);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glCullFace(GL_BACK);
 
-		bunny->setMaterial(depthPassMat);
-		glm::mat4 lightView = glm::lookAt(-lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 lightProj = glm::ortho(-2.5f, 2.5f, -2.5f, 2.5f, -10.0f, 20.0f);
+		glEnable(GL_CULL_FACE);
+		for (std::size_t i = 0; i < spheres.size(); i++)
+		{
+			spheres[i]->setUniform("viewPos", mMainCamera->getPosition());
+			spheres[i]->render();
+		}
 
-		bunny->setUniform("lightView", lightView);
-		bunny->setUniform("lightProj", lightProj);
-		bunny->render();
+		glDisable(GL_CULL_FACE);
+		cube->render();
 
-		depthFBO->unbind();
-		glViewport(0, 0, mWindowWidth, mWindowHeight);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		bunny->setMaterial(sssMat);
-		bunny->setUniform("lightView", lightView);
-		bunny->setUniform("lightProj", lightProj);
-		bunny->setUniform("viewPos", mMainCamera->getPosition());
-		bunny->render();
 	}
 
 	virtual void windowResized() override

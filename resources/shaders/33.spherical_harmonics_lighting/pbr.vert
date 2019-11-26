@@ -2,30 +2,21 @@
 layout(location = 0) in vec3 vPos;
 layout(location = 1) in vec2 vTexcoord;
 layout(location = 2) in vec3 vNormal;
+layout(location = 3) in vec3 vTangent;
+layout(location = 4) in vec3 vBitangent;
 
 out vec3 fFragPos;
+out vec2 fTexcoord;
 out vec3 fNormal;
-out vec3 camDir;
-out vec3 camNormal;
-out vec4 lightSpaceFragPos;
-out float lightDist;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 biasMatrix;
-
-uniform mat4 lightView;
-uniform mat4 lightProj;
 
 void main()
 {
 	fFragPos = vec3(model * vec4(vPos, 1.0f));
-	fNormal = mat3(model) * vNormal;
-	camDir = -vec3(view * vec4(vPos, 1.0f));
-	camNormal = normalize(mat3(view) * vNormal);
-	lightSpaceFragPos = biasMatrix * lightProj * lightView * vec4(vPos, 1.0f);
-	lightDist = length(lightView * vec4(vPos, 1.0f));
-
+	fTexcoord = vTexcoord;
+	fNormal = mat3(transpose(inverse(model))) * vNormal;
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }
