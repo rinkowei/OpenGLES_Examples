@@ -35,6 +35,8 @@ public:
 	};
 	std::array<Light, 6> lights;
 
+	const float exposure = 3.0f;
+
 	Example()
 	{
 		title = "spherical harmonics lighting";
@@ -153,14 +155,18 @@ public:
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
-
-		std::shared_ptr<Material> pbrMat = Material::createFromData("pbr_mat",
+		
+		std::shared_ptr<Material> pbrMat = Material::createFromFiles("pbr_mat",
 			{
 				shadersDirectory + "pbr.vert",
 				shadersDirectory + "pbr.frag"
 			},
 			{
-				{ "irradianceSH", sh }
+				{ "albedoMap", texturesDirectory + "/PBR/wood-veneer/albedo.png" },
+				{ "metallicMap", texturesDirectory + "/PBR/wood-veneer/metallic.png" },
+				{ "normalMap", texturesDirectory + "/PBR/wood-veneer/normal.png" },
+				{ "roughnessMap", texturesDirectory + "/PBR/wood-veneer/roughness.png" },
+				{ "aoMap", texturesDirectory + "/PBR/wood-veneer/ao.png" }
 			}
 		);
 
@@ -172,6 +178,7 @@ public:
 		);
 
 		sphereTemplate->setMaterial(pbrMat);
+		sphereTemplate->setTexture("irradianceSH", sh);
 
 		lights[0].position = glm::vec3(-10.0f, -10.0f, 0.0f);
 		lights[1].position = glm::vec3(-10.0f, 10.0f, 0.0f);
@@ -189,11 +196,6 @@ public:
 				glm::vec3 pos = glm::vec3(float(y - (row / 2.0f)) * 2.5f, float(x - (col / 2.0f)) * 2.5f, 0.0f);
 				sphere->setPosition(pos);
 				sphere->setScale(glm::vec3(0.8f));
-				sphere->setUniform("albedo", glm::vec3(1.0f, 1.0f, 1.0f));
-				sphere->setUniform("roughness", glm::clamp((float)x / (float)(row - 1), 0.05f, 0.9f));
-				sphere->setUniform("metallic", glm::clamp((float)y / (float)(col - 1), 0.1f, 0.9f));
-				sphere->setUniform("ao", 1.0f);
-				sphere->setUniform("exposure", 1.0f);
 
 				for (std::size_t i = 0; i < lights.size(); i++)
 				{
@@ -201,12 +203,13 @@ public:
 					sphere->setUniform("lights[" + std::to_string(i) + "].position", lights[i].position);
 					sphere->setUniform("lights[" + std::to_string(i) + "].color", lights[i].color);
 				}
+				sphere->setUniform("exposure", exposure);
 
 				spheres.push_back(sphere);
 			}
 		}
 
-		std::shared_ptr<Material> backgroundMat = Material::createFromData("background_mat",
+		std::shared_ptr<Material> skyboxMat = Material::createFromData("skybox_mat",
 			{
 				shadersDirectory + "skybox.vert",
 				shadersDirectory + "skybox.frag"
@@ -214,8 +217,8 @@ public:
 			{
 				{ "environmentMap", envCubemap }
 			}
-			);
-		cube->setMaterial(backgroundMat);
+		);
+		cube->setMaterial(skyboxMat);
 	}
 
 	virtual void render(float deltaTime) override

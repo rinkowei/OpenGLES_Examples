@@ -12,12 +12,14 @@ struct Light {
 };
 
 uniform vec3 viewPos;
-uniform vec3 albedo;
-uniform float roughness;
-uniform float metallic;
-uniform float ao;
 
 uniform float exposure;
+
+uniform sampler2D albedoMap;
+uniform sampler2D metallicMap;
+uniform sampler2D normalMap;
+uniform sampler2D roughnessMap;
+uniform sampler2D aoMap;
 
 uniform sampler2D irradianceSH;
 
@@ -37,6 +39,34 @@ struct SH9Color
 {
     vec3 c[9];
 };
+
+vec3 uncharted2Tonemapping(vec3 x)
+{
+	float A = 0.15;
+	float B = 0.50;
+	float C = 0.10;
+	float D = 0.20;
+	float E = 0.02;
+	float F = 0.30;
+	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+vec3 getNormalFromMap()
+{
+	vec3 tangentNormal = texture(normalMap, fTexcoord).rgb * 2.0 - 1.0;
+
+	vec3 q1 = dFdx(fFragPos);
+	vec3 q2 = dFdy(fFragPos);
+	vec2 st1 = dFdx(fTexcoord);
+	vec2 st2 = dFdy(fTexcoord);
+
+	vec3 N = normalize(fNormal);
+	vec3 T = normalize(q1 * st2.t - q2 * st1.t);
+	vec3 B = -normalize(cross(N, T));
+	mat3 TBN = mat3(T, B, N);
+
+	return normalize(TBN * tangentNormal);
+}
 
 float distributionGGX(vec3 N, vec3 H, float roughness)
 {	
@@ -129,11 +159,15 @@ vec3 evaluateSH9Irradiance(in vec3 direction)
 
 void main()
 {
-	vec3 N = normalize(fNormal);
+	vec3 N = getNormalFromMap();
 	vec3 V = normalize(viewPos - fFragPos);
 	vec3 R = reflect(-V, N);
 
 	vec3 F0 = vec3(0.04);
+	vec3 albedo = pow(texture(albedoMap, fTexcoord).rgb, vec3(2.2));
+	float metallic = texture(metallicMap, fTexcoord).r;
+	float roughness = texture(roughnessMap, fTexcoord).r;
+	float ao = texture(aoMap, fTexcoord).r;
 	F0 = mix(F0, albedo, metallic);
 
 	vec3 Lo = vec3(0.0);
@@ -173,7 +207,9 @@ void main()
 	vec3 ambient = (kD * diffuse) * ao;
 	vec3 color = ambient + Lo;
 
-	color = vec3(1.0) - exp(-color * exposure);
+	color = uncharted2Tonemapping(color * exposure);
+	color = color * (1.0 / uncharted2Tonemapping(vec3(11.2)));
+
 	color = pow(color, vec3(1.0 / 2.2));
 
 	fragColor = vec4(color, 1.0);
