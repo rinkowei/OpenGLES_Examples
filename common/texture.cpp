@@ -384,12 +384,6 @@ namespace es
 				}
 			}
 		}
-		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		GLES_CHECK_ERROR(glTexParameteri(mTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-
-		GLES_CHECK_ERROR(glGenerateMipmap(mTarget));
 
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
 	}

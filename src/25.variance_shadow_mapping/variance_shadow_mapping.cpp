@@ -52,8 +52,8 @@ public:
 		glEnable(GL_CULL_FACE);
 
 		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
-		lightMap->setMinFilter(GL_NEAREST);
-		lightMap->setMagFilter(GL_NEAREST);
+		lightMap->setMinFilter(GL_LINEAR);
+		lightMap->setMagFilter(GL_LINEAR);
 		lightMap->setWrapping(GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT);
 		lightMap->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
 

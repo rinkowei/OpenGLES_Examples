@@ -21,7 +21,7 @@ float chebyshevUpperBound(vec3 shadowCoord)
 	}
 
 	float variance = moments.y - (moments.x * moments.x);
-	variance = max(variance, 0.02);
+	variance = max(variance, 0.005);
 
 	float d = shadowCoord.z - moments.x;
 	float pMax = variance / (variance + d * d);
