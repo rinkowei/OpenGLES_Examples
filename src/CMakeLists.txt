@@ -61,12 +61,11 @@ set(EXAMPLES
     25.variance_shadow_mapping
     26.bloom_with_hdr
     27.compute_shader_edgedetect
-    28.compute_shader_particles
-    29.basic_pbr
-    30.image_based_lighting_pbr
-    31.image_based_lighting_pbr_textured
-    32.subsurface_scattering
-    33.spherical_harmonics_lighting
+    28.basic_pbr
+    29.image_based_lighting_pbr
+    30.image_based_lighting_pbr_textured
+    31.subsurface_scattering
+    32.spherical_harmonics_lighting
 )
 
 buildExamples()
