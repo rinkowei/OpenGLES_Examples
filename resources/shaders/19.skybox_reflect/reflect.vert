@@ -9,18 +9,14 @@ uniform mat4 projection;
 
 out vec3 fFragPos;
 out vec3 fNormal;
-out vec3 fViewVec;
-out vec3 fLightVec;
-out mat4 fInvModel;
-
+out mat4 fInvModelView;
 
 void main()
 {
-	fFragPos = vec3(model * vec4(vPos, 1.0f));
-	fNormal = mat3(model) * vNormal;
-	fViewVec = -fFragPos.xyz;
-	fLightVec = vec3(0.0f, -5.0f, -5.0f) - fFragPos.xyz;
-	fInvModel = inverse(model);
+	fFragPos = vec3(model * vec4(vPos, 1.0));
+	fNormal = mat3(transpose(inverse(model))) * vNormal;
+	fInvModelView = inverse(model);
 
+	vec3 lightPos = vec3(0.0, -5.0, 5.0);
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }

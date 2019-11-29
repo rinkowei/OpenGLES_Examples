@@ -9,11 +9,13 @@ public:
 	std::shared_ptr<Model> skybox;
 	std::shared_ptr<Model> sphere;
 
+	float LodBias = 0.0f;
+	glm::vec3 lightPos = glm::vec3(0.0f, -5.0f, 5.0f);
+
 	Example()
 	{
 		title = "skybox reflect";
 		settings.vsync = true;
-		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -47,19 +49,24 @@ public:
 		});
 
 		skybox->setTexture("cubemap", cubemap);
+		skybox->setUniform("LodBias", LodBias);
 
-		sphere = Model::createFromFile("sphere", modelsDirectory + "/sphere/sphere.obj", {
+		sphere = Model::createFromFile("sphere", modelsDirectory + "/sphere/sphere.dae", {
 			shadersDirectory + "reflect.vert",
 			shadersDirectory + "reflect.frag"
 		});
 
 		sphere->setTexture("skybox", cubemap);
-		sphere->setScale(glm::vec3(0.02f));
+		sphere->setUniform("LodBias", LodBias);
+		sphere->setUniform("lightPos", lightPos);
 	}
 
 	virtual void render(float deltaTime) override
 	{
+		glEnable(GL_CULL_FACE);
+		sphere->setUniform("viewPos", mMainCamera->getPosition());
 		sphere->render();
+		glDisable(GL_CULL_FACE);
 
 		// change depth function so depth test passes when depth values are equal to content of depth buffer
 		glDepthFunc(GL_LEQUAL);
