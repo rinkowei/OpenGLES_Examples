@@ -27,6 +27,7 @@ public:
 	{
 		title = "bloom with hdr";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -50,34 +51,34 @@ public:
 
 		hdrFBO = Framebuffer::create();
 
-		fragColorTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		fragColorTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT, false);
 		fragColorTexture->setMinFilter(GL_LINEAR);
 		fragColorTexture->setMagFilter(GL_LINEAR);
 		fragColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		brightColorTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+		brightColorTexture = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT, false);
 		brightColorTexture->setMinFilter(GL_LINEAR);
 		brightColorTexture->setMagFilter(GL_LINEAR);
 		brightColorTexture->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		hdrFBO->attachRenderTarget(0, fragColorTexture.get(), 0, 0);
-		hdrFBO->attachRenderTarget(1, brightColorTexture.get(), 0, 0);
+		hdrFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, fragColorTexture->getTarget(), fragColorTexture->getID(), 0);
+		hdrFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT1, brightColorTexture->getTarget(), brightColorTexture->getID(), 0);
 
 		hdrRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
-		hdrFBO->attachRenderBufferTarget(hdrRBO.get());
+		hdrFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, hdrRBO->getTarget(), hdrRBO->getID());
 
 		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
 		{
 			pingpongFBO[i] = Framebuffer::create();
-			pingpongBuffer[i] = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT);
+			pingpongBuffer[i] = Texture2D::createFromData(mWindowWidth, mWindowHeight, 1, 1, GL_RGB16F, GL_RGB, GL_FLOAT, false);
 			pingpongBuffer[i]->setMinFilter(GL_LINEAR);
 			pingpongBuffer[i]->setMagFilter(GL_LINEAR);
 			pingpongBuffer[i]->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-			pingpongFBO[i]->attachRenderTarget(0, pingpongBuffer[i].get(), 0, 0);
+			pingpongFBO[i]->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, pingpongBuffer[i]->getTarget(), pingpongBuffer[i]->getID(), 0);
 
 			pingpongRBO[i] = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
-			pingpongFBO[i]->attachRenderBufferTarget(pingpongRBO[i].get());
+			pingpongFBO[i]->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, pingpongRBO[i]->getTarget(), pingpongRBO[i]->getID());
 		}
 
 		std::vector<float> vertexAttribs = {
@@ -123,13 +124,13 @@ public:
 			}
 		);
 
-		blurQuad = Mesh::createWithData("hdr_quad", vertices, indices);
+		blurQuad = Mesh::createWithData("blur_quad", vertices, indices);
 		blurQuad->setDrawType(Mesh::DrawType::ELEMENTS);
 		blurQuad->setMaterial(blurMat);
 		blurQuad->setUniform("blurScale", 2.0f);
 		blurQuad->setUniform("blurStrength", 1.0f);
 
-		hdrQuad = Mesh::createWithData("blur_quad", vertices, indices);
+		hdrQuad = Mesh::createWithData("hdr_quad", vertices, indices);
 		hdrQuad->setDrawType(Mesh::DrawType::ELEMENTS);
 		hdrQuad->setMaterial(hdrMat);
 		hdrQuad->setUniform("exposure", 1.0f);
