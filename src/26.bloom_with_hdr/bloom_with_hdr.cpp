@@ -67,6 +67,9 @@ public:
 		hdrRBO = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
 		hdrFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, hdrRBO->getTarget(), hdrRBO->getID());
 
+		std::array<GLenum, 2> bufs = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		hdrFBO->drawBuffers(bufs.size(), bufs.data());
+
 		for (std::size_t i = 0; i < pingpongFBO.size(); i++)
 		{
 			pingpongFBO[i] = Framebuffer::create();
@@ -79,6 +82,9 @@ public:
 
 			pingpongRBO[i] = Renderbuffer::create(GL_DEPTH24_STENCIL8, mWindowWidth, mWindowHeight);
 			pingpongFBO[i]->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, pingpongRBO[i]->getTarget(), pingpongRBO[i]->getID());
+
+			std::array<GLenum, 1> bufs = { GL_COLOR_ATTACHMENT0 };
+			pingpongFBO[i]->drawBuffers(bufs.size(), bufs.data());
 		}
 
 		std::vector<float> vertexAttribs = {
