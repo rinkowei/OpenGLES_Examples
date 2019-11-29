@@ -716,14 +716,10 @@ namespace es
 			mWidth = width;
 			mHeight = height;
 			
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, width, height, 0, mFormat, mType, data);
+			GLES_CHECK_ERROR(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mInternalFormat, width, height, 0, mFormat, mType, data));
 			stbi_image_free(data);
 		}
 		GLES_CHECK_ERROR(glBindTexture(mTarget, 0));
-
-		setMinFilter(GL_LINEAR);
-		setMagFilter(GL_LINEAR);
-		setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		return true;
 	}

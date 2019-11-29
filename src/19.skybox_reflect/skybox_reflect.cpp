@@ -13,6 +13,7 @@ public:
 	{
 		title = "skybox reflect";
 		settings.vsync = true;
+		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
@@ -34,6 +35,10 @@ public:
 		std::shared_ptr<TextureCube> cubemap = TextureCube::createFromFiles({ texturesDirectory + "/skyboxes/sincity/right.tga", texturesDirectory + "/skyboxes/sincity/left.tga",
 															 texturesDirectory + "/skyboxes/sincity/top.tga", texturesDirectory + "/skyboxes/sincity/bottom.tga",
 															 texturesDirectory + "/skyboxes/sincity/front.tga", texturesDirectory + "/skyboxes/sincity/back.tga" }, 1, false);
+		cubemap->setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+		cubemap->setMagFilter(GL_LINEAR);
+		cubemap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+		cubemap->generateMipmaps();
 
 		// create a cube model as skybox
 		skybox = Model::createFromFile("skybox", modelsDirectory + "/cube/cube.obj", {
