@@ -33,7 +33,7 @@ public:
 };
 
 Example* example;
-int APIENTRY SDL_main(int args, char **argc)
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	example = new Example();
 	example->setupValidation();
