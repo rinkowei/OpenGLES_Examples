@@ -152,3 +152,7 @@ cmake -G "Visual Studio 16 2019"
 
 
 #### [32 - spherical_harmonics_lighting](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/32.spherical_harmonics_lighting>)
+
+
+
+#### [33 - 3d_picking](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/33.3d_picking>)
