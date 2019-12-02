@@ -7,32 +7,32 @@ Ka 0.200000 0.200000 0.200000
 Kd 0.827451 0.792157 0.772549
 Ks 0.000000 0.000000 0.000000
 Ns 0.000000
-map_Kd .\wal67ar_small.jpg
+map_Kd .\wal67ar_small.png
 
 newmtl Brusttex
 Ka 0.200000 0.200000 0.200000
 Kd 0.800000 0.800000 0.800000
 Ks 0.000000 0.000000 0.000000
 Ns 0.000000
-map_Kd .\wal69ar_small.jpg
+map_Kd .\wal69ar_small.png
 
 newmtl HLeibTex
 Ka 0.200000 0.200000 0.200000
 Kd 0.690196 0.639216 0.615686
 Ks 0.000000 0.000000 0.000000
 Ns 0.000000
-map_Kd .\SpiderTex.jpg
+map_Kd .\SpiderTex.png
 
 newmtl BeinTex
 Ka 0.200000 0.200000 0.200000
 Kd 0.800000 0.800000 0.800000
 Ks 0.000000 0.000000 0.000000
 Ns 0.000000
-map_Kd .\drkwood2.jpg
+map_Kd .\drkwood2.png
 
 newmtl Augentex
 Ka 0.200000 0.200000 0.200000
 Kd 0.800000 0.800000 0.800000
 Ks 0.000000 0.000000 0.000000
 Ns 0.000000
-map_Kd .\engineflare1.jpg
+map_Kd .\engineflare1.png

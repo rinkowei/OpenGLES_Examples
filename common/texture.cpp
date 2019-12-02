@@ -285,7 +285,7 @@ namespace es
 		{
 			mMipLevels = mipLevels;
 		}
-
+	
 		if (mNumSamples > 1)
 		{
 			mTarget = GL_TEXTURE_2D_MULTISAMPLE;
@@ -300,11 +300,10 @@ namespace es
 
 		GLES_CHECK_ERROR(glBindTexture(mTarget, mID));
 		GLES_CHECK_ERROR(glTexStorage2D(mTarget, mMipLevels, mInternalFormat, mWidth, mHeight));
-
+	
 		for (int i = 0; i < mMipLevels; i++)
 		{
-			glTexSubImage2D(mTarget, i, 0, 0, width, height, mFormat, mType, data);
-
+			GLES_CHECK_ERROR(glTexSubImage2D(mTarget, i, 0, 0, width, height, mFormat, mType, data));
 			width = max(1, (width / 2));
 			height = max(1, (height / 2));
 		}
