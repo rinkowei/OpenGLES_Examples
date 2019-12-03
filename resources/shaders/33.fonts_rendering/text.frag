@@ -4,11 +4,11 @@ layout(location = 0) out vec4 fragColor;
 
 in vec2 Texcoord;
 
-uniform sampler2D text;
+uniform sampler2D glyphTexture;
 uniform vec3 textColor;
 
 void main()
 {    
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, Texcoord).r);
+    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(glyphTexture, Texcoord).r);
     fragColor = vec4(textColor, 1.0) * sampled;
 }
