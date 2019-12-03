@@ -19,7 +19,7 @@ if(WIN32 AND NOT MINGW)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
   
     link_directories(${CMAKE_SOURCE_DIR}/lib/win${BITS})
-    set(LIBS SDL2 SDL2main libEGL libGLESv2 assimp-vc140-mt)
+    set(LIBS SDL2 SDL2main libEGL libGLESv2 assimp-vc140-mt freetype)
 
     # copy DLLs to runtime_output_directory in advance
     file(GLOB DLLs ${CMAKE_SOURCE_DIR}/dll/win${BITS}/*.dll)

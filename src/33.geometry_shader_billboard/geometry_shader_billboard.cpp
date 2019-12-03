@@ -13,13 +13,13 @@ public:
 
 	Example()
 	{
-		title = "3d picking";
+		title = "geometry shader billboard";
 		settings.vsync = true;
 		settings.validation = true;
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/33.3d_picking/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/33.geometry_shader_billboard/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()
@@ -47,6 +47,7 @@ public:
 
 	virtual void render(float deltaTime) override
 	{
+		
 		spider1->setUniform("viewPos", mMainCamera->getPosition());
 		spider1->render();
 	}
