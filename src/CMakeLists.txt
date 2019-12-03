@@ -66,7 +66,7 @@ set(EXAMPLES
     30.image_based_lighting_pbr_textured
     31.subsurface_scattering
     32.spherical_harmonics_lighting
-    33.3d_picking
+    33.geometry_shader_billboard
 )
 
 buildExamples()

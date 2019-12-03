@@ -155,4 +155,4 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [33 - 3d_picking](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/33.3d_picking>)
+#### [33 - geometry_shader_billboard](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/33.geometry_shader_billboard>)
