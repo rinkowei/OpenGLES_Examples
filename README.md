@@ -155,4 +155,4 @@ cmake -G "Visual Studio 16 2019"
 
 
 
-#### [33 - geometry_shader_billboard](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/33.geometry_shader_billboard>)
+#### [33 - fonts_rendering](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/33.fonts_rendering>)
