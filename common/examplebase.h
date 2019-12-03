@@ -79,7 +79,8 @@ namespace es
 		{
 			Model,
 			Shader,
-			Texture
+			Texture,
+			Font
 		};
 
 		SDL_Window* window;
@@ -94,6 +95,7 @@ namespace es
 		std::string modelsDirectory;
 		std::string shadersDirectory;
 		std::string texturesDirectory;
+		std::string fontsDirectory;
 
 		Camera* mMainCamera;
 	public:

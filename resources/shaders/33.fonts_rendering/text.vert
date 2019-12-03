@@ -1,15 +1,12 @@
 #version 310 es
-layout(location = 0) in vec3 vPos;
+layout(location = 0) in vec4 vPos;
 
-out vec3 fFragPos;
+out vec2 Texcoord;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 proj;
 
 void main()
 {
-	fFragPos = vPos;
-	vec4 clipPos = projection * mat4(mat3(view)) * vec4(vPos, 1.0f);
-	gl_Position = clipPos.xyww;
+    gl_Position = proj * vec4(vPos.xy, 0.0, 1.0);
+    Texcoord = vPos.zw;
 }

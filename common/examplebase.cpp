@@ -24,6 +24,9 @@ namespace es
 		case ResourceType::Texture:
 			resName = "textures";
 			break;
+		case ResourceType::Font:
+			resName = "fonts";
+			break;
 		}
 
 		std::string resDir = "";
