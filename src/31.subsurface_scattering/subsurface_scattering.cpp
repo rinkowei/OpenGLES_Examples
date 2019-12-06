@@ -16,7 +16,7 @@ public:
 	std::shared_ptr<Material> depthPassMat;
 	std::shared_ptr<Material> sssMat;
 
-	glm::vec3 lightDir = glm::normalize(glm::vec3(0.0f, -1.0f, -1.0f));
+	glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -1.0f, 0.0f));
 
 	glm::mat4 biasMatrix = glm::mat4(
 		0.5, 0.0, 0.0, 0.0,
@@ -53,18 +53,17 @@ public:
 
 		depthFBO = Framebuffer::create();
 
-		depthMap = Texture2D::createFromData(depthMapSize, depthMapSize, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
+		depthMap = Texture2D::createFromData(depthMapSize, depthMapSize, 1, 1, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, true);
 		depthMap->setMinFilter(GL_NEAREST);
 		depthMap->setMagFilter(GL_NEAREST);
 		depthMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-		depthFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, depthMap->getTarget(), depthMap->getID(), 0);
+		depthFBO->addAttachmentTexture2D(GL_DEPTH_ATTACHMENT, depthMap->getTarget(), depthMap->getID(), 0);
 		
 		renderbuffer = Renderbuffer::create(GL_DEPTH24_STENCIL8, depthMapSize, depthMapSize);
 		depthFBO->addAttachmentRenderbuffer(GL_DEPTH_STENCIL_ATTACHMENT, renderbuffer->getTarget(), renderbuffer->getID());
 
-		std::array<GLenum, 1> bufs = { GL_COLOR_ATTACHMENT0 };
-		depthFBO->drawBuffers(bufs.size(), bufs.data());
+		depthFBO->drawBuffers(0, GL_NONE);
 
 		bunny = Model::createFromFile("bunny", modelsDirectory + "/bunny/bunny.obj", {}, false);
 
@@ -89,6 +88,11 @@ public:
 		);
 		sssMat->setUniform("biasMatrix", biasMatrix);
 		sssMat->setUniform("lightDir", lightDir);
+		sssMat->setUniform("albedo", glm::vec4(0.8f, 0.0f, 0.0f, 1.0f));
+		sssMat->setUniform("scatterColor", glm::vec4(0.8f, 0.0f, 0.0f, 1.0f));
+		sssMat->setUniform("wrap", 0.1f);
+		sssMat->setUniform("scatterWidth", 0.5f);
+		sssMat->setUniform("scatterFalloff", 5.0f);
 	}
 
 	virtual void render(float deltaTime) override
@@ -96,7 +100,6 @@ public:
 		depthFBO->bind();
 		glViewport(0, 0, depthMapSize, depthMapSize);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glCullFace(GL_BACK);
 
 		bunny->setMaterial(depthPassMat);
 		glm::mat4 lightView = glm::lookAt(-lightDir, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -105,7 +108,7 @@ public:
 		bunny->setUniform("lightView", lightView);
 		bunny->setUniform("lightProj", lightProj);
 		bunny->render();
-
+		
 		depthFBO->unbind();
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

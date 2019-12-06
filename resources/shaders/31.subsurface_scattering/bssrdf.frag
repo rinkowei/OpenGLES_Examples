@@ -9,28 +9,44 @@ in vec3 camNormal;
 in vec4 lightSpaceFragPos;
 in float lightDist;
 
+uniform vec4 albedo;
+uniform vec4 scatterColor;
+uniform float wrap;
+uniform float scatterWidth;
+uniform float scatterFalloff;
 uniform vec3 viewPos;
 uniform vec3 lightDir;
 uniform sampler2D depthMap;
 
+float wrapLighting(float x, float wrap)
+{
+	return (x + wrap) / (1.0 + wrap);
+}
+
+float scatterTint(float x, float scatterWidth)
+{
+	if (scatterWidth == 0.0)
+	{
+		return 0.0;
+	}
+
+	return smoothstep(0.0, scatterWidth, x) * smoothstep(scatterWidth * 2.0, scatterWidth, x); 
+}
+
 void main()
 {
-	float bias = 0.005f;
+	float depthInWC = texture(depthMap, lightSpaceFragPos.xy).r;
+	float depthOutWC = lightSpaceFragPos.z;
 
-	float hitShadowDist = texture(depthMap, lightSpaceFragPos.xy).r;
-	float scatDistance = lightDist - hitShadowDist;
-	float scatPower = exp(-scatDistance * 10.0f);
+	float scatterFalloff = exp(-abs(depthOutWC - depthInWC) * scatterFalloff);
 
-	vec3 albedo = vec3(0.7f);
-	vec3 N = normalize(fNormal);
-	vec3 L = normalize(-lightDir);
-	vec3 V = normalize(viewPos - fFragPos);
+	vec3 normal = normalize(fNormal);
 
-	vec3 ambient = 0.1f * albedo;
+	float NdotL = dot(normal, -lightDir);
+	float NdotL_wrap = wrapLighting(NdotL, wrap);
 
-	vec3 diff = max(dot(N, L), 0.0f) * albedo;
+	float diffuse = max(NdotL, 0.0);
+	float scatter = scatterTint(NdotL_wrap, scatterWidth);
 
-	vec3 spec = pow(max(dot(N, normalize(V + L)), 0.0f), 32.0f) * albedo;
-
-	fragColor = vec4(vec3(ambient + scatPower * diff + spec), 1.0f);
+	fragColor = albedo * diffuse + scatterColor * scatter * scatterFalloff;
 }

@@ -24,7 +24,7 @@ void main()
 	fNormal = mat3(model) * vNormal;
 	camDir = -vec3(view * vec4(vPos, 1.0f));
 	camNormal = normalize(mat3(view) * vNormal);
-	lightSpaceFragPos = biasMatrix * lightProj * lightView * vec4(vPos, 1.0f);
+	lightSpaceFragPos = biasMatrix * lightProj * lightView * model * vec4(vPos, 1.0f);
 	lightDist = length(lightView * vec4(vPos, 1.0f));
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
