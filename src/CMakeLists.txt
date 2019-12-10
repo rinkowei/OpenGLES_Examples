@@ -67,6 +67,7 @@ set(EXAMPLES
     31.subsurface_scattering
     32.spherical_harmonics_lighting
     33.fonts_rendering
+    34.cpu_ray_tracing
 )
 
 buildExamples()
