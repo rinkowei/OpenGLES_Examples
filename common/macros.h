@@ -10,6 +10,9 @@
 
 #define SDL_MAIN_HANDLED
 
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #define ENABLE_GL_ERROR_CHECK
 #ifdef ENABLE_GL_ERROR_CHECK
 #define GLES_CHECK_ERROR(x)                                                         \
