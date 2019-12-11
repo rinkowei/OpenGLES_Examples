@@ -1,7 +1,6 @@
 #ifndef IMAGE_H_
 #define IMAGE_H_
 
-#include <ogles.h>
 #include <glm/glm.hpp>
 #include <string>
 

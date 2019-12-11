@@ -1,5 +1,6 @@
 #include "texture.h"
 #include <stb_image.h>
+#include <stb_image_write.h>
 #include <utility.h>
 
 namespace es

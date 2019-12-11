@@ -2,7 +2,6 @@
 #define TEXTURE_H_
 
 #include <ogles.h>
-
 #include <string>
 #include <fstream>
 #include <iostream>
