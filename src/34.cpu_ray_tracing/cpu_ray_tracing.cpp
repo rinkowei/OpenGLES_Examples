@@ -1,5 +1,7 @@
 ﻿#include <examplebase.h>
 #include <ray.h>
+#include <image.h>
+#include <math.h>
 using namespace es;
 
 class Example final : public ExampleBase
@@ -31,26 +33,17 @@ public:
 	{
 		ExampleBase::prepare();
 
-		int nx = 200;
-		int ny = 100;
-		std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-		glm::vec3 lower_left_corner(-2.0, -1.0, -1.0);
-		glm::vec3 horizontal(4.0, 0.0, 0.0);
-		glm::vec3 vertical(0.0, 2.0, 0.0);
-		glm::vec3 origin(0.0, 0.0, 0.0);
-		for (int j = ny - 1; j >= 0; j--) {
-			for (int i = 0; i < nx; i++) {
-				float u = float(i) / float(nx);
-				float v = float(j) / float(ny);
-				Ray r(origin, lower_left_corner + u * horizontal + v * vertical);
-				glm::vec3 col = color(r);
-				int ir = int(255.99 * col[0]);
-				int ig = int(255.99 * col[1]);
-				int ib = int(255.99 * col[2]);
-
-				std::cout << ir << " " << ig << " " << ib << "\n";
+		Image img(400, 400, 4);
+		for (uint32_t i = 0; i < 400; i++) {
+			for (uint32_t j = 0; j < 400; j++) {
+				if ((i + j) % 2 == 0)
+					img.setPixel(i, j, Image::Pixel<float>(0.0f, 0.0f, 0.0f, 1.0f));
+				else {
+					img.setPixel(i, j, Image::Pixel<float>(10.0 + i / 400.0, 10.0 + i / 400.0, 0, 0.1));
+				}
 			}
 		}
+		img.saveAsPNG("test.png");
 	}
 
 	virtual void render(float deltaTime) override
