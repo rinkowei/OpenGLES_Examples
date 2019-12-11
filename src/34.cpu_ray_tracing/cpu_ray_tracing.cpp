@@ -1,12 +1,15 @@
 ﻿#include <examplebase.h>
+#include <model.h>
+#include <texture.h>
 #include <ray.h>
-#include <image.h>
 #include <math.h>
 using namespace es;
 
 class Example final : public ExampleBase
 {
 public:
+	std::shared_ptr<Model> quad;
+
 	Example()
 	{
 		title = "cpu ray tracing";
@@ -44,6 +47,8 @@ public:
 			}
 		}
 		img.saveAsPNG("test.png");
+
+		std::shared_ptr<Texture2D> tex = Texture2D::createFromData(200, 100, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
 	}
 
 	virtual void render(float deltaTime) override
