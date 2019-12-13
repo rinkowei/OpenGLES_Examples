@@ -2,13 +2,11 @@
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-in vec2 Texcoord;
+in vec2 fTexcoord;
 
-uniform sampler2D glyphTexture;
-uniform vec3 textColor;
+uniform sampler2D raytracingMap;
 
 void main()
-{    
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(glyphTexture, Texcoord).r);
-    fragColor = vec4(textColor, 1.0) * sampled;
+{
+	fragColor = texture(raytracingMap, fTexcoord);
 }
