@@ -54,8 +54,7 @@ public:
 		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
 		lightMap->setMinFilter(GL_LINEAR);
 		lightMap->setMagFilter(GL_LINEAR);
-		lightMap->setWrapping(GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT, GL_CLAMP_TO_BORDER_EXT);
-		lightMap->setBorderColor(1.0f, 1.0f, 1.0f, 1.0f);
+		lightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
 		lightMapFBO = Framebuffer::create();
 		lightMapFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, lightMap->getTarget(), lightMap->getID(), 0);
@@ -77,7 +76,7 @@ public:
 			{
 				{ "depthMap", lightMap },
 			}
-			);
+		);
 		sampleScene->setMaterial(mat);
 		sampleScene->setUniform("biasMatrix", biasMatrix);
 		sampleScene->setScale(sampleSceneShadow->getScaling());

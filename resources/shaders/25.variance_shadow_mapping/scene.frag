@@ -12,45 +12,54 @@ uniform vec3 viewPos;
 
 uniform sampler2D depthMap;
 
-float chebyshevUpperBound(vec3 shadowCoord)
+float linearStep(float minVal, float maxVal, float val)
 {
-	vec2 moments = texture(depthMap, shadowCoord.xy).rg;
-	if (shadowCoord.z <= moments.x)
+	return clamp((val - minVal) / (maxVal - minVal), 0.0, 1.0);
+}
+
+float reduceLightBleed(float pMax, float amount)
+{
+	return linearStep(amount, 1.0, pMax);
+}
+
+float chebyshev(vec2 moments, float depth)
+{
+	if (depth <= moments.x)
 	{
-		return 0.0;
+		return 1.0;
 	}
 
 	float variance = moments.y - (moments.x * moments.x);
 	variance = max(variance, 0.005);
 
-	float d = shadowCoord.z - moments.x;
+	float d = depth - moments.x;
 	float pMax = variance / (variance + d * d);
-
-	return pMax;
+	
+	return reduceLightBleed(1.0 - pMax, 0.2);
 }
 
 void main()
 {
-	vec3 color = vec3(0.8f, 0.8f, 0.8f);
+	vec3 albedo = vec3(0.8, 0.8, 0.8);
 	vec3 normal = normalize(fNormal);
-	vec3 lightColor = vec3(0.5f);
+	vec3 lightColor = vec3(0.6);
 
 	// ambient
-	vec3 ambient = 0.3f * color;
+	vec3 ambient = 0.2 * albedo;
 
 	// diffuse
 	vec3 lightDir = normalize(lightPos - fFragPos);
-	float diff = max(dot(lightDir, normal), 0.0f);
-	vec3 diffuse = diff * lightColor;
+	float diff = max(dot(lightDir, normal), 0.0);
+	vec3 diffuse = diff * albedo * lightColor;
 
 	// specular
     vec3 viewDir = normalize(viewPos - fFragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0);
     vec3 specular = spec * lightColor;    
 
 	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
-	float shadow = chebyshevUpperBound(shadowCoord);
-	
-    fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
+	float shadow = chebyshev(texture(depthMap, shadowCoord.xy).rg, shadowCoord.z);
+
+    fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0);
 }
