@@ -127,6 +127,10 @@ cmake -G "Visual Studio 16 2019"
 
 
 
+#### [26 - exponential_variance_shadow_mapping](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/26.exponential_variance_shadow_mapping>)
+
+
+
 #### [26 - bloom_with_hdr](<https://github.com/rinkowei/OpenGLES_Examples/tree/master/src/26.bloom_with_hdr>)
 
 
