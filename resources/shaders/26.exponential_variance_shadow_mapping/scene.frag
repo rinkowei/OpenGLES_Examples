@@ -73,6 +73,7 @@ void main()
 	float xoffset = 1.0 / float(texelSize.x);
 	float yoffset = 1.0 / float(texelSize.y);
 	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
+	
 	int count = 0;
 	int kernel = 2;
 	for (int x = -kernel; x <= kernel; x++)

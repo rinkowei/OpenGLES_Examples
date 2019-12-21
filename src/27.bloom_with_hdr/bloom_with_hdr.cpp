@@ -31,7 +31,7 @@ public:
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/26.bloom_with_hdr/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/27.bloom_with_hdr/";
 	}
 
 	~Example()

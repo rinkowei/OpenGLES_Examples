@@ -6,43 +6,36 @@ in vec2 fTexcoord;
 
 uniform sampler2D inputImage;
 
-float normpdf(float x, float sigma)
-{
-  return 0.39894*exp(-0.5*x*x / (sigma*sigma)) / sigma;
-}
-
-
 void main()
 {
-    vec4 c = texture(inputImage, fTexcoord);
+    float Pi = 6.28318530718; // Pi*2
+    
+    // GAUSSIAN BLUR SETTINGS {{{
+    float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
+    float Quality = 3.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
+    float Size = 8.0; // BLUR SIZE (Radius)
+    // GAUSSIAN BLUR SETTINGS }}}
+    ivec2 texelSize = textureSize(inputImage, 0);
+    vec2 Radius = Size / vec2(texelSize);
+    
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fTexcoord;
 
-    const int mSize = 11;
-    const int kSize = int((float(mSize) - 1.0) / 2.0);
-    float kernel[mSize];
-    vec4 final_color = vec4(0.0);
-
-    // Create the kernel
-    float sigma = 7.0;
-    float Z = 0.0;
-    for (int j = 0; j <= kSize; ++j)
-    {
-        kernel[kSize + j] = kernel[kSize - j] = normpdf(float(j), sigma);
-    }
-
-    //get the normalization factor (as the gaussian has been clamped)
-    for (int j = 0; j < mSize; ++j)
-    {
-        Z += kernel[j];
-    }
-
-    //read out the texels
-    for (int i = -kSize; i <= kSize; ++i)
-    {
-        for (int j = -kSize; j <= kSize; ++j)
-        {
-            final_color += kernel[kSize + j] * kernel[kSize + i] * texture(inputImage, (fTexcoord + vec2(float(i), float(j))/vec2(textureSize(inputImage, 0).xy)));
-        }
-    }
-    fragColor = texture(inputImage, fTexcoord);
-    //fragColor = vec4(final_color / (Z*Z));
+    int count = 0;
+	int kernel = 2;
+    float xoffset = 1.0 / float(texelSize.x);
+	float yoffset = 1.0 / float(texelSize.y);
+    vec4 color = vec4(0.0);
+	for (int x = -kernel; x <= kernel; x++)
+	{
+		for (int y = -kernel; y <= kernel; y++)
+		{
+			uv.xy += vec2(xoffset * float(x), yoffset * float(y));
+			color += texture(inputImage, uv);
+			count++;
+		}
+	}
+	color /= float(count);
+    
+    fragColor =  color;
 }

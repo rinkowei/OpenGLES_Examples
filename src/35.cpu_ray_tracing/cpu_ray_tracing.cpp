@@ -18,7 +18,7 @@ public:
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/34.cpu_ray_tracing/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/35.cpu_ray_tracing/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()

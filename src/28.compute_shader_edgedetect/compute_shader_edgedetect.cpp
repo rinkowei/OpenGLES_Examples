@@ -21,8 +21,8 @@ public:
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/27.compute_shader_edgedetect/";
-		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/27.compute_shader_edgedetect/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/28.compute_shader_edgedetect/";
+		texturesDirectory = getResourcesPath(ResourceType::Texture) + "/28.compute_shader_edgedetect/";
 	}
 
 	~Example()

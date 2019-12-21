@@ -41,7 +41,7 @@ public:
 		defaultClearColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/32.spherical_harmonics_lighting/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/33.spherical_harmonics_lighting/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 	}
 	~Example()

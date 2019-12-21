@@ -15,7 +15,7 @@ public:
 		defaultClearColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		modelsDirectory = getResourcesPath(ResourceType::Model);
-		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/33.fonts_rendering/";
+		shadersDirectory = getResourcesPath(ResourceType::Shader) + "/34.fonts_rendering/";
 		texturesDirectory = getResourcesPath(ResourceType::Texture);
 		fontsDirectory = getResourcesPath(ResourceType::Font) + "/arial.ttf";
 	}
