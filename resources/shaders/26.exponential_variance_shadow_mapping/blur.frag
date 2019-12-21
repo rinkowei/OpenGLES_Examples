@@ -6,22 +6,43 @@ in vec2 fTexcoord;
 
 uniform sampler2D inputImage;
 
-const float sigma   = 20.0;             // Gaussian sigma
-const int   support = int(sigma * 3.0); // int(sigma * 3.0) truncation
+float normpdf(float x, float sigma)
+{
+  return 0.39894*exp(-0.5*x*x / (sigma*sigma)) / sigma;
+}
+
+
 void main()
 {
-	vec2 iResolution = vec2(2048.0);
-    vec2 loc   = vec2(fTexcoord.x, 1.0 - fTexcoord.y);
-    vec2 dir   = vec2( 0.0, 1.0 / iResolution.y ); // horiz=(1.0, 0.0), vert=(0.0, 1.0)
-	vec4 acc   = vec4( 0.0 );                      // accumulator
-	float norm = 0.0;
-	for (int i = -support; i <= support; i++) {
-		float coeff = exp(-0.5 * float(i) * float(i) / (sigma * sigma));
-		acc += (texture(inputImage, loc + float(i) * dir)) * coeff;
-		norm += coeff;
-	}
-	acc *= 1.0/norm;                               // normalize for unity gain
+    vec4 c = texture(inputImage, fTexcoord);
 
-    // Output to screen
+    const int mSize = 11;
+    const int kSize = int((float(mSize) - 1.0) / 2.0);
+    float kernel[mSize];
+    vec4 final_color = vec4(0.0);
+
+    // Create the kernel
+    float sigma = 7.0;
+    float Z = 0.0;
+    for (int j = 0; j <= kSize; ++j)
+    {
+        kernel[kSize + j] = kernel[kSize - j] = normpdf(float(j), sigma);
+    }
+
+    //get the normalization factor (as the gaussian has been clamped)
+    for (int j = 0; j < mSize; ++j)
+    {
+        Z += kernel[j];
+    }
+
+    //read out the texels
+    for (int i = -kSize; i <= kSize; ++i)
+    {
+        for (int j = -kSize; j <= kSize; ++j)
+        {
+            final_color += kernel[kSize + j] * kernel[kSize + i] * texture(inputImage, (fTexcoord + vec2(float(i), float(j))/vec2(textureSize(inputImage, 0).xy)));
+        }
+    }
     fragColor = texture(inputImage, fTexcoord);
+    //fragColor = vec4(final_color / (Z*Z));
 }

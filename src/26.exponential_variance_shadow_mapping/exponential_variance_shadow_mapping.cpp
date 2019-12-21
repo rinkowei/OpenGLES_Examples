@@ -18,7 +18,7 @@ public:
 
 	std::unique_ptr<Framebuffer> blurFBO;
 	std::unique_ptr<Framebuffer> lightMapFBO;
-	const uint16_t lightMapSize = 2048;
+	const uint16_t lightMapSize = 1024;
 
 	glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
 
@@ -83,7 +83,7 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-				{ "depthMap", gaussianBlurrdedLightMap },
+				{ "depthMap", lightMap },
 			}
 		);
 

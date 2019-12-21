@@ -14,16 +14,6 @@ uniform sampler2D depthMap;
 
 const vec2 exponents = vec2(80.0, 80.0);
 
-float linearStep(float minVal, float maxVal, float val)
-{
-	return clamp((val - minVal) / (maxVal - minVal), 0.0, 1.0);
-}
-
-float reduceLightBleed(float pMax, float amount)
-{
-	return linearStep(amount, 1.0, pMax);
-}
-
 float chebyshev(vec2 moments, float depth)
 {
 	if (depth <= moments.x)
@@ -35,19 +25,15 @@ float chebyshev(vec2 moments, float depth)
 	variance = max(variance, 0.005);
 
 	float d = depth - moments.x;
-	float pMax = variance / (variance + d * d);
+	float pMax = smoothstep(0.2, 1.0, variance / (variance + d * d));
 	
-	return reduceLightBleed(1.0 - pMax, 0.2);
+	return 1.0 - pMax;
 }
 
-float calculateShadow(vec4 shadowCoord)
+float calculateShadow(vec3 projCoords)
 {
-	vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
-
-	//projCoords.z -= 0.005;
+	//projCoords.z -= 0.00002;
 	projCoords = projCoords * 0.5 + 0.5;
-
-	float shadow = 0.0;
 
 	vec4 moments = texture(depthMap, projCoords.xy);
 
@@ -58,7 +44,7 @@ float calculateShadow(vec4 shadowCoord)
 
 	float posShadow = chebyshev(moments.xy, pos);
 	float negShadow = chebyshev(moments.zw, neg);
-	shadow = min(posShadow, negShadow);
+	float shadow = min(posShadow, negShadow);
 	return shadow;
 }
 
@@ -82,8 +68,23 @@ void main()
     float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0);
     vec3 specular = spec * lightColor;    
 
+	float shadow = 0.0;
+	ivec2 texelSize = textureSize(depthMap, 0);
+	float xoffset = 1.0 / float(texelSize.x);
+	float yoffset = 1.0 / float(texelSize.y);
 	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
-	//float shadow = chebyshev(texture(depthMap, shadowCoord.xy).rg, shadowCoord.z);
-	float shadow = calculateShadow(fFragPosLightSpace);
+	int count = 0;
+	int kernel = 2;
+	for (int x = -kernel; x <= kernel; x++)
+	{
+		for (int y = -kernel; y <= kernel; y++)
+		{
+			shadowCoord.xy += vec2(xoffset * float(x), yoffset * float(y));
+			shadow += calculateShadow(shadowCoord);
+			count++;
+		}
+	}
+	shadow /= float(count);
+
     fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0);
 }
