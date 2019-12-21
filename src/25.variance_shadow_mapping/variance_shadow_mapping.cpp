@@ -55,7 +55,7 @@ public:
 		lightMap->setMinFilter(GL_LINEAR);
 		lightMap->setMagFilter(GL_LINEAR);
 		lightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
+	
 		lightMapFBO = Framebuffer::create();
 		lightMapFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, lightMap->getTarget(), lightMap->getID(), 0);
 

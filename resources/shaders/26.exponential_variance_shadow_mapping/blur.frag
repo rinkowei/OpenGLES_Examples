@@ -3,35 +3,54 @@ precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
 in vec2 fTexcoord;
+in vec3 fNormal;
+in vec3 fFragPos;
+in vec4 fFragPosLightSpace;
 
-uniform sampler2D image;
+uniform vec3 lightPos;
+uniform vec3 viewPos;
 
-uniform float blurScale;
-uniform float blurStrength;
-uniform bool horizontal;
+uniform sampler2D depthMap;
+
+float chebyshevUpperBound(vec3 shadowCoord)
+{
+	vec2 moments = texture(depthMap, shadowCoord.xy).rg;
+	if (shadowCoord.z <= moments.x)
+	{
+		return 0.0;
+	}
+
+	float variance = moments.y - (moments.x * moments.x);
+	variance = max(variance, 0.005);
+
+	float d = shadowCoord.z - moments.x;
+	float pMax = variance / (variance + d * d);
+
+	return pMax;
+}
 
 void main()
 {
-	 float weight[5] = float[](0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162);
-	 ivec2 texSize = textureSize(image, 0); // gets size of single texel
-	 vec2 texOffset = vec2(1.0f / float(texSize.x), 1.0f / float(texSize.y)) * blurScale;
-     vec3 result = texture(image, fTexcoord).rgb * weight[0];
-     if (horizontal)
-     {
-         for(int i = 1; i < 5; ++i)
-         {
-            result += texture(image, fTexcoord + vec2(texOffset.x * float(i), 0.0)).rgb * weight[i] * blurStrength;
-            result += texture(image, fTexcoord - vec2(texOffset.x * float(i), 0.0)).rgb * weight[i] * blurStrength;
-         }
-     }
-     else
-     {
-         for(int i = 1; i < 5; ++i)
-         {
-             result += texture(image, fTexcoord + vec2(0.0, texOffset.y * float(i))).rgb * weight[i] * blurStrength;
-             result += texture(image, fTexcoord - vec2(0.0, texOffset.y * float(i))).rgb * weight[i] * blurStrength;
-         }
-     }
+	vec3 color = vec3(0.8f, 0.8f, 0.8f);
+	vec3 normal = normalize(fNormal);
+	vec3 lightColor = vec3(0.5f);
 
-	 fragColor = vec4(result, 1.0f);
+	// ambient
+	vec3 ambient = 0.3f * color;
+
+	// diffuse
+	vec3 lightDir = normalize(lightPos - fFragPos);
+	float diff = max(dot(lightDir, normal), 0.0f);
+	vec3 diffuse = diff * lightColor;
+
+	// specular
+    vec3 viewDir = normalize(viewPos - fFragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);  
+    float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
+    vec3 specular = spec * lightColor;    
+
+	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
+	float shadow = chebyshevUpperBound(shadowCoord);
+	
+    fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
 }

@@ -2,24 +2,20 @@
 precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
-in vec2 fTexcoord;
-
-uniform sampler2D scene;
-uniform sampler2D bloomBlur;
-
-uniform float exposure;
+in vec4 fPosition;
 
 void main()
 {
-	const float gamma = 2.2;
-    vec3 hdrColor = texture(scene, fTexcoord).rgb;      
-    vec3 bloomColor = texture(bloomBlur, fTexcoord).rgb;
-
-    hdrColor += bloomColor; // additive blending
-    // tone mapping
-    vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
-    // also gamma correct while we're at it       
-    result = pow(result, vec3(1.0 / gamma));
-    fragColor = vec4(result, 1.0);
-	//fragColor = vec4(texture(bloomBlur, fTexcoord).rgb, 1.0f);
+	float depth = fPosition.z / fPosition.w ;
+	depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
+	
+	float moment1 = depth;
+	float moment2 = depth * depth;
+	
+	// Adjusting moments (this is sort of bias per pixel) using partial derivative
+	float dx = dFdx(depth);
+	float dy = dFdy(depth);
+	moment2 += 0.25*(dx*dx+dy*dy) ;
+	
+	fragColor = vec4( moment1,moment2, 0.0, 0.0 );
 }
