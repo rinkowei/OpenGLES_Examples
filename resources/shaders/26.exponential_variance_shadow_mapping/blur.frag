@@ -3,54 +3,25 @@ precision mediump float;
 layout(location = 0) out vec4 fragColor;
 
 in vec2 fTexcoord;
-in vec3 fNormal;
-in vec3 fFragPos;
-in vec4 fFragPosLightSpace;
 
-uniform vec3 lightPos;
-uniform vec3 viewPos;
+uniform sampler2D inputImage;
 
-uniform sampler2D depthMap;
-
-float chebyshevUpperBound(vec3 shadowCoord)
-{
-	vec2 moments = texture(depthMap, shadowCoord.xy).rg;
-	if (shadowCoord.z <= moments.x)
-	{
-		return 0.0;
-	}
-
-	float variance = moments.y - (moments.x * moments.x);
-	variance = max(variance, 0.005);
-
-	float d = shadowCoord.z - moments.x;
-	float pMax = variance / (variance + d * d);
-
-	return pMax;
-}
-
+const float sigma   = 20.0;             // Gaussian sigma
+const int   support = int(sigma * 3.0); // int(sigma * 3.0) truncation
 void main()
 {
-	vec3 color = vec3(0.8f, 0.8f, 0.8f);
-	vec3 normal = normalize(fNormal);
-	vec3 lightColor = vec3(0.5f);
+	vec2 iResolution = vec2(2048.0);
+    vec2 loc   = vec2(fTexcoord.x, 1.0 - fTexcoord.y);
+    vec2 dir   = vec2( 0.0, 1.0 / iResolution.y ); // horiz=(1.0, 0.0), vert=(0.0, 1.0)
+	vec4 acc   = vec4( 0.0 );                      // accumulator
+	float norm = 0.0;
+	for (int i = -support; i <= support; i++) {
+		float coeff = exp(-0.5 * float(i) * float(i) / (sigma * sigma));
+		acc += (texture(inputImage, loc + float(i) * dir)) * coeff;
+		norm += coeff;
+	}
+	acc *= 1.0/norm;                               // normalize for unity gain
 
-	// ambient
-	vec3 ambient = 0.3f * color;
-
-	// diffuse
-	vec3 lightDir = normalize(lightPos - fFragPos);
-	float diff = max(dot(lightDir, normal), 0.0f);
-	vec3 diffuse = diff * lightColor;
-
-	// specular
-    vec3 viewDir = normalize(viewPos - fFragPos);
-    vec3 halfwayDir = normalize(lightDir + viewDir);  
-    float spec = pow(max(dot(normal, halfwayDir), 0.0f), 64.0f);
-    vec3 specular = spec * lightColor;    
-
-	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
-	float shadow = chebyshevUpperBound(shadowCoord);
-	
-    fragColor = vec4(ambient + (1.0f - shadow) * (diffuse + specular), 1.0f);
+    // Output to screen
+    fragColor = texture(inputImage, fTexcoord);
 }

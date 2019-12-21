@@ -1,21 +1,31 @@
 #version 310 es
 
-layout (local_size_x = 1024) in;
-layout (binding = 0, rgba8) uniform readonly highp image2D inputImage;
-layout (binding = 1, rgba8) uniform writeonly highp image2D outputImage;
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout (binding = 0, rgba32f) uniform writeonly highp image2D outputImage;
 
-shared vec4 scanline[1024];
+uniform highp sampler2D inputImage;
 
 void main()
-{	
+{
+	const float PI = 3.14159;
+	const float directions = 16.0;
+	const float quality = 3.0;
+	const float size = 8.0;
+
+	vec2 radius = vec2(size);
+
 	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
 
-	scanline[pos.x] = imageLoad(inputImage, pos);
-	barrier();
-	vec4 result = scanline[min(pos.x + 1, 1023)] - scanline[max(pos.x - 1, 0)];
-	if (result.r > 0.0 || result.g > 0.0 || result.b > 0.0)
+	vec4 color = texelFetch(inputImage, pos, 0);
+
+	for (float d = 0.0; d < PI * 2.0; d += PI * 2.0 / directions)
 	{
-		result.rgb = vec3(1.0);
+		for(float i = 1.0 / quality; i <= 1.0; i += 1.0 / quality)
+        {
+			color += texelFetch(inputImage, pos + ivec2(cos(d) * size * i, sin(d) * size * i), 0);		
+        }
 	}
-	imageStore(outputImage, pos.yx, result);
+
+	color /= (quality * directions - 15.0);
+	imageStore(outputImage, pos, color);
 }

@@ -21,7 +21,7 @@ void main()
 	fTexcoord = vTexcoord;
 	fNormal = transpose(inverse(mat3(model))) * vNormal;
 	fFragPos = vec3(model * vec4(vPos, 1.0f));
-	fFragPosLightSpace = (biasMatrix * lightSpaceMatrix * model) * vec4(vPos, 1.0f);
+	fFragPosLightSpace = (lightSpaceMatrix * model) * vec4(vPos, 1.0f);
 
 	gl_Position = projection * view * model * vec4(vPos, 1.0f);
 }

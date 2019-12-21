@@ -7,13 +7,18 @@ class Example final : public ExampleBase
 {
 public:
 	std::shared_ptr<Model> sampleScene;
+	std::shared_ptr<Model> blurQuad;
 
 	std::shared_ptr<Material> sceneMat;
 	std::shared_ptr<Material> lightPassMat;
+	std::shared_ptr<Material> blurMat;
 
-	const uint16_t lightMapWidth = 2048;
-	const uint16_t lightMapHeight = 2048;
+	std::shared_ptr<Texture2D> lightMap;
+	std::shared_ptr<Texture2D> gaussianBlurrdedLightMap;
+
+	std::unique_ptr<Framebuffer> blurFBO;
 	std::unique_ptr<Framebuffer> lightMapFBO;
+	const uint16_t lightMapSize = 2048;
 
 	glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
 
@@ -56,7 +61,7 @@ public:
 		// enable cull face
 		glEnable(GL_CULL_FACE);
 
-		std::shared_ptr<Texture2D> lightMap = Texture2D::createFromData(lightMapWidth, lightMapHeight, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
+		lightMap = Texture2D::createFromData(lightMapSize, lightMapSize, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
 		lightMap->setMinFilter(GL_LINEAR);
 		lightMap->setMagFilter(GL_LINEAR);
 		lightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -64,8 +69,13 @@ public:
 		lightMapFBO = Framebuffer::create();
 		lightMapFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, lightMap->getTarget(), lightMap->getID(), 0);
 
-		sampleScene = Model::createFromFile("sample_scene", modelsDirectory + "/teapots-pillars/samplescene.dae", {}, false);
-		sampleScene->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		gaussianBlurrdedLightMap = Texture2D::createFromData(lightMapSize, lightMapSize, 1, 1, GL_RGBA32F, GL_RGBA, GL_FLOAT, true);
+		gaussianBlurrdedLightMap->setMinFilter(GL_NEAREST);
+		gaussianBlurrdedLightMap->setMagFilter(GL_NEAREST);
+		gaussianBlurrdedLightMap->setWrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+		blurFBO = Framebuffer::create();
+		blurFBO->addAttachmentTexture2D(GL_COLOR_ATTACHMENT0, gaussianBlurrdedLightMap->getTarget(), gaussianBlurrdedLightMap->getID(), 0);
 
 		sceneMat = Material::createFromData("scene_mat",
 			{
@@ -73,7 +83,7 @@ public:
 				shadersDirectory + "scene.frag"
 			},
 			{
-				{ "depthMap", lightMap },
+				{ "depthMap", gaussianBlurrdedLightMap },
 			}
 		);
 
@@ -83,14 +93,32 @@ public:
 				shadersDirectory + "light_pass.frag"
 			},
 			{
-		
+
 			}
 		);
+
+		blurMat = Material::createFromData("blur_mat",
+			{
+				shadersDirectory + "blur.vert",
+				shadersDirectory + "blur.frag"
+			},
+			{
+				{ "inputImage", lightMap }
+			}
+		);
+
+		sampleScene = Model::createFromFile("sample_scene", modelsDirectory + "/teapots-pillars/samplescene.dae", {}, false);
+		sampleScene->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
+
+		blurQuad = Model::createFromFile("blur_quad", modelsDirectory + "/quadrangle/quadrangle.obj", {}, false);
+		blurQuad->setMaterial(blurMat);
 	}
 
 	virtual void render(float deltaTime) override
 	{
 		lightMapPass();
+
+		lightMapGaussianBlur();
 
 		glViewport(0, 0, mWindowWidth, mWindowHeight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -116,8 +144,8 @@ public:
 		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProj * lightView;
 
-		glViewport(0, 0, lightMapWidth, lightMapHeight);
 		lightMapFBO->bind();
+		glViewport(0, 0, lightMapSize, lightMapSize);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		sampleScene->setMaterial(lightPassMat);
 		sampleScene->setUniform("lightSpaceMatrix", lightSpaceMatrix);
@@ -127,6 +155,17 @@ public:
 		glCullFace(GL_BACK);
 
 		lightMapFBO->unbind();
+	}
+
+	void lightMapGaussianBlur()
+	{
+		blurFBO->bind();
+		glViewport(0, 0, lightMapSize, lightMapSize);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		blurQuad->render();
+
+		blurFBO->unbind();
 	}
 };
 

@@ -4,18 +4,15 @@ layout(location = 0) out vec4 fragColor;
 
 in vec4 fPosition;
 
+const vec2 exponents = vec2(80.0, 80.0);
+
 void main()
 {
 	float depth = fPosition.z / fPosition.w ;
-	depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
+	//depth = depth * 0.5 + 0.5;			//Don't forget to move away from unit cube ([-1,1]) to [0,1] coordinate system
 	
-	float moment1 = depth;
-	float moment2 = depth * depth;
+	float pos = exp(exponents.x * depth);
+	float neg = -exp(-exponents.y * depth);
 	
-	// Adjusting moments (this is sort of bias per pixel) using partial derivative
-	float dx = dFdx(depth);
-	float dy = dFdy(depth);
-	moment2 += 0.25*(dx*dx+dy*dy) ;
-	
-	fragColor = vec4( moment1,moment2, 0.0, 0.0 );
+	fragColor = vec4(pos, pos * pos, neg, neg * neg);
 }

@@ -12,6 +12,8 @@ uniform vec3 viewPos;
 
 uniform sampler2D depthMap;
 
+const vec2 exponents = vec2(80.0, 80.0);
+
 float linearStep(float minVal, float maxVal, float val)
 {
 	return clamp((val - minVal) / (maxVal - minVal), 0.0, 1.0);
@@ -38,6 +40,28 @@ float chebyshev(vec2 moments, float depth)
 	return reduceLightBleed(1.0 - pMax, 0.2);
 }
 
+float calculateShadow(vec4 shadowCoord)
+{
+	vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
+
+	//projCoords.z -= 0.005;
+	projCoords = projCoords * 0.5 + 0.5;
+
+	float shadow = 0.0;
+
+	vec4 moments = texture(depthMap, projCoords.xy);
+
+	projCoords = projCoords * 2.0 - 1.0;
+
+	float pos = exp(exponents.x * projCoords.z);
+	float neg = -exp(-exponents.y * projCoords.z);
+
+	float posShadow = chebyshev(moments.xy, pos);
+	float negShadow = chebyshev(moments.zw, neg);
+	shadow = min(posShadow, negShadow);
+	return shadow;
+}
+
 void main()
 {
 	vec3 albedo = vec3(0.8, 0.8, 0.8);
@@ -59,7 +83,7 @@ void main()
     vec3 specular = spec * lightColor;    
 
 	vec3 shadowCoord = fFragPosLightSpace.xyz / fFragPosLightSpace.w;
-	float shadow = chebyshev(texture(depthMap, shadowCoord.xy).rg, shadowCoord.z);
-
+	//float shadow = chebyshev(texture(depthMap, shadowCoord.xy).rg, shadowCoord.z);
+	float shadow = calculateShadow(fFragPosLightSpace);
     fragColor = vec4(ambient + shadow * (diffuse + specular), 1.0);
 }
