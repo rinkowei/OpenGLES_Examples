@@ -41,17 +41,6 @@ vec3 acesToneMapping(vec3 color, float adaptedNum)
 	return (color * (A * color + B)) / (color * (C * color + D) + E);
 }
 
-vec3 uncharted2Tonemapping(vec3 x)
-{
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
-	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
-}
-
 vec3 getNormalFromMap()
 {
 	vec3 tangentNormal = texture(normalMap, fTexcoord).rgb * 2.0 - 1.0;

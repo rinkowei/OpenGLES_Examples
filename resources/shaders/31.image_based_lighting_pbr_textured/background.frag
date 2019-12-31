@@ -7,23 +7,24 @@ in vec3 fFragPos;
 uniform float exposure;
 uniform samplerCube environmentMap;
 
-vec3 uncharted2Tonemapping(vec3 x)
+vec3 acesToneMapping(vec3 color, float adaptedNum)
 {
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
-	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+	const float A = 2.51f;
+	const float B = 0.03f;
+	const float C = 2.43f;
+	const float D = 0.59f;
+	const float E = 0.14f;
+
+	color *= adaptedNum;
+	return (color * (A * color + B)) / (color * (C * color + D) + E);
 }
 
 void main()
 {
     vec3 envColor = textureLod(environmentMap, fFragPos, 0.0).rgb;
     
-	envColor = uncharted2Tonemapping(envColor * exposure);
-	envColor = envColor * (1.0 / uncharted2Tonemapping(vec3(11.2)));
+	envColor = acesToneMapping(envColor, exposure);
+
     envColor = pow(envColor, vec3(1.0/2.2)); 
     
 	fragColor = vec4(envColor, 1.0);

@@ -30,7 +30,7 @@ public:
 	};
 	std::array<Light, 4> lights;
 
-	const float exposure = 2.0f;
+	const float exposure = 1.5f;
 
 	Example()
 	{
