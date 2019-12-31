@@ -29,6 +29,18 @@ uniform Light lights[4];
 
 const float PI = 3.14159265359;
 
+vec3 acesToneMapping(vec3 color, float adaptedNum)
+{
+	const float A = 2.51f;
+	const float B = 0.03f;
+	const float C = 2.43f;
+	const float D = 0.59f;
+	const float E = 0.14f;
+
+	color *= adaptedNum;
+	return (color * (A * color + B)) / (color * (C * color + D) + E);
+}
+
 vec3 uncharted2Tonemapping(vec3 x)
 {
 	float A = 0.15;
@@ -156,8 +168,7 @@ void main()
 
 	vec3 color = ambient + Lo;
 
-	color = uncharted2Tonemapping(color * exposure);
-	color = color * (1.0 / uncharted2Tonemapping(vec3(11.2)));
+	color = acesToneMapping(color, exposure);
 
 	color = pow(color, vec3(1.0 / 2.2));
 
